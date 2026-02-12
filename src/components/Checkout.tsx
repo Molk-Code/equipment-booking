@@ -31,8 +31,9 @@ export default function Checkout({ onBack }: CheckoutProps) {
       await sendEmail(pdfBlob, items, info, totalPrice);
       setSent(true);
       clearCart();
-    } catch (err) {
-      setError('Failed to send booking. Please try again or download the PDF manually.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Failed to send booking: ${msg}`);
       console.error(err);
     } finally {
       setSending(false);
@@ -50,8 +51,8 @@ export default function Checkout({ onBack }: CheckoutProps) {
         <div className="success-icon">
           <Send size={48} />
         </div>
-        <h2>Booking Complete!</h2>
-        <p>Your booking PDF has been downloaded. Please send it to the equipment manager to confirm your reservation.</p>
+        <h2>Booking Sent!</h2>
+        <p>Your equipment booking has been emailed to the equipment manager. You will receive a confirmation shortly.</p>
         <button className="primary-btn" onClick={onBack}>Back to Equipment</button>
       </div>
     );

@@ -65,7 +65,6 @@ function normalizeName(name: string): string {
 }
 
 // Build image lookup from old equipment.json
-// Maps: exact normalized name -> image, and base name (without #N) -> image
 const imageMap = new Map<string, string>();
 const baseImageMap = new Map<string, string>();
 
@@ -75,7 +74,7 @@ const baseImageMap = new Map<string, string>();
   if (!imageMap.has(norm)) {
     imageMap.set(norm, item.image);
   }
-  // Also store base name: "bmpcc 6k #1" -> "bmpcc 6k" for matching consolidated entries
+  // Also store base name: "bmpcc 6k #1" -> "bmpcc 6k"
   const base = norm.replace(/\s*#\d+\s*$/, '').trim();
   if (base !== norm && !baseImageMap.has(base)) {
     baseImageMap.set(base, item.image);
@@ -99,7 +98,7 @@ function findImage(sheetName: string): string {
   const baseNorm = norm.replace(/\s*#\d+\s*$/, '').trim();
   if (baseNorm !== norm && baseImageMap.has(baseNorm)) return baseImageMap.get(baseNorm)!;
 
-  // 4. Prefix match — find first item in imageMap whose key starts with norm or vice versa
+  // 4. Prefix match
   for (const [key, img] of imageMap) {
     if (key.startsWith(norm) || norm.startsWith(key)) return img;
   }
@@ -115,8 +114,10 @@ export async function fetchEquipment(): Promise<Equipment[]> {
     const rows = parseCSV(csv);
 
     const items: Equipment[] = [];
-    let currentCategory = '';
+    // Default to CAMERA since the sheet has no separate CAMERA header row
+    let currentCategory = 'CAMERA';
     let id = 1;
+    let isFirstRow = true;
 
     const validCategories = new Set(['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS']);
 
@@ -128,14 +129,21 @@ export async function fetchEquipment(): Promise<Equipment[]> {
       const colF = (row[5] || '').trim();
       const colG = (row[6] || '').trim();
 
-      // Check if this row is a category header
-      const catUpper = colB.toUpperCase();
-      if (validCategories.has(catUpper) && !colD) {
-        currentCategory = catUpper;
+      // Skip the very first row (header with "List of content:...")
+      if (isFirstRow) {
+        isFirstRow = false;
         continue;
       }
 
-      // Skip header rows
+      // Check if this row is a category header (case-insensitive)
+      const catUpper = colB.toUpperCase().trim();
+      if (validCategories.has(catUpper)) {
+        currentCategory = catUpper;
+        // If this row also has no product name, it's just a separator — skip
+        if (!colD) continue;
+      }
+
+      // Skip rows with no product name or header-like content
       if (!colD || colD === 'Product:' || colD === 'Contains:') continue;
       if (!currentCategory) continue;
 
