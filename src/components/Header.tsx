@@ -14,7 +14,7 @@ export default function Header({ onCartClick }: HeaderProps) {
         <div className="logo">
           <Film size={28} />
           <div>
-            <h1>Molkom Film Equipment</h1>
+            <h1>Molkom Rental House</h1>
             <span className="logo-subtitle">Booking System</span>
           </div>
         </div>

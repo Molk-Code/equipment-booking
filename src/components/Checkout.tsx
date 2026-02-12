@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Send, FileText, Loader2 } from 'lucide-react';
 import { useCart, calculatePrice } from '../context/CartContext';
 import { generatePDF } from '../utils/pdf';
-import { sendEmail } from '../utils/email';
+import { sendEmail, downloadPdf, getPdfFilename } from '../utils/email';
 import type { CheckoutInfo } from '../types';
 
 interface CheckoutProps {
@@ -41,12 +41,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
 
   const handleDownloadPDF = () => {
     const pdfBlob = generatePDF(items, info, totalPrice);
-    const url = URL.createObjectURL(pdfBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `equipment-booking-${info.name.replace(/\s+/g, '-')}-${info.dateFrom}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadPdf(pdfBlob, getPdfFilename(info));
   };
 
   if (sent) {

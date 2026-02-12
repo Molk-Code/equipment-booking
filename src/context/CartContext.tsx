@@ -63,11 +63,18 @@ export function useCart() {
 
 export function calculatePrice(dayRate: number, days: number): number {
   if (dayRate === 0) return 0;
-  if (days >= 7) {
-    const weeks = Math.floor(days / 7);
-    const remainingDays = days % 7;
-    const weekRate = dayRate * 5; // week rate = 5x day rate
+  // Weekly rate = 5 days worth at 15% discount: dayRate * 5 * 0.85
+  // Applied per 5-day block. Remaining days at full day rate.
+  const weekRate = Math.round(dayRate * 5 * 0.85);
+  if (days >= 5) {
+    const weeks = Math.floor(days / 5);
+    const remainingDays = days % 5;
     return weeks * weekRate + remainingDays * dayRate;
   }
   return days * dayRate;
+}
+
+export function getWeekRate(dayRate: number): number {
+  if (dayRate === 0) return 0;
+  return Math.round(dayRate * 5 * 0.85);
 }

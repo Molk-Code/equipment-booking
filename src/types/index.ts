@@ -6,6 +6,7 @@ export interface Equipment {
   priceExclVat: number;
   priceInclVat: number;
   image?: string;
+  filmYear2?: boolean;
 }
 
 export interface CartItem {

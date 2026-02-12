@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { Plus, Minus, ShoppingCart, Check } from 'lucide-react';
-import { useCart, calculatePrice } from '../context/CartContext';
+import { Plus, Minus, ShoppingCart, Check, Lock } from 'lucide-react';
+import { useCart, calculatePrice, getWeekRate } from '../context/CartContext';
 import type { Equipment } from '../types';
 
 interface ProductCardProps {
   equipment: Equipment;
 }
 
-const categoryImages: Record<string, string> = {
-  CAMERA: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
-  GRIP: 'https://images.unsplash.com/photo-1585939000680-9ecb0a804ccc?w=400&h=300&fit=crop',
-  LIGHTS: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=400&h=300&fit=crop',
-  SOUND: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=300&fit=crop',
-  LOCATION: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=300&fit=crop',
-  BOOKS: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop',
+const categoryFallbacks: Record<string, string> = {
+  CAMERA: '/images/image87.jpg',
+  GRIP: '/images/image44.png',
+  LIGHTS: '/images/image60.jpg',
+  SOUND: '/images/image112.jpg',
+  LOCATION: '/images/image123.jpg',
+  BOOKS: '/images/image134.jpg',
 };
 
 export default function ProductCard({ equipment }: ProductCardProps) {
@@ -23,7 +23,7 @@ export default function ProductCard({ equipment }: ProductCardProps) {
 
   const inCart = items.some(item => item.equipment.id === equipment.id);
   const price = calculatePrice(equipment.priceExclVat, days);
-  const imageUrl = equipment.image || categoryImages[equipment.category] || categoryImages.CAMERA;
+  const imageUrl = equipment.image || categoryFallbacks[equipment.category] || categoryFallbacks.CAMERA;
 
   const handleAdd = () => {
     addItem(equipment, days);
@@ -36,6 +36,12 @@ export default function ProductCard({ equipment }: ProductCardProps) {
       <div className="product-image">
         <img src={imageUrl} alt={equipment.name} loading="lazy" />
         <span className="product-category-tag">{equipment.category}</span>
+        {equipment.filmYear2 && (
+          <span className="film-year2-badge">
+            <Lock size={10} />
+            Film Year 2 Only
+          </span>
+        )}
       </div>
       <div className="product-info">
         <h3 className="product-name">{equipment.name}</h3>
@@ -46,7 +52,7 @@ export default function ProductCard({ equipment }: ProductCardProps) {
           {equipment.priceExclVat > 0 ? (
             <>
               <span className="price-day">{equipment.priceExclVat} kr/day</span>
-              <span className="price-week">{equipment.priceExclVat * 5} kr/week</span>
+              <span className="price-week">{getWeekRate(equipment.priceExclVat)} kr/week</span>
             </>
           ) : (
             <span className="price-tbd">Price TBD</span>

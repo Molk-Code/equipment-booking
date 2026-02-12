@@ -1,20 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from './components/Header';
 import CategoryFilter from './components/CategoryFilter';
 import SearchBar from './components/SearchBar';
 import ProductCard from './components/ProductCard';
 import CartDrawer from './components/CartDrawer';
 import Checkout from './components/Checkout';
-import equipmentData from './data/equipment.json';
+import { fetchEquipment } from './utils/sheets';
 import type { Equipment, Category } from './types';
 
-const equipment = equipmentData as Equipment[];
-
 export default function App() {
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<Category>('ALL');
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+
+  useEffect(() => {
+    fetchEquipment().then(data => {
+      setEquipment(data);
+      setLoading(false);
+    });
+  }, []);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -22,7 +29,7 @@ export default function App() {
       c[e.category] = (c[e.category] || 0) + 1;
     });
     return c;
-  }, []);
+  }, [equipment]);
 
   const filtered = useMemo(() => {
     let items = equipment;
@@ -39,7 +46,7 @@ export default function App() {
       );
     }
     return items;
-  }, [category, search]);
+  }, [category, search, equipment]);
 
   if (showCheckout) {
     return (
@@ -68,16 +75,22 @@ export default function App() {
           <SearchBar value={search} onChange={setSearch} />
         </div>
         <div className="results-info">
-          <span>{filtered.length} items</span>
+          <span>{loading ? 'Loading...' : `${filtered.length} items`}</span>
           {category !== 'ALL' && <span className="active-filter">{category}</span>}
           {search && <span className="active-filter">"{search}"</span>}
         </div>
-        <div className="product-grid">
-          {filtered.map(e => (
-            <ProductCard key={e.id} equipment={e} />
-          ))}
-        </div>
-        {filtered.length === 0 && (
+        {loading ? (
+          <div className="no-results">
+            <p>Loading equipment from database...</p>
+          </div>
+        ) : (
+          <div className="product-grid">
+            {filtered.map(e => (
+              <ProductCard key={e.id} equipment={e} />
+            ))}
+          </div>
+        )}
+        {!loading && filtered.length === 0 && (
           <div className="no-results">
             <p>No equipment found matching your search.</p>
           </div>
