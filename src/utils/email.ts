@@ -1,18 +1,13 @@
-import emailjs from '@emailjs/browser';
 import type { CartItem, CheckoutInfo } from '../types';
 import { calculatePrice } from '../context/CartContext';
 
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+const RECIPIENT_EMAIL = 'fredrik.fridlund@fhsregionvarmland.se';
 
 export function getPdfFilename(info: CheckoutInfo): string {
   const name = info.name.replace(/\s+/g, '');
   const today = new Date().toISOString().split('T')[0];
   return `${name}_Equipment_${today}.pdf`;
 }
-
-const isConfigured = EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID';
 
 export async function sendEmail(
   pdfBlob: Blob,
@@ -22,36 +17,42 @@ export async function sendEmail(
 ): Promise<void> {
   const filename = getPdfFilename(info);
 
-  // Always download the PDF first
-  downloadPdf(pdfBlob, filename);
+  const itemsList = items
+    .map(item => {
+      const price = calculatePrice(item.equipment.priceExclVat, item.days);
+      return `<li>${item.equipment.name} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Price TBD'}</li>`;
+    })
+    .join('\n');
 
-  // If EmailJS is configured, also send by email
-  if (isConfigured) {
-    const itemsList = items
-      .map(item => {
-        const price = calculatePrice(item.equipment.priceExclVat, item.days);
-        return `- ${item.equipment.name} (${item.equipment.category}) | ${item.days} days | ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Price TBD'}`;
-      })
-      .join('\n');
+  const html = `
+    <h2>Equipment Booking</h2>
+    <p><strong>Student:</strong> ${info.name}</p>
+    <p><strong>Class:</strong> ${info.className}</p>
+    <p><strong>Period:</strong> ${info.dateFrom} to ${info.dateTo}</p>
+    <p><strong>Items:</strong> ${items.length}</p>
+    <p><strong>Total (excl. VAT):</strong> ${totalPrice} kr</p>
+    <h3>Equipment List</h3>
+    <ul>${itemsList}</ul>
+    <p><em>See attached PDF for the full booking document.</em></p>
+  `;
 
-    const base64 = await blobToBase64(pdfBlob);
+  const pdfBase64 = await blobToBase64(pdfBlob);
 
-    const templateParams = {
-      to_email: 'fredrik.fridlund@fhsregionvarmland.se',
-      from_name: info.name,
-      student_name: info.name,
-      student_class: info.className,
-      date_from: info.dateFrom,
-      date_to: info.dateTo,
-      items_list: itemsList,
-      total_price: `${totalPrice} kr`,
-      items_count: items.length.toString(),
-      content: base64,
-      filename: filename,
-      subject: `Equipment Booking - ${info.name} (${info.className}) - ${info.dateFrom}`,
-    };
+  const response = await fetch('/api/send-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: RECIPIENT_EMAIL,
+      subject: `Equipment Booking — ${info.name} (${info.className}) — ${info.dateFrom}`,
+      html,
+      pdfBase64,
+      filename,
+    }),
+  });
 
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to send email');
   }
 }
 
