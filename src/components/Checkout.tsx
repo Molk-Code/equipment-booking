@@ -50,8 +50,8 @@ export default function Checkout({ onBack }: CheckoutProps) {
         <div className="success-icon">
           <Send size={48} />
         </div>
-        <h2>Booking Sent!</h2>
-        <p>Your equipment booking has been sent to the equipment manager. You will receive a confirmation shortly.</p>
+        <h2>Booking Complete!</h2>
+        <p>Your booking PDF has been downloaded. Please send it to the equipment manager to confirm your reservation.</p>
         <button className="primary-btn" onClick={onBack}>Back to Equipment</button>
       </div>
     );

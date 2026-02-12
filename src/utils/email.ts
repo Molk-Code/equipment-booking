@@ -12,44 +12,47 @@ export function getPdfFilename(info: CheckoutInfo): string {
   return `${name}_Equipment_${today}.pdf`;
 }
 
+const isConfigured = EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID';
+
 export async function sendEmail(
   pdfBlob: Blob,
   items: CartItem[],
   info: CheckoutInfo,
   totalPrice: number
 ): Promise<void> {
-  const itemsList = items
-    .map(item => {
-      const price = calculatePrice(item.equipment.priceExclVat, item.days);
-      return `- ${item.equipment.name} (${item.equipment.category}) | ${item.days} days | ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Price TBD'}`;
-    })
-    .join('\n');
-
-  const base64 = await blobToBase64(pdfBlob);
   const filename = getPdfFilename(info);
 
-  const templateParams = {
-    to_email: 'fredrik.fridlund@fhsregionvarmland.se',
-    from_name: info.name,
-    student_name: info.name,
-    student_class: info.className,
-    date_from: info.dateFrom,
-    date_to: info.dateTo,
-    items_list: itemsList,
-    total_price: `${totalPrice} kr`,
-    items_count: items.length.toString(),
-    content: base64,
-    filename: filename,
-    subject: `Equipment Booking - ${info.name} (${info.className}) - ${info.dateFrom}`,
-  };
+  // Always download the PDF first
+  downloadPdf(pdfBlob, filename);
 
-  if (EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID') {
-    // Demo mode - download PDF instead
-    downloadPdf(pdfBlob, filename);
-    throw new Error('EmailJS is not configured. The PDF has been downloaded instead. Please set up EmailJS credentials in your .env file.');
+  // If EmailJS is configured, also send by email
+  if (isConfigured) {
+    const itemsList = items
+      .map(item => {
+        const price = calculatePrice(item.equipment.priceExclVat, item.days);
+        return `- ${item.equipment.name} (${item.equipment.category}) | ${item.days} days | ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Price TBD'}`;
+      })
+      .join('\n');
+
+    const base64 = await blobToBase64(pdfBlob);
+
+    const templateParams = {
+      to_email: 'fredrik.fridlund@fhsregionvarmland.se',
+      from_name: info.name,
+      student_name: info.name,
+      student_class: info.className,
+      date_from: info.dateFrom,
+      date_to: info.dateTo,
+      items_list: itemsList,
+      total_price: `${totalPrice} kr`,
+      items_count: items.length.toString(),
+      content: base64,
+      filename: filename,
+      subject: `Equipment Booking - ${info.name} (${info.className}) - ${info.dateFrom}`,
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
   }
-
-  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
 }
 
 export function downloadPdf(pdfBlob: Blob, filename: string) {
