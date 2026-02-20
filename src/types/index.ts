@@ -16,6 +16,7 @@ export interface CartItem {
 
 export interface CheckoutInfo {
   name: string;
+  email: string;
   className: string;
   dateFrom: string;
   dateTo: string;

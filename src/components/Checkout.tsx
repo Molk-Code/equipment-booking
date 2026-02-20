@@ -13,6 +13,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
   const { items, totalPrice, clearCart } = useCart();
   const [info, setInfo] = useState<CheckoutInfo>({
     name: '',
+    email: '',
     className: '',
     dateFrom: '',
     dateTo: '',
@@ -51,8 +52,8 @@ export default function Checkout({ onBack }: CheckoutProps) {
         <div className="success-icon">
           <Send size={48} />
         </div>
-        <h2>Booking Sent!</h2>
-        <p>Your equipment booking has been emailed to the equipment manager. You will receive a confirmation shortly.</p>
+        <h2>Booking Inquiry Sent!</h2>
+        <p>Your equipment booking inquiry has been emailed to the equipment manager. You will receive a confirmation at {info.email}.</p>
         <button className="primary-btn" onClick={onBack}>Back to Equipment</button>
       </div>
     );
@@ -81,15 +82,29 @@ export default function Checkout({ onBack }: CheckoutProps) {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="className">Class</label>
+            <label htmlFor="email">Email</label>
             <input
+              id="email"
+              type="email"
+              required
+              value={info.email}
+              onChange={e => setInfo(prev => ({ ...prev, email: e.target.value }))}
+              placeholder="your.email@example.com"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="className">Class</label>
+            <select
               id="className"
-              type="text"
               required
               value={info.className}
               onChange={e => setInfo(prev => ({ ...prev, className: e.target.value }))}
-              placeholder="e.g. Film Year 1"
-            />
+              className="form-select"
+            >
+              <option value="" disabled>Select your class</option>
+              <option value="Film Year 1">Film Year 1</option>
+              <option value="Film Year 2">Film Year 2</option>
+            </select>
           </div>
 
           <h3>Rental Period</h3>
@@ -124,7 +139,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
               type="button"
               className="secondary-btn"
               onClick={handleDownloadPDF}
-              disabled={!info.name || !info.className || !info.dateFrom || !info.dateTo}
+              disabled={!info.name || !info.email || !info.className || !info.dateFrom || !info.dateTo}
             >
               <FileText size={18} /> Download PDF
             </button>
@@ -151,7 +166,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
                 <span className="summary-price">
                   {item.equipment.priceExclVat > 0
                     ? `${calculatePrice(item.equipment.priceExclVat, item.days)} kr`
-                    : 'TBD'}
+                    : 'Free'}
                 </span>
               </div>
             ))}

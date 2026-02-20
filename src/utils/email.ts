@@ -1,7 +1,7 @@
 import type { CartItem, CheckoutInfo } from '../types';
 import { calculatePrice } from '../context/CartContext';
 
-const RECIPIENT_EMAIL = 'fredrik.fridlund@fhsregionvarmland.se';
+const RECIPIENT_EMAIL = 'fredrik.fridlund@regionvarmland.se';
 
 export function getPdfFilename(info: CheckoutInfo): string {
   const name = info.name.replace(/\s+/g, '');
@@ -20,20 +20,26 @@ export async function sendEmail(
   const itemsList = items
     .map(item => {
       const price = calculatePrice(item.equipment.priceExclVat, item.days);
-      return `<li>${item.equipment.name} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Price TBD'}</li>`;
+      return `<li>${item.equipment.name} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}</li>`;
     })
     .join('\n');
 
+  const confirmLink = `mailto:${encodeURIComponent(info.email)}?subject=${encodeURIComponent(`Booking Confirmed — ${info.name}`)}&body=${encodeURIComponent(`Hi ${info.name},\n\nYour equipment booking inquiry has been approved.\n\nPeriod: ${info.dateFrom} to ${info.dateTo}\nItems: ${items.length}\n\nPlease pick up the equipment at the scheduled time.\n\nBest regards,\nMolkom Rental House`)}`;
+
   const html = `
-    <h2>Equipment Booking</h2>
+    <h2>Equipment Booking Inquiry</h2>
     <p><strong>Student:</strong> ${info.name}</p>
+    <p><strong>Student Email:</strong> ${info.email}</p>
     <p><strong>Class:</strong> ${info.className}</p>
     <p><strong>Period:</strong> ${info.dateFrom} to ${info.dateTo}</p>
     <p><strong>Items:</strong> ${items.length}</p>
     <p><strong>Total (excl. VAT):</strong> ${totalPrice} kr</p>
     <h3>Equipment List</h3>
     <ul>${itemsList}</ul>
-    <p><em>See attached PDF for the full booking document.</em></p>
+    <p><em>See attached PDF for the full booking inquiry document.</em></p>
+    <hr/>
+    <p><strong>To confirm this booking, click the link below:</strong></p>
+    <p><a href="${confirmLink}">Send confirmation email to ${info.email}</a></p>
   `;
 
   const pdfBase64 = await blobToBase64(pdfBlob);
@@ -43,7 +49,7 @@ export async function sendEmail(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       to: RECIPIENT_EMAIL,
-      subject: `Equipment Booking — ${info.name} (${info.className}) — ${info.dateFrom}`,
+      subject: `Equipment Booking Inquiry — ${info.name} (${info.className}) — ${info.dateFrom}`,
       html,
       pdfBase64,
       filename,

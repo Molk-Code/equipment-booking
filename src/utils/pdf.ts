@@ -14,13 +14,13 @@ export function generatePDF(
   // Header
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('Equipment Booking', pageWidth / 2, y, { align: 'center' });
+  doc.text('Equipment Booking Inquiry', pageWidth / 2, y, { align: 'center' });
   y += 8;
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100);
-  doc.text('Molkom Folk High School - Film Department', pageWidth / 2, y, { align: 'center' });
+  doc.text('Molkom Rental House', pageWidth / 2, y, { align: 'center' });
   y += 12;
 
   // Divider
@@ -39,19 +39,21 @@ export function generatePDF(
   doc.setFont('helvetica', 'normal');
   doc.text(`Name: ${info.name}`, 20, y);
   y += 6;
+  doc.text(`Email: ${info.email}`, 20, y);
+  y += 6;
   doc.text(`Class: ${info.className}`, 20, y);
   y += 6;
   doc.text(`Rental Period: ${info.dateFrom} to ${info.dateTo}`, 20, y);
   y += 12;
 
-  // Equipment contract notice
+  // Inquiry disclaimer
   doc.setFontSize(8);
   doc.setTextColor(100);
-  const contractText =
-    'The following items are loaned to the above-mentioned borrower. The borrowers are aware that by signing this agreement, they are responsible for handling, storing, and transporting the equipment in such a way that no damage or abnormal wear and tear occurs. If any damage occurs, it must be reported immediately.';
-  const contractLines = doc.splitTextToSize(contractText, pageWidth - 40);
-  doc.text(contractLines, 20, y);
-  y += contractLines.length * 4 + 8;
+  const disclaimerText =
+    'This is an inquiry and does not guarantee that all items are accepted or available. The borrower is responsible for properly handling, storing, and transporting all loaned equipment. Any damage must be reported immediately.';
+  const disclaimerLines = doc.splitTextToSize(disclaimerText, pageWidth - 40);
+  doc.text(disclaimerLines, 20, y);
+  y += disclaimerLines.length * 4 + 8;
 
   // Divider
   doc.setDrawColor(200);
@@ -102,7 +104,7 @@ export function generatePDF(
 
     const price = calculatePrice(item.equipment.priceExclVat, item.days);
     doc.text(
-      item.equipment.priceExclVat > 0 ? `${price} kr` : 'TBD',
+      item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free',
       165,
       y,
       { align: 'right' }
@@ -121,32 +123,13 @@ export function generatePDF(
   doc.setFont('helvetica', 'bold');
   doc.text('Total (excl. VAT):', 100, y);
   doc.text(`${totalPrice} kr`, 165, y, { align: 'right' });
-  y += 15;
-
-  // Signature lines
-  if (y > 240) {
-    doc.addPage();
-    y = 20;
-  }
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setDrawColor(150);
-
-  doc.text('Borrower Signature:', 20, y);
-  doc.line(20, y + 15, 90, y + 15);
-  doc.text('Date:', 20, y + 20);
-
-  doc.text('Staff Signature:', 110, y);
-  doc.line(110, y + 15, 180, y + 15);
-  doc.text('Date:', 110, y + 20);
 
   // Footer
   const footerY = doc.internal.pageSize.getHeight() - 10;
   doc.setFontSize(8);
   doc.setTextColor(150);
   doc.text(
-    `Generated: ${new Date().toLocaleDateString('sv-SE')} | Molkom Folk High School Equipment Booking`,
+    `Generated: ${new Date().toLocaleDateString('sv-SE')} | Molkom Rental House - Equipment Booking Inquiry`,
     pageWidth / 2,
     footerY,
     { align: 'center' }

@@ -55,11 +55,10 @@ function parseCSV(csv: string): string[][] {
   return rows;
 }
 
-// Normalize a product name for matching: lowercase, strip parenthetical content, trim
 function normalizeName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/\s*\(.*?\)\s*/g, '') // remove (contents in parens)
+    .replace(/\s*\(.*?\)\s*/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -74,7 +73,6 @@ const baseImageMap = new Map<string, string>();
   if (!imageMap.has(norm)) {
     imageMap.set(norm, item.image);
   }
-  // Also store base name: "bmpcc 6k #1" -> "bmpcc 6k"
   const base = norm.replace(/\s*#\d+\s*$/, '').trim();
   if (base !== norm && !baseImageMap.has(base)) {
     baseImageMap.set(base, item.image);
@@ -84,26 +82,31 @@ const baseImageMap = new Map<string, string>();
 function findImage(sheetName: string): string {
   const norm = normalizeName(sheetName);
 
-  // 1. Exact match
   if (imageMap.has(norm)) return imageMap.get(norm)!;
 
-  // 2. Sheet has range like "#1-#8" — extract base and look up
   const rangeStripped = norm.replace(/\s*#\d+-#\d+\s*$/, '').trim();
   if (rangeStripped !== norm) {
     if (baseImageMap.has(rangeStripped)) return baseImageMap.get(rangeStripped)!;
     if (imageMap.has(rangeStripped)) return imageMap.get(rangeStripped)!;
   }
 
-  // 3. Base name match (strip #N suffix)
   const baseNorm = norm.replace(/\s*#\d+\s*$/, '').trim();
   if (baseNorm !== norm && baseImageMap.has(baseNorm)) return baseImageMap.get(baseNorm)!;
 
-  // 4. Prefix match
   for (const [key, img] of imageMap) {
     if (key.startsWith(norm) || norm.startsWith(key)) return img;
   }
 
   return '';
+}
+
+// Get the base name without #N or #N-#M suffix for deduplication
+function getBaseName(name: string): string {
+  return name
+    .replace(/\s*#\d+-#\d+\s*$/, '')  // "#1-#8"
+    .replace(/\s*#\d+\s*$/, '')        // "#1"
+    .replace(/\s*\(.*?\)\s*$/, '')     // "(contents)"
+    .trim();
 }
 
 export async function fetchEquipment(): Promise<Equipment[]> {
@@ -113,8 +116,7 @@ export async function fetchEquipment(): Promise<Equipment[]> {
     const csv = await response.text();
     const rows = parseCSV(csv);
 
-    const items: Equipment[] = [];
-    // Default to CAMERA since the sheet has no separate CAMERA header row
+    const rawItems: Equipment[] = [];
     let currentCategory = 'CAMERA';
     let id = 1;
     let isFirstRow = true;
@@ -129,21 +131,17 @@ export async function fetchEquipment(): Promise<Equipment[]> {
       const colF = (row[5] || '').trim();
       const colG = (row[6] || '').trim();
 
-      // Skip the very first row (header with "List of content:...")
       if (isFirstRow) {
         isFirstRow = false;
         continue;
       }
 
-      // Check if this row is a category header (case-insensitive)
       const catUpper = colB.toUpperCase().trim();
       if (validCategories.has(catUpper)) {
         currentCategory = catUpper;
-        // If this row also has no product name, it's just a separator — skip
         if (!colD) continue;
       }
 
-      // Skip rows with no product name or header-like content
       if (!colD || colD === 'Product:' || colD === 'Contains:') continue;
       if (!currentCategory) continue;
 
@@ -154,7 +152,7 @@ export async function fetchEquipment(): Promise<Equipment[]> {
       const filmYear2 = colC.toLowerCase().includes('film year 2');
       const image = findImage(colD);
 
-      items.push({
+      rawItems.push({
         id: id++,
         name: colD,
         category: currentCategory,
@@ -163,6 +161,43 @@ export async function fetchEquipment(): Promise<Equipment[]> {
         priceInclVat: priceInclVat,
         image,
         filmYear2,
+      });
+    }
+
+    // Deduplicate: merge items with same base name + category into one
+    const deduped = new Map<string, Equipment>();
+    const countMap = new Map<string, number>();
+
+    for (const item of rawItems) {
+      const base = getBaseName(item.name);
+      const key = `${item.category}::${base.toLowerCase()}`;
+
+      const existing = deduped.get(key);
+      if (existing) {
+        countMap.set(key, (countMap.get(key) || 1) + 1);
+        // Keep better image if current one has none
+        if (!existing.image && item.image) {
+          existing.image = item.image;
+        }
+        // Keep filmYear2 if any variant has it
+        if (item.filmYear2) {
+          existing.filmYear2 = true;
+        }
+      } else {
+        deduped.set(key, { ...item, name: base || item.name });
+        countMap.set(key, 1);
+      }
+    }
+
+    // Build final list with quantity in name
+    const items: Equipment[] = [];
+    let finalId = 1;
+    for (const [key, item] of deduped) {
+      const count = countMap.get(key) || 1;
+      items.push({
+        ...item,
+        id: finalId++,
+        name: count > 1 ? `${item.name} (${count} available)` : item.name,
       });
     }
 
