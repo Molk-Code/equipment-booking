@@ -18,6 +18,7 @@ export interface CheckoutInfo {
   name: string;
   email: string;
   className: string;
+  project: string;
   dateFrom: string;
   dateTo: string;
 }

@@ -15,6 +15,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
     name: '',
     email: '',
     className: '',
+    project: '',
     dateFrom: '',
     dateTo: '',
   });
@@ -106,6 +107,17 @@ export default function Checkout({ onBack }: CheckoutProps) {
               <option value="Film Year 2">Film Year 2</option>
             </select>
           </div>
+          <div className="form-group">
+            <label htmlFor="project">Project</label>
+            <input
+              id="project"
+              type="text"
+              required
+              value={info.project}
+              onChange={e => setInfo(prev => ({ ...prev, project: e.target.value }))}
+              placeholder="Project name"
+            />
+          </div>
 
           <h3>Rental Period</h3>
           <div className="form-row">
@@ -139,7 +151,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
               type="button"
               className="secondary-btn"
               onClick={handleDownloadPDF}
-              disabled={!info.name || !info.email || !info.className || !info.dateFrom || !info.dateTo}
+              disabled={!info.name || !info.email || !info.className || !info.project || !info.dateFrom || !info.dateTo}
             >
               <FileText size={18} /> Download PDF
             </button>

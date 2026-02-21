@@ -103,9 +103,10 @@ function findImage(sheetName: string): string {
 // Get the base name without #N or #N-#M suffix for deduplication
 function getBaseName(name: string): string {
   return name
-    .replace(/\s*#\d+-#\d+\s*$/, '')  // "#1-#8"
-    .replace(/\s*#\d+\s*$/, '')        // "#1"
-    .replace(/\s*\(.*?\)\s*$/, '')     // "(contents)"
+    .replace(/\s*#\d+-#\d+\s*/g, '')   // "#1-#8" anywhere in name
+    .replace(/\s*#\d+\s*/g, '')         // "#1" anywhere in name
+    .replace(/\s*\(.*?\)\s*$/, '')      // "(contents)" at the end
+    .replace(/\s+/g, ' ')              // collapse multiple spaces
     .trim();
 }
 
@@ -165,6 +166,7 @@ export async function fetchEquipment(): Promise<Equipment[]> {
     }
 
     // Deduplicate: merge items with same base name + category into one
+    // Only the #1 variant (or the first non-numbered variant) is kept for display
     const deduped = new Map<string, Equipment>();
     const countMap = new Map<string, number>();
 
@@ -175,13 +177,20 @@ export async function fetchEquipment(): Promise<Equipment[]> {
       const existing = deduped.get(key);
       if (existing) {
         countMap.set(key, (countMap.get(key) || 1) + 1);
-        // Keep better image if current one has none
-        if (!existing.image && item.image) {
+        // Prefer the #1 variant's image (or the first item with an image)
+        const isNumber1 = /\s*#1(\s|$|\()/.test(item.name) || item.name.endsWith('#1');
+        if (isNumber1 && item.image) {
+          existing.image = item.image;
+        } else if (!existing.image && item.image) {
           existing.image = item.image;
         }
         // Keep filmYear2 if any variant has it
         if (item.filmYear2) {
           existing.filmYear2 = true;
+        }
+        // Keep better description
+        if (!existing.description && item.description) {
+          existing.description = item.description;
         }
       } else {
         deduped.set(key, { ...item, name: base || item.name });

@@ -43,6 +43,8 @@ export function generatePDF(
   y += 6;
   doc.text(`Class: ${info.className}`, 20, y);
   y += 6;
+  doc.text(`Project: ${info.project || 'N/A'}`, 20, y);
+  y += 6;
   doc.text(`Rental Period: ${info.dateFrom} to ${info.dateTo}`, 20, y);
   y += 12;
 
