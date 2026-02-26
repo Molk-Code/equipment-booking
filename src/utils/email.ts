@@ -9,6 +9,27 @@ export function getPdfFilename(info: CheckoutInfo): string {
   return `${name}_Equipment_${today}.pdf`;
 }
 
+function buildConfirmPageUrl(items: CartItem[], info: CheckoutInfo, totalPrice: number): string {
+  const confirmData = {
+    name: info.name,
+    email: info.email,
+    className: info.className,
+    project: info.project,
+    dateFrom: info.dateFrom,
+    dateTo: info.dateTo,
+    totalPrice,
+    items: items.map(item => ({
+      name: item.equipment.name,
+      category: item.equipment.category,
+      days: item.days,
+      priceExclVat: item.equipment.priceExclVat,
+    })),
+  };
+  const encoded = btoa(encodeURIComponent(JSON.stringify(confirmData)));
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://equipment-booking-pi.vercel.app';
+  return `${baseUrl}/confirm?data=${encoded}`;
+}
+
 export async function sendEmail(
   pdfBlob: Blob,
   items: CartItem[],
@@ -24,7 +45,7 @@ export async function sendEmail(
     })
     .join('\n');
 
-  const confirmLink = `mailto:${encodeURIComponent(info.email)}?subject=${encodeURIComponent(`Booking Confirmed — ${info.name}`)}&body=${encodeURIComponent(`Hi ${info.name},\n\nYour equipment booking inquiry has been approved.\n\nPeriod: ${info.dateFrom} to ${info.dateTo}\nItems: ${items.length}\n\nPlease pick up the equipment at the scheduled time.\n\nBest regards,\nMolkom Rental House`)}`;
+  const confirmPageUrl = buildConfirmPageUrl(items, info, totalPrice);
 
   const html = `
     <h2>Equipment Booking Inquiry</h2>
@@ -39,8 +60,9 @@ export async function sendEmail(
     <ul>${itemsList}</ul>
     <p><em>See attached PDF for the full booking inquiry document.</em></p>
     <hr/>
-    <p><strong>To confirm this booking, click the link below:</strong></p>
-    <p><a href="${confirmLink}">Send confirmation email to ${info.email}</a></p>
+    <p><strong>To confirm this booking, click the button below:</strong></p>
+    <p><a href="${confirmPageUrl}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">Confirm Booking &amp; Send PDF to ${info.email}</a></p>
+    <p style="color:#888;font-size:12px;">This will open a confirmation page where you can send the approval email with the booking PDF attached.</p>
   `;
 
   // Confirmation email HTML for the student/booker

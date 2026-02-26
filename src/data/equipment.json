@@ -1,297 +1,2657 @@
 [
-  {"id": 1, "name": "Sony Venice 2", "category": "CAMERA", "description": "", "priceExclVat": 7500.0, "priceInclVat": 9375.0, "image": "/images/image87.jpg"},
-  {"id": 2, "name": "Sony F55", "category": "CAMERA", "description": "", "priceExclVat": 2500.0, "priceInclVat": 3125.0, "image": "/images/image7.jpg"},
-  {"id": 3, "name": "Sony F3", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image8.jpg"},
-  {"id": 4, "name": "Sony Fs7 w. PL-mount", "category": "CAMERA", "description": "", "priceExclVat": 1800.0, "priceInclVat": 2250.0, "image": "/images/image4.jpg"},
-  {"id": 5, "name": "Z-cam", "category": "CAMERA", "description": "", "priceExclVat": 900.0, "priceInclVat": 1125.0, "image": "/images/image9.jpg"},
-  {"id": 6, "name": "Sony Fs7", "category": "CAMERA", "description": "", "priceExclVat": 1500.0, "priceInclVat": 1875.0, "image": "/images/image5.jpg"},
-  {"id": 7, "name": "BM Pyxis 12k Kit #1", "category": "CAMERA", "description": "", "priceExclVat": 3000.0, "priceInclVat": 3750.0, "image": "/images/image5.jpg"},
-  {"id": 8, "name": "BM Pyxis 12k Kit #2", "category": "CAMERA", "description": "", "priceExclVat": 3000.0, "priceInclVat": 3750.0, "image": "/images/image5.jpg"},
-  {"id": 9, "name": "BM Pyxis 12k Kit #3", "category": "CAMERA", "description": "", "priceExclVat": 3000.0, "priceInclVat": 3750.0, "image": "/images/image12.jpg"},
-  {"id": 10, "name": "Bmpcc 6k #1 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image12.jpg"},
-  {"id": 11, "name": "Bmpcc 6k #2 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image12.jpg"},
-  {"id": 12, "name": "Bmpcc 6k #3 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image12.jpg"},
-  {"id": 13, "name": "Bmpcc 6k #4 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image28.jpg"},
-  {"id": 14, "name": "Sony A7s", "category": "CAMERA", "description": "", "priceExclVat": 800.0, "priceInclVat": 1000.0, "image": "/images/image14.jpg"},
-  {"id": 15, "name": "DJI Phantom 4", "category": "CAMERA", "description": "", "priceExclVat": 800.0, "priceInclVat": 1000.0, "image": "/images/image17.png"},
-  {"id": 16, "name": "DJI Mavic Pro", "category": "CAMERA", "description": "", "priceExclVat": 1200.0, "priceInclVat": 1500.0, "image": "/images/image10.jpg"},
-  {"id": 17, "name": "Sony PL Lens Set", "category": "CAMERA", "description": "20, 25, 35, 50, 85, 135mm", "priceExclVat": 3500.0, "priceInclVat": 4375.0, "image": "/images/image3.jpg"},
-  {"id": 18, "name": "Tilta Nucleus Nano Follow Focus #1", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image6.jpg"},
-  {"id": 19, "name": "Tilta Nucleus Nano II Follow Focus #1", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image11.jpg"},
-  {"id": 20, "name": "Cookin Variable ND-filter", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 21, "name": "Black Mist Filter 1/8", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image16.jpg"},
-  {"id": 22, "name": "Paralinx ArrowX Wireless Video", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image15.jpg"},
-  {"id": 23, "name": "CineEye 2s Wireless Video", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image18.jpg"},
-  {"id": 24, "name": "Hollyland Mars 300 kit #1", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image18.jpg"},
-  {"id": 25, "name": "Hollyland Mars 300 kit #2", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image25.jpg"},
-  {"id": 26, "name": "Ipad Monitor Kit #1", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image25.jpg"},
-  {"id": 27, "name": "Ipad Monitor Kit #2", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image24.jpg"},
-  {"id": 28, "name": "Atomos Ninja Monitor/Recorder", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image22.jpg"},
-  {"id": 29, "name": "Atomos Shogun Flame Monitor/Recorder", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image21.jpg"},
-  {"id": 30, "name": "Blueshape Battery 150wh", "category": "CAMERA", "description": "150Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image20.jpg"},
-  {"id": 31, "name": "Jupio V-lock Battery Extreme 155 #1", "category": "CAMERA", "description": "155Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image20.jpg"},
-  {"id": 32, "name": "Jupio V-lock Battery Extreme 155 #2", "category": "CAMERA", "description": "155Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image19.jpg"},
-  {"id": 33, "name": "Hawk-Woods V-lock Battery Mini #1", "category": "CAMERA", "description": "150Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 34, "name": "Jupio V-lock Battery #1", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 35, "name": "Jupio V-lock Battery #2", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 36, "name": "Jupio V-lock Battery #3", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 37, "name": "Jupio V-lock Battery #4", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 38, "name": "Jupio V-lock Battery #5", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 39, "name": "Jupio V-lock Battery #6", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 40, "name": "Jupio V-lock Battery #7", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image23.jpg"},
-  {"id": 41, "name": "Jupio V-lock Battery #8", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 42, "name": "Farseeing V-lock Battery #1", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 43, "name": "Farseeing V-lock Battery #2", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 44, "name": "Farseeing V-lock Battery #3", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 45, "name": "Farseeing V-lock Battery #4", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 46, "name": "Farseeing V-lock Battery #5", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 47, "name": "Farseeing V-lock Battery #6", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image29.jpg"},
-  {"id": 48, "name": "Farseeing V-lock Battery #7", "category": "CAMERA", "description": "95Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image27.jpg"},
-  {"id": 49, "name": "Jupio Mini V-lock Battery #1", "category": "CAMERA", "description": "99Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image27.jpg"},
-  {"id": 50, "name": "Jupio Mini V-lock Battery #2", "category": "CAMERA", "description": "99Wh", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image33.jpg"},
-  {"id": 51, "name": "V-lock Charger", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image34.jpg"},
-  {"id": 52, "name": "Blueshape Battery Charger", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image30.jpg"},
-  {"id": 53, "name": "Clapper board #1", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image30.jpg"},
-  {"id": 54, "name": "Clapper board #2", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image30.jpg"},
-  {"id": 55, "name": "Clapper board #3", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image30.jpg"},
-  {"id": 56, "name": "Clapper board #4", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image26.jpg"},
-  {"id": 57, "name": "SDI-Cable (Long)", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image32.jpg"},
-  {"id": 58, "name": "Sdi-Cable (Short)", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image31.jpg"},
-  {"id": 59, "name": "Cine Arm", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image47.jpg"},
-  {"id": 60, "name": "Mini Ball Head", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image38.jpg"},
-  {"id": 61, "name": "Rain Cover", "category": "CAMERA", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 62, "name": "DJI Ronin 2", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image37.jpg"},
-  {"id": 63, "name": "Tilta Armor Man 2", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image35.jpg"},
-  {"id": 64, "name": "Folkvagn Dolly Kit (Leveler, 2 stands, 2 clamps, 2 straps, Ladder)", "category": "GRIP", "description": "Leveler, 2 stands, 2 clamps, 2 straps, Ladder", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image43.jpg"},
-  {"id": 65, "name": "Benro Slider MoveOver", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image41.jpg"},
-  {"id": 66, "name": "DJI RS 4 Pro", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image57.jpg"},
-  {"id": 67, "name": "Tilta Gravity G1 Gimbal", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image70.jpg"},
-  {"id": 68, "name": "Mini Camera Dolly", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image36.jpg"},
-  {"id": 69, "name": "Tripod Vinten Vision", "category": "GRIP", "description": "17kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image40.jpg"},
-  {"id": 70, "name": "Tripod Benro BVX18CFK", "category": "GRIP", "description": "18kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image42.jpg"},
-  {"id": 71, "name": "Tripod Vinten PRO-10 #1", "category": "GRIP", "description": "10kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image42.jpg"},
-  {"id": 72, "name": "Tripod Vinten PRO-10 #2", "category": "GRIP", "description": "10kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image42.jpg"},
-  {"id": 73, "name": "Tripod Vinten PRO-10 #3", "category": "GRIP", "description": "10kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image39.jpg"},
-  {"id": 74, "name": "Tripod Benro A673TM #1", "category": "GRIP", "description": "8kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image39.jpg"},
-  {"id": 75, "name": "Tripod Benro A673TM #2", "category": "GRIP", "description": "8kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image39.jpg"},
-  {"id": 76, "name": "Tripod Benro A673TM #3", "category": "GRIP", "description": "8kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image63.jpg"},
-  {"id": 77, "name": "Tripod Benro BV6PRO #1", "category": "GRIP", "description": "6kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image63.jpg"},
-  {"id": 78, "name": "Tripod Benro BV6PRO #2", "category": "GRIP", "description": "6kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image63.jpg"},
-  {"id": 79, "name": "Tripod Benro BV6PRO #3", "category": "GRIP", "description": "6kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image46.jpg"},
-  {"id": 80, "name": "Tripod Benro KH26NL", "category": "GRIP", "description": "5kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image66.jpg"},
-  {"id": 81, "name": "Easyrig Vario 5", "category": "GRIP", "description": "5-17kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image64.jpg"},
-  {"id": 82, "name": "Easyrig Minimax #1", "category": "GRIP", "description": "2-7kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image64.jpg"},
-  {"id": 83, "name": "Easyrig Minimax #2", "category": "GRIP", "description": "2-7kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image64.jpg"},
-  {"id": 84, "name": "Easyrig Minimax #3", "category": "GRIP", "description": "2-7kg", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image48.jpg"},
-  {"id": 85, "name": "Panther Dolly", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image45.jpg"},
-  {"id": 86, "name": "Dolly Tripod Head", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image49.jpg"},
-  {"id": 87, "name": "Jib Arm", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image50.jpg"},
-  {"id": 88, "name": "Steadicam w. vest & arm", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image52.jpg"},
-  {"id": 89, "name": "Sandbag", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image51.jpg"},
-  {"id": 90, "name": "Counterweight", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image59.jpg"},
-  {"id": 91, "name": "Matthelini Clamp", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image56.jpg"},
-  {"id": 92, "name": "Big Clamp", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image54.jpg"},
-  {"id": 93, "name": "Pipe C-Clamp", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image53.jpg"},
-  {"id": 94, "name": "Magic Clamp", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image67.jpg"},
-  {"id": 95, "name": "Magic Arm", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image69.jpg"},
-  {"id": 96, "name": "Clamp Holder", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image61.jpg"},
-  {"id": 97, "name": "Light Boom Holder", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image55.jpg"},
-  {"id": 98, "name": "Styrofoam Fork", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image58.jpg"},
-  {"id": 99, "name": "Bounce board Clamp", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image74.jpg"},
-  {"id": 100, "name": "Small Clamp 4-kit", "category": "GRIP", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 101, "name": "Amaran F22C #1 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image60.jpg"},
-  {"id": 102, "name": "Amaran F22C #2 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image60.jpg"},
-  {"id": 103, "name": "Amaran F22C #3 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image60.jpg"},
-  {"id": 104, "name": "Amaran F22C #4 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image60.jpg"},
-  {"id": 105, "name": "Amaran F22C #5 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image60.jpg"},
-  {"id": 106, "name": "Amaran F22C #6 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image81.jpg"},
-  {"id": 107, "name": "LEDGO V58C1K1 #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image81.jpg"},
-  {"id": 108, "name": "LEDGO V58C1K1 #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image81.jpg"},
-  {"id": 109, "name": "LEDGO V58C1K1 #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image72.jpg"},
-  {"id": 110, "name": "Godox TL60 Kit 4-kit", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image65.jpg"},
-  {"id": 111, "name": "Godox TL60 Kit 2-kit #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image65.jpg"},
-  {"id": 112, "name": "Godox TL60 Kit 2-kit #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image65.jpg"},
-  {"id": 113, "name": "Godox TL60 Kit 2-kit #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image84.jpg"},
-  {"id": 114, "name": "Redhead LED 3-kit #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image84.jpg"},
-  {"id": 115, "name": "Redhead LED 3-kit #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image84.jpg"},
-  {"id": 116, "name": "Redhead LED 3-kit #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image85.jpg"},
-  {"id": 117, "name": "Redhead Tungsten 3-kit #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image85.jpg"},
-  {"id": 118, "name": "Redhead Tungsten 3-kit #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image93.jpg"},
-  {"id": 119, "name": "Dedo Lights 3-kit #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image93.jpg"},
-  {"id": 120, "name": "Dedo Lights 3-kit #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image68.jpg"},
-  {"id": 121, "name": "Aputure 1200x", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image71.jpg"},
-  {"id": 122, "name": "Arri 5000w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image79.jpg"},
-  {"id": 123, "name": "Arri 2000w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image75.png"},
-  {"id": 124, "name": "Arri 1000w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image107.jpg"},
-  {"id": 125, "name": "Arri 800w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image73.jpg"},
-  {"id": 126, "name": "Arri 650w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image94.jpg"},
-  {"id": 127, "name": "Arri 300w Tungsten", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image100.jpg"},
-  {"id": 128, "name": "Arri 800w Tungsten 4-kit", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image77.jpg"},
-  {"id": 129, "name": "Godox LEDP260C 2-kit", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image76.jpg"},
-  {"id": 130, "name": "HDVCAM Small Light", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image83.jpg"},
-  {"id": 131, "name": "Limelite LED-Panel 3-kit", "category": "LIGHTS", "description": "Hardcase", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image78.jpg"},
-  {"id": 132, "name": "Kinoflo Bar-100G", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image88.jpg"},
-  {"id": 133, "name": "Aputure MC LED 4-kit", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image99.jpg"},
-  {"id": 134, "name": "Aputure MC LED", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image80.jpg"},
-  {"id": 135, "name": "Aputure B7C 8-kit", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image82.jpg"},
-  {"id": 136, "name": "Aputure B7C", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image96.jpg"},
-  {"id": 137, "name": "Aputure AL-H198 LED", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image86.jpg"},
-  {"id": 138, "name": "Big Flag", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image91.jpg"},
-  {"id": 139, "name": "Small Flag", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image90.jpg"},
-  {"id": 140, "name": "Foldable Reflector #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image90.jpg"},
-  {"id": 141, "name": "Foldable Reflector #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image90.jpg"},
-  {"id": 142, "name": "Foldable Reflector #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image92.jpg"},
-  {"id": 143, "name": "Bounce board", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image89.jpg"},
-  {"id": 144, "name": "Manfrotto Skylite Rapid", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 145, "name": "Godox C-stand #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 146, "name": "Godox C-stand #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 147, "name": "Godox C-stand #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 148, "name": "Godox C-stand #4", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 149, "name": "Godox C-stand #5", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 150, "name": "Godox C-stand #6", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image204.png"},
-  {"id": 151, "name": "Godox C-stand #7", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image97.jpg"},
-  {"id": 152, "name": "Small Light Stand", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image95.jpg"},
-  {"id": 153, "name": "Combo Stand", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image105.jpg"},
-  {"id": 154, "name": "Combo stand w. Wheels", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image104.jpg"},
-  {"id": 155, "name": "Manfrotto Light Boom", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image108.jpg"},
-  {"id": 156, "name": "Manfrotto Autopole Long #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image108.jpg"},
-  {"id": 157, "name": "Manfrotto Autopole Long #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image108.jpg"},
-  {"id": 158, "name": "Manfrotto Autopole Short #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image108.jpg"},
-  {"id": 159, "name": "Manfrotto Autopole Short #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image98.jpg"},
-  {"id": 160, "name": "Smoke machine - Live T26", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image103.jpg"},
-  {"id": 161, "name": "Extension Cable Orange #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image103.jpg"},
-  {"id": 162, "name": "Extension Cable Orange #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image103.jpg"},
-  {"id": 163, "name": "Extension Cable Orange #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image101.jpg"},
-  {"id": 164, "name": "Extension Cable Red #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image101.jpg"},
-  {"id": 165, "name": "Extension Cable Red #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image101.jpg"},
-  {"id": 166, "name": "Extension Cable Red #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image102.jpg"},
-  {"id": 167, "name": "Socket circuit breaker #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image102.jpg"},
-  {"id": 168, "name": "Socket circuit breaker #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image102.jpg"},
-  {"id": 169, "name": "Socket circuit breaker #3", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image102.jpg"},
-  {"id": 170, "name": "Socket circuit breaker #4", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image102.jpg"},
-  {"id": 171, "name": "Socket circuit breaker #5", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image111.jpg"},
-  {"id": 172, "name": "Power jack 3-sockets #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image111.jpg"},
-  {"id": 173, "name": "Power jack 3-sockets #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image110.jpg"},
-  {"id": 174, "name": "Cable Reel 20m #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image124.jpg"},
-  {"id": 175, "name": "Cable Reel 40m #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image106.jpg"},
-  {"id": 176, "name": "Cable Reel 50m #1", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image106.jpg"},
-  {"id": 177, "name": "Cable Reel 50m #2", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image109.jpg"},
-  {"id": 178, "name": "Black wrap", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 179, "name": "Diffusion Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 180, "name": "ND Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 181, "name": "CTB Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 182, "name": "CTO Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 183, "name": "Red Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 184, "name": "Green Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 185, "name": "Orange Gel", "category": "LIGHTS", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 186, "name": "Zoom F8n kit #1 (Headphones, SD-card)", "category": "SOUND", "description": "Zoom F8n #1", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image112.jpg"},
-  {"id": 187, "name": "Zoom F8 kit #1 (Headphones, SD-card)", "category": "SOUND", "description": "Zoom F8 #1", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image112.jpg"},
-  {"id": 188, "name": "Zoom F8 kit #2 (Headphones, SD-card)", "category": "SOUND", "description": "Zoom F8 #2", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image112.jpg"},
-  {"id": 189, "name": "Zoom F8 kit #3 (Headphones, SD-card)", "category": "SOUND", "description": "Zoom F8 #3", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image112.jpg"},
-  {"id": 190, "name": "Zoom F8 kit #4 (Headphones, SD-card)", "category": "SOUND", "description": "Zoom F8 #4", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image113.jpg"},
-  {"id": 191, "name": "Zoom H5 (SD-Card, 2x Rechargeable AA-batteries)", "category": "SOUND", "description": "Zoom H5", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image116.jpg"},
-  {"id": 192, "name": "Røde NTG-3 (Foam Windscreen) #1", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image116.jpg"},
-  {"id": 193, "name": "Røde NTG-3 (Foam Windscreen) #2", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image116.jpg"},
-  {"id": 194, "name": "Røde NTG-3 (Foam Windscreen) #3", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image116.jpg"},
-  {"id": 195, "name": "Røde NTG-3 (Foam Windscreen) #4", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image115.jpg"},
-  {"id": 196, "name": "XLR-Cable", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image114.jpg"},
-  {"id": 197, "name": "Sennheiser lavalier 2-kit", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image120.jpg"},
-  {"id": 198, "name": "XVIVE U4R2 Wireless Monitor system", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image117.jpg"},
-  {"id": 199, "name": "Wireless Boom Transmitter + Reciever kit", "category": "SOUND", "description": "Phantom Power", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image121.jpg"},
-  {"id": 200, "name": "Wireless Mic Transmitter", "category": "SOUND", "description": "No Phantom Power", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image119.jpg"},
-  {"id": 201, "name": "Mic Boom Pole", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image118.jpg"},
-  {"id": 202, "name": "Røde Blimp w. Dead Cat #1", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image118.jpg"},
-  {"id": 203, "name": "Røde Blimp w. Dead Cat #2", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image118.jpg"},
-  {"id": 204, "name": "Røde Blimp w. Dead Cat #3", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image118.jpg"},
-  {"id": 205, "name": "Røde Blimp w. Dead Cat #4", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image122.jpg"},
-  {"id": 206, "name": "Røde Videomic NTG #1", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 207, "name": "Swit V-lock Battery #1", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 208, "name": "Swit V-lock Battery #2", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 209, "name": "Swit V-lock Battery #3", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 210, "name": "Swit V-lock Battery #4", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 211, "name": "Swit V-lock Battery #5", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image128.gif"},
-  {"id": 212, "name": "Swit V-lock Battery #6", "category": "SOUND", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 213, "name": "Vest #1", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image123.jpg"},
-  {"id": 214, "name": "Vest #2", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image123.jpg"},
-  {"id": 215, "name": "Vest #3", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image123.jpg"},
-  {"id": 216, "name": "Vest #4", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image123.jpg"},
-  {"id": 217, "name": "Vest #5", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image123.jpg"},
-  {"id": 218, "name": "Vest #6", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image168.png"},
-  {"id": 219, "name": "Gasoline Generator", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image125.jpg"},
-  {"id": 220, "name": "Hollyland Solidcom C1 3-kit", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image131.jpg"},
-  {"id": 221, "name": "Topcom Walkie Talkie 2-set", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image127.jpg"},
-  {"id": 222, "name": "50w Worklight", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image132.jpg"},
-  {"id": 223, "name": "Grunda Pro LED 5500", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image136.jpg"},
-  {"id": 224, "name": "Small LED Working Light", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image130.jpg"},
-  {"id": 225, "name": "LED Battery Lamp", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image133.jpg"},
-  {"id": 226, "name": "Foldable chair", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image126.jpg"},
-  {"id": 227, "name": "Groundsheet", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image139.jpg"},
-  {"id": 228, "name": "Hob/Kokplatta", "category": "LOCATION", "description": "", "priceExclVat": 0, "priceInclVat": 0, "image": ""},
-  {"id": 229, "name": "(BOOK) 1001 Movies You Must See Before You Die", "category": "BOOKS", "description": "(2003) Steven Jay Schneider", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image134.jpg"},
-  {"id": 230, "name": "(BOOK) Advanced Screenwriting", "category": "BOOKS", "description": "(2003) Dr. Linda Seger", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image148.jpg"},
-  {"id": 231, "name": "(BOOK) The Art of Adaption: Turning Fact and Fiction into Film", "category": "BOOKS", "description": "(1992) Linda Seger", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image161.png"},
-  {"id": 232, "name": "(BOOK) The Art of Digital Video", "category": "BOOKS", "description": "(2000) John Watkingson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image137.jpg"},
-  {"id": 233, "name": "(BOOK) The Art of the Storyboard", "category": "BOOKS", "description": "(1999) John Hart", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image169.jpg"},
-  {"id": 234, "name": "(BOOK) The Artist's Way - A Spiritual Path to Higher Creativity", "category": "BOOKS", "description": "(2020) Julia Cameron", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image147.jpg"},
-  {"id": 235, "name": "(BOOK) Att skriva filmmanus – konsten och hantverket – en praktisk handbok", "category": "BOOKS", "description": "(2009) Fredrik Lindqvist", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image144.jpg"},
-  {"id": 236, "name": "(BOOK) Att skriva för film", "category": "BOOKS", "description": "(2005) Kjell Sundstedt", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image141.jpg"},
-  {"id": 237, "name": "(BOOK) Basics of Video Lighting", "category": "BOOKS", "description": "(1999) Des Lyver & Graham Swainson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image140.jpg"},
-  {"id": 238, "name": "(BOOK) Basic of Video Production", "category": "BOOKS", "description": "(1999) Des Lyver & Graham Swainson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image143.png"},
-  {"id": 239, "name": "(BOOK) Basics of Video Sound", "category": "BOOKS", "description": "(1999) Des Lyver & Graham Swainson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image145.jpg"},
-  {"id": 240, "name": "(BOOK) Bild och retorik i media", "category": "BOOKS", "description": "(2001) Anders Carlsson & Thomas Koppfeldt", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image138.jpg"},
-  {"id": 241, "name": "(BOOK) Bildspråkets grunder – Om konst, film/tv, nyheter, barn/ungdomskultur ", "category": "BOOKS", "description": "(1999) Hasse Hansson, Sten-Gösta Karlsson & Gert Z Nordström", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image142.jpg"},
-  {"id": 242, "name": "(BOOK) Börja Tala", "category": "BOOKS", "description": "(1999) Charlotte Säfström", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image146.jpg"},
-  {"id": 243, "name": "(BOOK) Cinematography: Theory & Practice", "category": "BOOKS", "description": "(2021) Blain Brown", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image150.jpg"},
-  {"id": 244, "name": "(BOOK) Creating Special Effects for TV and Video", "category": "BOOKS", "description": "(1996) Bernard Wilkie", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image149.jpg"},
-  {"id": 245, "name": "(BOOK) Diversity in the Swedish film heritage 1890-1950", "category": "BOOKS", "description": "(2016) Cecilia Gärding", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image154.jpg"},
-  {"id": 246, "name": "(BOOK) Dokumentärfilmarens resa – Reflektioner kring ett trettioårigt arbete", "category": "BOOKS", "description": "(2006) PeÅ Holmquist", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image151.jpg"},
-  {"id": 247, "name": "(BOOK) The filmmaker’s eye – Learning (and breaking) the rules of cinematic composition", "category": "BOOKS", "description": "(2011) Gustavo Mercado", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image164.jpg"},
-  {"id": 248, "name": "(BOOK) Filming on a Microbudget", "category": "BOOKS", "description": "(2004) Paul Hardy", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image153.jpg"},
-  {"id": 249, "name": "(BOOK) Film Directing Shot by Shot: Visualizing from Concept to Screen", "category": "BOOKS", "description": "(2019) Steve D. Katz", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image156.jpg"},
-  {"id": 250, "name": "(BOOK) Film History – An Introduction", "category": "BOOKS", "description": "(2003) Kristin Thompson & David Bordwell", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image152.jpg"},
-  {"id": 251, "name": "(BOOK) Film Production Theory", "category": "BOOKS", "description": "(2000) Jean-Pierre Geuens", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image155.jpg"},
-  {"id": 252, "name": "(BOOK) Film Theory – An introduction", "category": "BOOKS", "description": "(2000) Robert Stam", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image167.jpg"},
-  {"id": 253, "name": "(BOOK) Film Theory and Criticism – Introductury Readings", "category": "BOOKS", "description": "(1999) Leo Braudy & Marshall Cohen", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image158.jpg"},
-  {"id": 254, "name": "(BOOK) Fotografera i Färg", "category": "BOOKS", "description": "(1979) Adrian Bailey & Adrian Holloway", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image157.jpg"},
-  {"id": 255, "name": "(BOOK) From Star Wars to Indiana Jones – The best of Lucasfilms Archives", "category": "BOOKS", "description": "(1994) Mark Cottta Vaz & Shinji Hata", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image162.jpg"},
-  {"id": 256, "name": "(BOOK) Goodfellas", "category": "BOOKS", "description": "(1985) Nicholas Pileggi", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image160.jpg"},
-  {"id": 257, "name": "(BOOK) Good Will Hunting – Screenplay", "category": "BOOKS", "description": "(1998) Matt Damon & Ben Affleck", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image159.jpg"},
-  {"id": 258, "name": "(BOOK) Grammar of The Edit", "category": "BOOKS", "description": "(1993) Roy Thompson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image185.jpg"},
-  {"id": 259, "name": "(BOOK) Grammar of The Shot", "category": "BOOKS", "description": "(1998) Roy Thompson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image165.jpg"},
-  {"id": 260, "name": "(BOOK) The Hollywood Standard", "category": "BOOKS", "description": "(2021) Christopher Riley", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image166.jpg"},
-  {"id": 261, "name": "(BOOK) How Movies Work", "category": "BOOKS", "description": "(1992) Bruce F. Kawin", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image163.jpg"},
-  {"id": 262, "name": "(BOOK) In the Blink of an Eye", "category": "BOOKS", "description": "(2001) Walter Murch", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image170.jpg"},
-  {"id": 263, "name": "(BOOK) Individer, grupper och ledarskap i projekt", "category": "BOOKS", "description": "(2011) Tomas Jansson & Lennart Ljung", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image178.jpg"},
-  {"id": 264, "name": "(BOOK) Industrial Light & Magic – The Art of Special Effects", "category": "BOOKS", "description": "(1986) Thomas G. Smith", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image174.jpg"},
-  {"id": 265, "name": "(BOOK) Inledning till filmstudier", "category": "BOOKS", "description": "(1997) Lars Thomas Braaten, Stig Kulset & Ove Solum", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image175.jpg"},
-  {"id": 266, "name": "(BOOK) Inside The Writers' Room", "category": "BOOKS", "description": "(2013) Christina Kallas", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image172.jpg"},
-  {"id": 267, "name": "(BOOK) Jägarna - Från idé till succé", "category": "BOOKS", "description": "(1996) Jorunn Amcoff, Björn Carlström & Joakim Hansson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image171.jpg"},
-  {"id": 268, "name": "(BOOK) Konst som rörlig bild", "category": "BOOKS", "description": "(2006) Sveriges allmänna konstförenings årsbok", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image173.jpg"},
-  {"id": 269, "name": "(BOOK) Lev Kreativt - Hur du utvecklar ditt skapande jag i tolv steg", "category": "BOOKS", "description": "(2016) Julia Cameron", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image176.jpg"},
-  {"id": 270, "name": "(BOOK) Lighting for Television & Film", "category": "BOOKS", "description": "(1991) Gerald Millerson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image179.jpg"},
-  {"id": 271, "name": "(BOOK) The Major Film Theories – An introduction", "category": "BOOKS", "description": "(1976) J. Dudley Andrew", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image181.jpg"},
-  {"id": 272, "name": "(BOOK) Mary Ellen Mark – American Oddyssey 1963-1999", "category": "BOOKS", "description": "(1999) Mary Ellen Mark", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image184.jpg"},
-  {"id": 273, "name": "(BOOK) Marknadsföring - Modeller och Principer", "category": "BOOKS", "description": "(2011) Carl Gezelius & Per Wildenstam", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image202.jpg"},
-  {"id": 274, "name": "(BOOK) Master Shots vol. 1 2nd edition – 100 advanced camera techniques", "category": "BOOKS", "description": "(2012) Christopher Kenworthty", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image180.jpg"},
-  {"id": 275, "name": "(BOOK) Master Shots vol. 2 – Shooting great dialogue scenes", "category": "BOOKS", "description": "(2011) Christopher Kenworthty", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image192.jpg"},
-  {"id": 276, "name": "(BOOK) Master Shots vol. 3 – The directors vision", "category": "BOOKS", "description": "(2013) Christopher Kenworthty", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image177.jpg"},
-  {"id": 277, "name": "(BOOK) Mediekunskap och Mediekommunikation", "category": "BOOKS", "description": "(2003) Hans-Erik Hallin & Jörgen Hallström", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image182.jpg"},
-  {"id": 278, "name": "(BOOK) Modet att skapa", "category": "BOOKS", "description": "(2005) Rollo May", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image189.jpg"},
-  {"id": 279, "name": "(BOOK) Myth and the Movies – Discovering the Mythic Structure of 50 Unforgettable Films", "category": "BOOKS", "description": "(1999) Stuard Voytilla", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image194.jpg"},
-  {"id": 280, "name": "(BOOK) On Directing Film", "category": "BOOKS", "description": "(1992) David Mamet", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image187.jpg"},
-  {"id": 281, "name": "(BOOK) Ordbok för filmare", "category": "BOOKS", "description": "(1999) Ronald Sterner", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image190.jpg"},
-  {"id": 282, "name": "(BOOK) Save the cat!", "category": "BOOKS", "description": "(2005) Blake Snyder", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image188.jpg"},
-  {"id": 283, "name": "(BOOK) Setting the Scene – The Great Hollywood Art Directors", "category": "BOOKS", "description": "(1994) Robert S. Sennett", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image183.jpg"},
-  {"id": 284, "name": "(BOOK) Screenplay – The Foundations of Screenwriting", "category": "BOOKS", "description": "(1994) Syd Field", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image186.jpg"},
-  {"id": 285, "name": "(BOOK) Screenwriting From the Heart – The Technique of the Character-Driven Screenplay", "category": "BOOKS", "description": "(2000) James Ryan", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image193.jpg"},
-  {"id": 286, "name": "(BOOK) Screenwriting Updated – New (and Conventional) Ways of Writing for the Screen", "category": "BOOKS", "description": "(2001) Linda Aronson", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image196.jpg"},
-  {"id": 287, "name": "(BOOK) Sculpting in time", "category": "BOOKS", "description": "(1989) Andrey Tarkovsky", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image191.jpg"},
-  {"id": 288, "name": "(BOOK) Successful Sitcom Writing – How to Write and Sell for TV’s Hottest Format", "category": "BOOKS", "description": "(1996) Jurgen Wolff", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image201.jpg"},
-  {"id": 289, "name": "(BOOK) Så smalfilmar man", "category": "BOOKS", "description": "(1958) George Wain", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image198.jpg"},
-  {"id": 290, "name": "(BOOK) Tankar om film", "category": "BOOKS", "description": "Sara Broos, Broby Grafiska", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image197.jpg"},
-  {"id": 291, "name": "(BOOK) Taxi Driver - Screenplay", "category": "BOOKS", "description": "(1990) Paul Schrader", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image200.jpg"},
-  {"id": 292, "name": "(BOOK) Television – An international History", "category": "BOOKS", "description": "(1995) Anthony Smith", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image195.jpg"},
-  {"id": 293, "name": "(BOOK) Understanding Movies", "category": "BOOKS", "description": "(1998) Louis Gianetti", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image199.jpg"},
-  {"id": 294, "name": "(BOOK) Writing for the Screen", "category": "BOOKS", "description": "(2008) Craig Batty & Zara Waldeback", "priceExclVat": 0, "priceInclVat": 0, "image": "/images/image203.jpg"},
-  {"id": 295, "name": "(BOOK) The Writer’s Journey – Mythic Structure for Writers", "category": "BOOKS", "description": "(2007) Christopher Vogler", "priceExclVat": 0, "priceInclVat": 0, "image": ""}
+  {
+    "id": 1,
+    "name": "Sony Venice 2",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 7500.0,
+    "priceInclVat": 9375.0,
+    "image": "/images/image13.png"
+  },
+  {
+    "id": 2,
+    "name": "Sony F55",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 2500.0,
+    "priceInclVat": 3125.0,
+    "image": "/images/image87.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Sony F3",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image7.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Sony Fs7 w. PL-mount",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1800.0,
+    "priceInclVat": 2250.0,
+    "image": "/images/image8.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Z-cam",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 900.0,
+    "priceInclVat": 1125.0,
+    "image": "/images/image4.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Sony Fs7",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1500.0,
+    "priceInclVat": 1875.0,
+    "image": "/images/image9.jpg"
+  },
+  {
+    "id": 7,
+    "name": "BM Pyxis 12k Kit #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 3000.0,
+    "priceInclVat": 3750.0,
+    "image": "/images/image5.jpg"
+  },
+  {
+    "id": 8,
+    "name": "BM Pyxis 12k Kit #2",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 3000.0,
+    "priceInclVat": 3750.0,
+    "image": "/images/image5.jpg"
+  },
+  {
+    "id": 9,
+    "name": "BM Pyxis 12k Kit #3",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 3000.0,
+    "priceInclVat": 3750.0,
+    "image": "/images/image5.jpg"
+  },
+  {
+    "id": 10,
+    "name": "Bmpcc 6k #1 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image12.jpg"
+  },
+  {
+    "id": 11,
+    "name": "Bmpcc 6k #2 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image12.jpg"
+  },
+  {
+    "id": 12,
+    "name": "Bmpcc 6k #3 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image12.jpg"
+  },
+  {
+    "id": 13,
+    "name": "Bmpcc 6k #4 (V-lock battery, SSD-disc, USB-C Cable, ND-filter, Promist-filter, Screwdriver)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image12.jpg"
+  },
+  {
+    "id": 14,
+    "name": "Sony A7s",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 800.0,
+    "priceInclVat": 1000.0,
+    "image": "/images/image14.jpg"
+  },
+  {
+    "id": 15,
+    "name": "DJI Phantom 4",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 800.0,
+    "priceInclVat": 1000.0,
+    "image": "/images/image17.png"
+  },
+  {
+    "id": 16,
+    "name": "DJI Mavic Pro",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 1200.0,
+    "priceInclVat": 1500.0,
+    "image": "/images/image16.jpg"
+  },
+  {
+    "id": 17,
+    "name": "Sony PL Lens Set",
+    "category": "CAMERA",
+    "description": "20, 25, 35, 50, 85, 135mm",
+    "priceExclVat": 3500.0,
+    "priceInclVat": 4375.0,
+    "image": "/images/image10.jpg"
+  },
+  {
+    "id": 18,
+    "name": "Tilta Nucleus Nano Follow Focus #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image3.jpg"
+  },
+  {
+    "id": 19,
+    "name": "Tilta Nucleus Nano II Follow Focus #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image6.jpg"
+  },
+  {
+    "id": 20,
+    "name": "Cookin Variable ND-filter",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image11.jpg"
+  },
+  {
+    "id": 21,
+    "name": "Black Mist Filter 1/8",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image15.jpg"
+  },
+  {
+    "id": 22,
+    "name": "Paralinx ArrowX Wireless Video",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image18.jpg"
+  },
+  {
+    "id": 23,
+    "name": "CineEye 2s Wireless Video",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image19.jpg"
+  },
+  {
+    "id": 24,
+    "name": "Hollyland Mars 300 kit #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image20.jpg"
+  },
+  {
+    "id": 25,
+    "name": "Hollyland Mars 300 kit #2",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image20.jpg"
+  },
+  {
+    "id": 26,
+    "name": "Ipad Monitor Kit #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image21.jpg"
+  },
+  {
+    "id": 27,
+    "name": "Ipad Monitor Kit #2",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image21.jpg"
+  },
+  {
+    "id": 28,
+    "name": "Atomos Ninja Monitor/Recorder",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image22.jpg"
+  },
+  {
+    "id": 29,
+    "name": "Atomos Shogun Flame Monitor/Recorder",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image23.jpg"
+  },
+  {
+    "id": 30,
+    "name": "Blueshape Battery 150wh",
+    "category": "CAMERA",
+    "description": "150Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image24.jpg"
+  },
+  {
+    "id": 31,
+    "name": "Jupio V-lock Battery Extreme 155 #1",
+    "category": "CAMERA",
+    "description": "155Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image25.jpg"
+  },
+  {
+    "id": 32,
+    "name": "Jupio V-lock Battery Extreme 155 #2",
+    "category": "CAMERA",
+    "description": "155Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image25.jpg"
+  },
+  {
+    "id": 33,
+    "name": "Hawk-Woods V-lock Battery Mini #1",
+    "category": "CAMERA",
+    "description": "150Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image26.jpg"
+  },
+  {
+    "id": 34,
+    "name": "Jupio V-lock Battery #1",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 35,
+    "name": "Jupio V-lock Battery #2",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 36,
+    "name": "Jupio V-lock Battery #3",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 37,
+    "name": "Jupio V-lock Battery #4",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 38,
+    "name": "Jupio V-lock Battery #5",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 39,
+    "name": "Jupio V-lock Battery #6",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 40,
+    "name": "Jupio V-lock Battery #7",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 41,
+    "name": "Jupio V-lock Battery #8",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image27.jpg"
+  },
+  {
+    "id": 42,
+    "name": "Farseeing V-lock Battery #1",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 43,
+    "name": "Farseeing V-lock Battery #2",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 44,
+    "name": "Farseeing V-lock Battery #3",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 45,
+    "name": "Farseeing V-lock Battery #4",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 46,
+    "name": "Farseeing V-lock Battery #5",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 47,
+    "name": "Farseeing V-lock Battery #6",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 48,
+    "name": "Farseeing V-lock Battery #7",
+    "category": "CAMERA",
+    "description": "95Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image28.jpg"
+  },
+  {
+    "id": 49,
+    "name": "Jupio Mini V-lock Battery #1",
+    "category": "CAMERA",
+    "description": "99Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image29.jpg"
+  },
+  {
+    "id": 50,
+    "name": "Jupio Mini V-lock Battery #2",
+    "category": "CAMERA",
+    "description": "99Wh",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image29.jpg"
+  },
+  {
+    "id": 51,
+    "name": "V-lock Charger",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image30.jpg"
+  },
+  {
+    "id": 52,
+    "name": "Blueshape Battery Charger",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image31.jpg"
+  },
+  {
+    "id": 53,
+    "name": "Clapper board #1",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image32.jpg"
+  },
+  {
+    "id": 54,
+    "name": "Clapper board #2",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image32.jpg"
+  },
+  {
+    "id": 55,
+    "name": "Clapper board #3",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image32.jpg"
+  },
+  {
+    "id": 56,
+    "name": "Clapper board #4",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image32.jpg"
+  },
+  {
+    "id": 57,
+    "name": "SDI-Cable (Long)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image33.jpg"
+  },
+  {
+    "id": 58,
+    "name": "Sdi-Cable (Short)",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image34.jpg"
+  },
+  {
+    "id": 59,
+    "name": "Cine Arm",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image35.jpg"
+  },
+  {
+    "id": 60,
+    "name": "Mini Ball Head",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image36.jpg"
+  },
+  {
+    "id": 61,
+    "name": "Rain Cover",
+    "category": "CAMERA",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image38.jpg"
+  },
+  {
+    "id": 62,
+    "name": "DJI Ronin 2",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image37.jpg"
+  },
+  {
+    "id": 63,
+    "name": "Tilta Armor Man 2",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image39.jpg"
+  },
+  {
+    "id": 64,
+    "name": "Folkvagn Dolly Kit (Leveler, 2 stands, 2 clamps, 2 straps, Ladder)",
+    "category": "GRIP",
+    "description": "Leveler, 2 stands, 2 clamps, 2 straps, Ladder",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image40.jpg"
+  },
+  {
+    "id": 65,
+    "name": "Benro Slider MoveOver",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image41.jpg"
+  },
+  {
+    "id": 66,
+    "name": "DJI RS 4 Pro",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image42.jpg"
+  },
+  {
+    "id": 67,
+    "name": "Tilta Gravity G1 Gimbal",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image43.jpg"
+  },
+  {
+    "id": 68,
+    "name": "Mini Camera Dolly",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image44.png"
+  },
+  {
+    "id": 69,
+    "name": "Tripod Vinten Vision",
+    "category": "GRIP",
+    "description": "17kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image45.jpg"
+  },
+  {
+    "id": 70,
+    "name": "Tripod Benro BVX18CFK",
+    "category": "GRIP",
+    "description": "18kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image46.jpg"
+  },
+  {
+    "id": 71,
+    "name": "Tripod Vinten PRO-10 #1",
+    "category": "GRIP",
+    "description": "10kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image47.jpg"
+  },
+  {
+    "id": 72,
+    "name": "Tripod Vinten PRO-10 #2",
+    "category": "GRIP",
+    "description": "10kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image47.jpg"
+  },
+  {
+    "id": 73,
+    "name": "Tripod Vinten PRO-10 #3",
+    "category": "GRIP",
+    "description": "10kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image47.jpg"
+  },
+  {
+    "id": 74,
+    "name": "Tripod Benro A673TM #1",
+    "category": "GRIP",
+    "description": "8kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image48.jpg"
+  },
+  {
+    "id": 75,
+    "name": "Tripod Benro A673TM #2",
+    "category": "GRIP",
+    "description": "8kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image48.jpg"
+  },
+  {
+    "id": 76,
+    "name": "Tripod Benro A673TM #3",
+    "category": "GRIP",
+    "description": "8kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image48.jpg"
+  },
+  {
+    "id": 77,
+    "name": "Tripod Benro BV6PRO #1",
+    "category": "GRIP",
+    "description": "6kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image49.jpg"
+  },
+  {
+    "id": 78,
+    "name": "Tripod Benro BV6PRO #2",
+    "category": "GRIP",
+    "description": "6kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image49.jpg"
+  },
+  {
+    "id": 79,
+    "name": "Tripod Benro BV6PRO #3",
+    "category": "GRIP",
+    "description": "6kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image49.jpg"
+  },
+  {
+    "id": 80,
+    "name": "Tripod Benro KH26NL",
+    "category": "GRIP",
+    "description": "5kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image50.jpg"
+  },
+  {
+    "id": 81,
+    "name": "Easyrig Vario 5",
+    "category": "GRIP",
+    "description": "5-17kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image51.jpg"
+  },
+  {
+    "id": 82,
+    "name": "Easyrig Minimax #1",
+    "category": "GRIP",
+    "description": "2-7kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image52.jpg"
+  },
+  {
+    "id": 83,
+    "name": "Easyrig Minimax #2",
+    "category": "GRIP",
+    "description": "2-7kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image52.jpg"
+  },
+  {
+    "id": 84,
+    "name": "Easyrig Minimax #3",
+    "category": "GRIP",
+    "description": "2-7kg",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image52.jpg"
+  },
+  {
+    "id": 85,
+    "name": "Panther Dolly",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image53.jpg"
+  },
+  {
+    "id": 86,
+    "name": "Dolly Tripod Head",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image54.jpg"
+  },
+  {
+    "id": 87,
+    "name": "Jib Arm",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image55.jpg"
+  },
+  {
+    "id": 88,
+    "name": "Steadicam w. vest & arm",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image56.jpg"
+  },
+  {
+    "id": 89,
+    "name": "Sandbag",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image57.jpg"
+  },
+  {
+    "id": 90,
+    "name": "Counterweight",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image58.jpg"
+  },
+  {
+    "id": 91,
+    "name": "Matthelini Clamp",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image59.jpg"
+  },
+  {
+    "id": 92,
+    "name": "Big Clamp",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image61.jpg"
+  },
+  {
+    "id": 93,
+    "name": "Pipe C-Clamp",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image62.jpg"
+  },
+  {
+    "id": 94,
+    "name": "Magic Clamp",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image63.jpg"
+  },
+  {
+    "id": 95,
+    "name": "Magic Arm",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image64.jpg"
+  },
+  {
+    "id": 96,
+    "name": "Clamp Holder",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image65.jpg"
+  },
+  {
+    "id": 97,
+    "name": "Light Boom Holder",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image66.jpg"
+  },
+  {
+    "id": 98,
+    "name": "Styrofoam Fork",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image67.jpg"
+  },
+  {
+    "id": 99,
+    "name": "Bounce board Clamp",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image68.jpg"
+  },
+  {
+    "id": 100,
+    "name": "Small Clamp 4-kit",
+    "category": "GRIP",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image69.jpg"
+  },
+  {
+    "id": 101,
+    "name": "Amaran F22C #1 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 102,
+    "name": "Amaran F22C #2 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 103,
+    "name": "Amaran F22C #3 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 104,
+    "name": "Amaran F22C #4 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 105,
+    "name": "Amaran F22C #5 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 106,
+    "name": "Amaran F22C #6 (Reflector frame, Popup-frame w. hooks, Diffuser fabric, Grid, Control Device, Power Supply, Power Cable, Mounting Head)",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image60.jpg"
+  },
+  {
+    "id": 107,
+    "name": "LEDGO V58C1K1 #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image70.jpg"
+  },
+  {
+    "id": 108,
+    "name": "LEDGO V58C1K1 #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image70.jpg"
+  },
+  {
+    "id": 109,
+    "name": "LEDGO V58C1K1 #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image70.jpg"
+  },
+  {
+    "id": 110,
+    "name": "Godox TL60 Kit 4-kit",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image71.jpg"
+  },
+  {
+    "id": 111,
+    "name": "Godox TL60 Kit 2-kit #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image71.jpg"
+  },
+  {
+    "id": 112,
+    "name": "Godox TL60 Kit 2-kit #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image71.jpg"
+  },
+  {
+    "id": 113,
+    "name": "Godox TL60 Kit 2-kit #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image71.jpg"
+  },
+  {
+    "id": 114,
+    "name": "Redhead LED 3-kit #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image72.jpg"
+  },
+  {
+    "id": 115,
+    "name": "Redhead LED 3-kit #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image72.jpg"
+  },
+  {
+    "id": 116,
+    "name": "Redhead LED 3-kit #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image72.jpg"
+  },
+  {
+    "id": 117,
+    "name": "Redhead Tungsten 3-kit #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image73.jpg"
+  },
+  {
+    "id": 118,
+    "name": "Redhead Tungsten 3-kit #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image73.jpg"
+  },
+  {
+    "id": 119,
+    "name": "Dedo Lights 3-kit #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image74.jpg"
+  },
+  {
+    "id": 120,
+    "name": "Dedo Lights 3-kit #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image74.jpg"
+  },
+  {
+    "id": 121,
+    "name": "Aputure 1200x",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image75.png"
+  },
+  {
+    "id": 122,
+    "name": "Arri 5000w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image76.jpg"
+  },
+  {
+    "id": 123,
+    "name": "Arri 2000w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image77.jpg"
+  },
+  {
+    "id": 124,
+    "name": "Arri 1000w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image78.jpg"
+  },
+  {
+    "id": 125,
+    "name": "Arri 800w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image79.jpg"
+  },
+  {
+    "id": 126,
+    "name": "Arri 650w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image107.jpg"
+  },
+  {
+    "id": 127,
+    "name": "Arri 300w Tungsten",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image80.jpg"
+  },
+  {
+    "id": 128,
+    "name": "Arri 800w Tungsten 4-kit",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image79.jpg"
+  },
+  {
+    "id": 129,
+    "name": "Godox LEDP260C 2-kit",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image81.jpg"
+  },
+  {
+    "id": 130,
+    "name": "HDVCAM Small Light",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image82.jpg"
+  },
+  {
+    "id": 131,
+    "name": "Limelite LED-Panel 3-kit",
+    "category": "LIGHTS",
+    "description": "Hardcase",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image83.jpg"
+  },
+  {
+    "id": 132,
+    "name": "Kinoflo Bar-100G",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image84.jpg"
+  },
+  {
+    "id": 133,
+    "name": "Aputure MC LED 4-kit",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image85.jpg"
+  },
+  {
+    "id": 134,
+    "name": "Aputure MC LED",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image86.jpg"
+  },
+  {
+    "id": 135,
+    "name": "Aputure B7C 8-kit",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image88.jpg"
+  },
+  {
+    "id": 136,
+    "name": "Aputure B7C",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image88.jpg"
+  },
+  {
+    "id": 137,
+    "name": "Aputure AL-H198 LED",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image86.jpg"
+  },
+  {
+    "id": 138,
+    "name": "Big Flag",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image91.jpg"
+  },
+  {
+    "id": 139,
+    "name": "Small Flag",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image92.jpg"
+  },
+  {
+    "id": 140,
+    "name": "Foldable Reflector #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image90.jpg"
+  },
+  {
+    "id": 141,
+    "name": "Foldable Reflector #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image90.jpg"
+  },
+  {
+    "id": 142,
+    "name": "Foldable Reflector #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image90.jpg"
+  },
+  {
+    "id": 143,
+    "name": "Bounce board",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image89.jpg"
+  },
+  {
+    "id": 144,
+    "name": "Manfrotto Skylite Rapid",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image93.jpg"
+  },
+  {
+    "id": 145,
+    "name": "Godox C-stand #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 146,
+    "name": "Godox C-stand #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 147,
+    "name": "Godox C-stand #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 148,
+    "name": "Godox C-stand #4",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 149,
+    "name": "Godox C-stand #5",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 150,
+    "name": "Godox C-stand #6",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 151,
+    "name": "Godox C-stand #7",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image94.jpg"
+  },
+  {
+    "id": 152,
+    "name": "Small Light Stand",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image95.jpg"
+  },
+  {
+    "id": 153,
+    "name": "Combo Stand",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image96.jpg"
+  },
+  {
+    "id": 154,
+    "name": "Combo stand w. Wheels",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image105.jpg"
+  },
+  {
+    "id": 155,
+    "name": "Manfrotto Light Boom",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image104.jpg"
+  },
+  {
+    "id": 156,
+    "name": "Manfrotto Autopole Long #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image108.jpg"
+  },
+  {
+    "id": 157,
+    "name": "Manfrotto Autopole Long #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image108.jpg"
+  },
+  {
+    "id": 158,
+    "name": "Manfrotto Autopole Short #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image108.jpg"
+  },
+  {
+    "id": 159,
+    "name": "Manfrotto Autopole Short #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image108.jpg"
+  },
+  {
+    "id": 160,
+    "name": "Smoke machine - Live T26",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image98.jpg"
+  },
+  {
+    "id": 161,
+    "name": "Extension Cable Orange #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image103.jpg"
+  },
+  {
+    "id": 162,
+    "name": "Extension Cable Orange #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image103.jpg"
+  },
+  {
+    "id": 163,
+    "name": "Extension Cable Orange #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image103.jpg"
+  },
+  {
+    "id": 164,
+    "name": "Extension Cable Red #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image101.jpg"
+  },
+  {
+    "id": 165,
+    "name": "Extension Cable Red #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image101.jpg"
+  },
+  {
+    "id": 166,
+    "name": "Extension Cable Red #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image101.jpg"
+  },
+  {
+    "id": 167,
+    "name": "Socket circuit breaker #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image102.jpg"
+  },
+  {
+    "id": 168,
+    "name": "Socket circuit breaker #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image102.jpg"
+  },
+  {
+    "id": 169,
+    "name": "Socket circuit breaker #3",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image102.jpg"
+  },
+  {
+    "id": 170,
+    "name": "Socket circuit breaker #4",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image102.jpg"
+  },
+  {
+    "id": 171,
+    "name": "Socket circuit breaker #5",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image102.jpg"
+  },
+  {
+    "id": 172,
+    "name": "Power jack 3-sockets #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image111.jpg"
+  },
+  {
+    "id": 173,
+    "name": "Power jack 3-sockets #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image111.jpg"
+  },
+  {
+    "id": 174,
+    "name": "Cable Reel 20m #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image106.jpg"
+  },
+  {
+    "id": 175,
+    "name": "Cable Reel 40m #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image124.jpg"
+  },
+  {
+    "id": 176,
+    "name": "Cable Reel 50m #1",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image110.jpg"
+  },
+  {
+    "id": 177,
+    "name": "Cable Reel 50m #2",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image110.jpg"
+  },
+  {
+    "id": 178,
+    "name": "Black wrap",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image109.jpg"
+  },
+  {
+    "id": 179,
+    "name": "Diffusion Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 180,
+    "name": "ND Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 181,
+    "name": "CTB Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 182,
+    "name": "CTO Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 183,
+    "name": "Red Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 184,
+    "name": "Green Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 185,
+    "name": "Orange Gel",
+    "category": "LIGHTS",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  },
+  {
+    "id": 186,
+    "name": "Zoom F8n kit #1 (Headphones, SD-card)",
+    "category": "SOUND",
+    "description": "Zoom F8n #1",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image129.jpg"
+  },
+  {
+    "id": 187,
+    "name": "Zoom F8 kit #1 (Headphones, SD-card)",
+    "category": "SOUND",
+    "description": "Zoom F8 #1",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image112.jpg"
+  },
+  {
+    "id": 188,
+    "name": "Zoom F8 kit #2 (Headphones, SD-card)",
+    "category": "SOUND",
+    "description": "Zoom F8 #2",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image112.jpg"
+  },
+  {
+    "id": 189,
+    "name": "Zoom F8 kit #3 (Headphones, SD-card)",
+    "category": "SOUND",
+    "description": "Zoom F8 #3",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image112.jpg"
+  },
+  {
+    "id": 190,
+    "name": "Zoom F8 kit #4 (Headphones, SD-card)",
+    "category": "SOUND",
+    "description": "Zoom F8 #4",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image112.jpg"
+  },
+  {
+    "id": 191,
+    "name": "Zoom H5 (SD-Card, 2x Rechargeable AA-batteries)",
+    "category": "SOUND",
+    "description": "Zoom H5",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image113.jpg"
+  },
+  {
+    "id": 192,
+    "name": "Røde NTG-3 (Foam Windscreen) #1",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image116.jpg"
+  },
+  {
+    "id": 193,
+    "name": "Røde NTG-3 (Foam Windscreen) #2",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image116.jpg"
+  },
+  {
+    "id": 194,
+    "name": "Røde NTG-3 (Foam Windscreen) #3",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image116.jpg"
+  },
+  {
+    "id": 195,
+    "name": "Røde NTG-3 (Foam Windscreen) #4",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image116.jpg"
+  },
+  {
+    "id": 196,
+    "name": "XLR-Cable",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image115.jpg"
+  },
+  {
+    "id": 197,
+    "name": "Sennheiser lavalier 2-kit",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image114.jpg"
+  },
+  {
+    "id": 198,
+    "name": "XVIVE U4R2 Wireless Monitor system",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image120.jpg"
+  },
+  {
+    "id": 199,
+    "name": "Wireless Boom Transmitter + Reciever kit",
+    "category": "SOUND",
+    "description": "Phantom Power",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image117.jpg"
+  },
+  {
+    "id": 200,
+    "name": "Wireless Mic Transmitter",
+    "category": "SOUND",
+    "description": "No Phantom Power",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image121.jpg"
+  },
+  {
+    "id": 201,
+    "name": "Mic Boom Pole",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image119.jpg"
+  },
+  {
+    "id": 202,
+    "name": "Røde Blimp w. Dead Cat #1",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image118.jpg"
+  },
+  {
+    "id": 203,
+    "name": "Røde Blimp w. Dead Cat #2",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image118.jpg"
+  },
+  {
+    "id": 204,
+    "name": "Røde Blimp w. Dead Cat #3",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image118.jpg"
+  },
+  {
+    "id": 205,
+    "name": "Røde Blimp w. Dead Cat #4",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image118.jpg"
+  },
+  {
+    "id": 206,
+    "name": "Røde Videomic NTG #1",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image122.jpg"
+  },
+  {
+    "id": 207,
+    "name": "Swit V-lock Battery #1",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 208,
+    "name": "Swit V-lock Battery #2",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 209,
+    "name": "Swit V-lock Battery #3",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 210,
+    "name": "Swit V-lock Battery #4",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 211,
+    "name": "Swit V-lock Battery #5",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 212,
+    "name": "Swit V-lock Battery #6",
+    "category": "SOUND",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image128.gif"
+  },
+  {
+    "id": 213,
+    "name": "Vest #1",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 214,
+    "name": "Vest #2",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 215,
+    "name": "Vest #3",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 216,
+    "name": "Vest #4",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 217,
+    "name": "Vest #5",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 218,
+    "name": "Vest #6",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image123.jpg"
+  },
+  {
+    "id": 219,
+    "name": "Gasoline Generator",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image168.png"
+  },
+  {
+    "id": 220,
+    "name": "Hollyland Solidcom C1 3-kit",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image125.jpg"
+  },
+  {
+    "id": 221,
+    "name": "Topcom Walkie Talkie 2-set",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image131.jpg"
+  },
+  {
+    "id": 222,
+    "name": "50w Worklight",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image127.jpg"
+  },
+  {
+    "id": 223,
+    "name": "Grunda Pro LED 5500",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image132.jpg"
+  },
+  {
+    "id": 224,
+    "name": "Small LED Working Light",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image130.jpg"
+  },
+  {
+    "id": 225,
+    "name": "LED Battery Lamp",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image136.jpg"
+  },
+  {
+    "id": 226,
+    "name": "Foldable chair",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image133.jpg"
+  },
+  {
+    "id": 227,
+    "name": "Groundsheet",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image126.jpg"
+  },
+  {
+    "id": 228,
+    "name": "Hob/Kokplatta",
+    "category": "LOCATION",
+    "description": "",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image139.jpg"
+  },
+  {
+    "id": 229,
+    "name": "(BOOK) 1001 Movies You Must See Before You Die",
+    "category": "BOOKS",
+    "description": "(2003) Steven Jay Schneider",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image134.jpg"
+  },
+  {
+    "id": 230,
+    "name": "(BOOK) Advanced Screenwriting",
+    "category": "BOOKS",
+    "description": "(2003) Dr. Linda Seger",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image148.jpg"
+  },
+  {
+    "id": 231,
+    "name": "(BOOK) The Art of Adaption: Turning Fact and Fiction into Film",
+    "category": "BOOKS",
+    "description": "(1992) Linda Seger",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image161.png"
+  },
+  {
+    "id": 232,
+    "name": "(BOOK) The Art of Digital Video",
+    "category": "BOOKS",
+    "description": "(2000) John Watkingson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image137.jpg"
+  },
+  {
+    "id": 233,
+    "name": "(BOOK) The Art of the Storyboard",
+    "category": "BOOKS",
+    "description": "(1999) John Hart",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image169.jpg"
+  },
+  {
+    "id": 234,
+    "name": "(BOOK) The Artist's Way - A Spiritual Path to Higher Creativity",
+    "category": "BOOKS",
+    "description": "(2020) Julia Cameron",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image147.jpg"
+  },
+  {
+    "id": 235,
+    "name": "(BOOK) Att skriva filmmanus – konsten och hantverket – en praktisk handbok",
+    "category": "BOOKS",
+    "description": "(2009) Fredrik Lindqvist",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image144.jpg"
+  },
+  {
+    "id": 236,
+    "name": "(BOOK) Att skriva för film",
+    "category": "BOOKS",
+    "description": "(2005) Kjell Sundstedt",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image141.jpg"
+  },
+  {
+    "id": 237,
+    "name": "(BOOK) Basics of Video Lighting",
+    "category": "BOOKS",
+    "description": "(1999) Des Lyver & Graham Swainson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image140.jpg"
+  },
+  {
+    "id": 238,
+    "name": "(BOOK) Basic of Video Production",
+    "category": "BOOKS",
+    "description": "(1999) Des Lyver & Graham Swainson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image143.png"
+  },
+  {
+    "id": 239,
+    "name": "(BOOK) Basics of Video Sound",
+    "category": "BOOKS",
+    "description": "(1999) Des Lyver & Graham Swainson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image145.jpg"
+  },
+  {
+    "id": 240,
+    "name": "(BOOK) Bild och retorik i media",
+    "category": "BOOKS",
+    "description": "(2001) Anders Carlsson & Thomas Koppfeldt",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image138.jpg"
+  },
+  {
+    "id": 241,
+    "name": "(BOOK) Bildspråkets grunder – Om konst, film/tv, nyheter, barn/ungdomskultur ",
+    "category": "BOOKS",
+    "description": "(1999) Hasse Hansson, Sten-Gösta Karlsson & Gert Z Nordström",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image142.jpg"
+  },
+  {
+    "id": 242,
+    "name": "(BOOK) Börja Tala",
+    "category": "BOOKS",
+    "description": "(1999) Charlotte Säfström",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image146.jpg"
+  },
+  {
+    "id": 243,
+    "name": "(BOOK) Cinematography: Theory & Practice",
+    "category": "BOOKS",
+    "description": "(2021) Blain Brown",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image150.jpg"
+  },
+  {
+    "id": 244,
+    "name": "(BOOK) Creating Special Effects for TV and Video",
+    "category": "BOOKS",
+    "description": "(1996) Bernard Wilkie",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image149.jpg"
+  },
+  {
+    "id": 245,
+    "name": "(BOOK) Diversity in the Swedish film heritage 1890-1950",
+    "category": "BOOKS",
+    "description": "(2016) Cecilia Gärding",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image154.jpg"
+  },
+  {
+    "id": 246,
+    "name": "(BOOK) Dokumentärfilmarens resa – Reflektioner kring ett trettioårigt arbete",
+    "category": "BOOKS",
+    "description": "(2006) PeÅ Holmquist",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image151.jpg"
+  },
+  {
+    "id": 247,
+    "name": "(BOOK) The filmmaker’s eye – Learning (and breaking) the rules of cinematic composition",
+    "category": "BOOKS",
+    "description": "(2011) Gustavo Mercado",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image164.jpg"
+  },
+  {
+    "id": 248,
+    "name": "(BOOK) Filming on a Microbudget",
+    "category": "BOOKS",
+    "description": "(2004) Paul Hardy",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image153.jpg"
+  },
+  {
+    "id": 249,
+    "name": "(BOOK) Film Directing Shot by Shot: Visualizing from Concept to Screen",
+    "category": "BOOKS",
+    "description": "(2019) Steve D. Katz",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image156.jpg"
+  },
+  {
+    "id": 250,
+    "name": "(BOOK) Film History – An Introduction",
+    "category": "BOOKS",
+    "description": "(2003) Kristin Thompson & David Bordwell",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image152.jpg"
+  },
+  {
+    "id": 251,
+    "name": "(BOOK) Film Production Theory",
+    "category": "BOOKS",
+    "description": "(2000) Jean-Pierre Geuens",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image155.jpg"
+  },
+  {
+    "id": 252,
+    "name": "(BOOK) Film Theory – An introduction",
+    "category": "BOOKS",
+    "description": "(2000) Robert Stam",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image167.jpg"
+  },
+  {
+    "id": 253,
+    "name": "(BOOK) Film Theory and Criticism – Introductury Readings",
+    "category": "BOOKS",
+    "description": "(1999) Leo Braudy & Marshall Cohen",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image158.jpg"
+  },
+  {
+    "id": 254,
+    "name": "(BOOK) Fotografera i Färg",
+    "category": "BOOKS",
+    "description": "(1979) Adrian Bailey & Adrian Holloway",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image157.jpg"
+  },
+  {
+    "id": 255,
+    "name": "(BOOK) From Star Wars to Indiana Jones – The best of Lucasfilms Archives",
+    "category": "BOOKS",
+    "description": "(1994) Mark Cottta Vaz & Shinji Hata",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image162.jpg"
+  },
+  {
+    "id": 256,
+    "name": "(BOOK) Goodfellas",
+    "category": "BOOKS",
+    "description": "(1985) Nicholas Pileggi",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image160.jpg"
+  },
+  {
+    "id": 257,
+    "name": "(BOOK) Good Will Hunting – Screenplay",
+    "category": "BOOKS",
+    "description": "(1998) Matt Damon & Ben Affleck",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image159.jpg"
+  },
+  {
+    "id": 258,
+    "name": "(BOOK) Grammar of The Edit",
+    "category": "BOOKS",
+    "description": "(1993) Roy Thompson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image185.jpg"
+  },
+  {
+    "id": 259,
+    "name": "(BOOK) Grammar of The Shot",
+    "category": "BOOKS",
+    "description": "(1998) Roy Thompson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image165.jpg"
+  },
+  {
+    "id": 260,
+    "name": "(BOOK) The Hollywood Standard",
+    "category": "BOOKS",
+    "description": "(2021) Christopher Riley",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image166.jpg"
+  },
+  {
+    "id": 261,
+    "name": "(BOOK) How Movies Work",
+    "category": "BOOKS",
+    "description": "(1992) Bruce F. Kawin",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image163.jpg"
+  },
+  {
+    "id": 262,
+    "name": "(BOOK) In the Blink of an Eye",
+    "category": "BOOKS",
+    "description": "(2001) Walter Murch",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image170.jpg"
+  },
+  {
+    "id": 263,
+    "name": "(BOOK) Individer, grupper och ledarskap i projekt",
+    "category": "BOOKS",
+    "description": "(2011) Tomas Jansson & Lennart Ljung",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image178.jpg"
+  },
+  {
+    "id": 264,
+    "name": "(BOOK) Industrial Light & Magic – The Art of Special Effects",
+    "category": "BOOKS",
+    "description": "(1986) Thomas G. Smith",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image174.jpg"
+  },
+  {
+    "id": 265,
+    "name": "(BOOK) Inledning till filmstudier",
+    "category": "BOOKS",
+    "description": "(1997) Lars Thomas Braaten, Stig Kulset & Ove Solum",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image175.jpg"
+  },
+  {
+    "id": 266,
+    "name": "(BOOK) Inside The Writers' Room",
+    "category": "BOOKS",
+    "description": "(2013) Christina Kallas",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image172.jpg"
+  },
+  {
+    "id": 267,
+    "name": "(BOOK) Jägarna - Från idé till succé",
+    "category": "BOOKS",
+    "description": "(1996) Jorunn Amcoff, Björn Carlström & Joakim Hansson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image171.jpg"
+  },
+  {
+    "id": 268,
+    "name": "(BOOK) Konst som rörlig bild",
+    "category": "BOOKS",
+    "description": "(2006) Sveriges allmänna konstförenings årsbok",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image173.jpg"
+  },
+  {
+    "id": 269,
+    "name": "(BOOK) Lev Kreativt - Hur du utvecklar ditt skapande jag i tolv steg",
+    "category": "BOOKS",
+    "description": "(2016) Julia Cameron",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image176.jpg"
+  },
+  {
+    "id": 270,
+    "name": "(BOOK) Lighting for Television & Film",
+    "category": "BOOKS",
+    "description": "(1991) Gerald Millerson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image179.jpg"
+  },
+  {
+    "id": 271,
+    "name": "(BOOK) The Major Film Theories – An introduction",
+    "category": "BOOKS",
+    "description": "(1976) J. Dudley Andrew",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image181.jpg"
+  },
+  {
+    "id": 272,
+    "name": "(BOOK) Mary Ellen Mark – American Oddyssey 1963-1999",
+    "category": "BOOKS",
+    "description": "(1999) Mary Ellen Mark",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image184.jpg"
+  },
+  {
+    "id": 273,
+    "name": "(BOOK) Marknadsföring - Modeller och Principer",
+    "category": "BOOKS",
+    "description": "(2011) Carl Gezelius & Per Wildenstam",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image202.jpg"
+  },
+  {
+    "id": 274,
+    "name": "(BOOK) Master Shots vol. 1 2nd edition – 100 advanced camera techniques",
+    "category": "BOOKS",
+    "description": "(2012) Christopher Kenworthty",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image180.jpg"
+  },
+  {
+    "id": 275,
+    "name": "(BOOK) Master Shots vol. 2 – Shooting great dialogue scenes",
+    "category": "BOOKS",
+    "description": "(2011) Christopher Kenworthty",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image192.jpg"
+  },
+  {
+    "id": 276,
+    "name": "(BOOK) Master Shots vol. 3 – The directors vision",
+    "category": "BOOKS",
+    "description": "(2013) Christopher Kenworthty",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image177.jpg"
+  },
+  {
+    "id": 277,
+    "name": "(BOOK) Mediekunskap och Mediekommunikation",
+    "category": "BOOKS",
+    "description": "(2003) Hans-Erik Hallin & Jörgen Hallström",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image182.jpg"
+  },
+  {
+    "id": 278,
+    "name": "(BOOK) Modet att skapa",
+    "category": "BOOKS",
+    "description": "(2005) Rollo May",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image189.jpg"
+  },
+  {
+    "id": 279,
+    "name": "(BOOK) Myth and the Movies – Discovering the Mythic Structure of 50 Unforgettable Films",
+    "category": "BOOKS",
+    "description": "(1999) Stuard Voytilla",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image194.jpg"
+  },
+  {
+    "id": 280,
+    "name": "(BOOK) On Directing Film",
+    "category": "BOOKS",
+    "description": "(1992) David Mamet",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image187.jpg"
+  },
+  {
+    "id": 281,
+    "name": "(BOOK) Ordbok för filmare",
+    "category": "BOOKS",
+    "description": "(1999) Ronald Sterner",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image190.jpg"
+  },
+  {
+    "id": 282,
+    "name": "(BOOK) Save the cat!",
+    "category": "BOOKS",
+    "description": "(2005) Blake Snyder",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image188.jpg"
+  },
+  {
+    "id": 283,
+    "name": "(BOOK) Setting the Scene – The Great Hollywood Art Directors",
+    "category": "BOOKS",
+    "description": "(1994) Robert S. Sennett",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image183.jpg"
+  },
+  {
+    "id": 284,
+    "name": "(BOOK) Screenplay – The Foundations of Screenwriting",
+    "category": "BOOKS",
+    "description": "(1994) Syd Field",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image186.jpg"
+  },
+  {
+    "id": 285,
+    "name": "(BOOK) Screenwriting From the Heart – The Technique of the Character-Driven Screenplay",
+    "category": "BOOKS",
+    "description": "(2000) James Ryan",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image193.jpg"
+  },
+  {
+    "id": 286,
+    "name": "(BOOK) Screenwriting Updated – New (and Conventional) Ways of Writing for the Screen",
+    "category": "BOOKS",
+    "description": "(2001) Linda Aronson",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image196.jpg"
+  },
+  {
+    "id": 287,
+    "name": "(BOOK) Sculpting in time",
+    "category": "BOOKS",
+    "description": "(1989) Andrey Tarkovsky",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image191.jpg"
+  },
+  {
+    "id": 288,
+    "name": "(BOOK) Successful Sitcom Writing – How to Write and Sell for TV’s Hottest Format",
+    "category": "BOOKS",
+    "description": "(1996) Jurgen Wolff",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image201.jpg"
+  },
+  {
+    "id": 289,
+    "name": "(BOOK) Så smalfilmar man",
+    "category": "BOOKS",
+    "description": "(1958) George Wain",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image198.jpg"
+  },
+  {
+    "id": 290,
+    "name": "(BOOK) Tankar om film",
+    "category": "BOOKS",
+    "description": "Sara Broos, Broby Grafiska",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image197.jpg"
+  },
+  {
+    "id": 291,
+    "name": "(BOOK) Taxi Driver - Screenplay",
+    "category": "BOOKS",
+    "description": "(1990) Paul Schrader",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image200.jpg"
+  },
+  {
+    "id": 292,
+    "name": "(BOOK) Television – An international History",
+    "category": "BOOKS",
+    "description": "(1995) Anthony Smith",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image195.jpg"
+  },
+  {
+    "id": 293,
+    "name": "(BOOK) Understanding Movies",
+    "category": "BOOKS",
+    "description": "(1998) Louis Gianetti",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image199.jpg"
+  },
+  {
+    "id": 294,
+    "name": "(BOOK) Writing for the Screen",
+    "category": "BOOKS",
+    "description": "(2008) Craig Batty & Zara Waldeback",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": "/images/image203.jpg"
+  },
+  {
+    "id": 295,
+    "name": "(BOOK) The Writer’s Journey – Mythic Structure for Writers",
+    "category": "BOOKS",
+    "description": "(2007) Christopher Vogler",
+    "priceExclVat": 0,
+    "priceInclVat": 0,
+    "image": ""
+  }
 ]

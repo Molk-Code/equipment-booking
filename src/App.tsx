@@ -5,6 +5,7 @@ import SearchBar from './components/SearchBar';
 import ProductCard from './components/ProductCard';
 import CartDrawer from './components/CartDrawer';
 import Checkout from './components/Checkout';
+import ConfirmBooking from './components/ConfirmBooking';
 import { fetchEquipment } from './utils/sheets';
 import type { Equipment, Category } from './types';
 
@@ -16,12 +17,16 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
 
+  // Check if we're on the /confirm page
+  const isConfirmPage = window.location.pathname === '/confirm';
+
   useEffect(() => {
+    if (isConfirmPage) return;
     fetchEquipment().then(data => {
       setEquipment(data);
       setLoading(false);
     });
-  }, []);
+  }, [isConfirmPage]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -47,6 +52,17 @@ export default function App() {
     }
     return items;
   }, [category, search, equipment]);
+
+  if (isConfirmPage) {
+    return (
+      <div className="app">
+        <Header onCartClick={() => {}} />
+        <main className="main">
+          <ConfirmBooking />
+        </main>
+      </div>
+    );
+  }
 
   if (showCheckout) {
     return (

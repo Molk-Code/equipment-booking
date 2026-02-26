@@ -8,7 +8,7 @@ interface ProductCardProps {
 }
 
 const categoryFallbacks: Record<string, string> = {
-  CAMERA: '/images/image87.jpg',
+  CAMERA: '/images/image13.png',
   GRIP: '/images/image44.png',
   LIGHTS: '/images/image60.jpg',
   SOUND: '/images/image112.jpg',
