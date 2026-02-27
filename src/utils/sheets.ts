@@ -88,10 +88,26 @@ async function reloadManifest(): Promise<void> {
   }
 }
 
+// Light normalization: lowercase + collapse whitespace
 function normalizeName(name: string): string {
   return name
     .toLowerCase()
     .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Aggressive normalization: strips colons, plus signs, normalizes all
+// punctuation/spacing differences so sheet names match filenames even when
+// they differ in characters like ":" vs " ", "- " vs " - ", "+" etc.
+function fuzzyNormalize(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents: å→a, ö→o
+    .replace(/[:\/\\]/g, ' ')       // colons, slashes → space
+    .replace(/\+/g, ' ')            // plus signs → space
+    .replace(/\s*-\s*/g, ' ')       // normalize dashes with surrounding spaces
+    .replace(/[^\w\s()#.,&!]/g, '') // strip remaining special chars
+    .replace(/\s+/g, ' ')           // collapse whitespace
     .trim();
 }
 
@@ -109,40 +125,52 @@ function findImage(sheetName: string): string {
     if (normalizeName(key) === lower) return path;
   }
 
-  // 4. Strip #N suffix (e.g., "Tilta Nucleus Nano Follow Focus #1" → base)
+  // 4. Fuzzy match (handles colons, plus signs, spacing around dashes, accents)
+  const fuzzy = fuzzyNormalize(sheetName);
+  for (const [key, path] of Object.entries(imageManifest)) {
+    if (fuzzyNormalize(key) === fuzzy) return path;
+  }
+
+  // 5. Strip #N suffix (e.g., "Tilta Nucleus Nano Follow Focus #1" → base)
   const baseNoNum = trimmed.replace(/\s*#\d+\s*$/, '').trim();
   if (baseNoNum !== trimmed) {
-    if (imageManifest[baseNoNum]) return imageManifest[baseNoNum];
-    const baseLower = normalizeName(baseNoNum);
+    const baseFuzzy = fuzzyNormalize(baseNoNum);
     for (const [key, path] of Object.entries(imageManifest)) {
-      if (normalizeName(key) === baseLower) return path;
+      if (fuzzyNormalize(key) === baseFuzzy) return path;
     }
   }
 
-  // 5. Strip #N-#M range suffix
+  // 6. Strip #N-#M range suffix
   const baseNoRange = trimmed.replace(/\s*#\d+-#\d+\s*$/, '').trim();
   if (baseNoRange !== trimmed && baseNoRange !== baseNoNum) {
-    if (imageManifest[baseNoRange]) return imageManifest[baseNoRange];
-    const rangeLower = normalizeName(baseNoRange);
+    const rangeFuzzy = fuzzyNormalize(baseNoRange);
     for (const [key, path] of Object.entries(imageManifest)) {
-      if (normalizeName(key) === rangeLower) return path;
+      if (fuzzyNormalize(key) === rangeFuzzy) return path;
     }
   }
 
-  // 6. Strip parenthesized quantity/contents suffix: "Item (3 available)" → "Item"
+  // 7. Strip parenthesized content at end: "Item (contents)" → "Item"
   const baseNoParens = trimmed.replace(/\s*\(.*?\)\s*$/, '').trim();
   if (baseNoParens !== trimmed) {
-    if (imageManifest[baseNoParens]) return imageManifest[baseNoParens];
-    const parenLower = normalizeName(baseNoParens);
+    const parenFuzzy = fuzzyNormalize(baseNoParens);
     for (const [key, path] of Object.entries(imageManifest)) {
-      if (normalizeName(key) === parenLower) return path;
+      if (fuzzyNormalize(key) === parenFuzzy) return path;
     }
   }
 
-  // 7. Prefix matching — either the manifest key starts with the item name or vice versa
+  // 8. Combined: strip #N AND parenthesized content
+  const baseStripped = baseNoNum.replace(/\s*\(.*?\)\s*$/, '').trim();
+  if (baseStripped !== baseNoNum && baseStripped !== baseNoParens) {
+    const strippedFuzzy = fuzzyNormalize(baseStripped);
+    for (const [key, path] of Object.entries(imageManifest)) {
+      if (fuzzyNormalize(key) === strippedFuzzy) return path;
+    }
+  }
+
+  // 9. Prefix matching (fuzzy) — manifest key starts with item or vice versa
   for (const [key, path] of Object.entries(imageManifest)) {
-    const kl = normalizeName(key);
-    if (kl.startsWith(lower) || lower.startsWith(kl)) return path;
+    const kf = fuzzyNormalize(key);
+    if (kf.startsWith(fuzzy) || fuzzy.startsWith(kf)) return path;
   }
 
   return '';
