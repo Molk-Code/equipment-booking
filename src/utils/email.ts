@@ -65,24 +65,6 @@ export async function sendEmail(
     <p style="color:#888;font-size:12px;">This will open a confirmation page where you can send the approval email with the booking PDF attached.</p>
   `;
 
-  // Confirmation email HTML for the student/booker
-  const confirmationHtml = `
-    <h2>Booking Inquiry Received</h2>
-    <p>Hi ${info.name},</p>
-    <p>Thank you for your equipment booking inquiry at <strong>Molkom Rental House</strong>. Your request has been received and is being reviewed.</p>
-    <h3>Booking Details</h3>
-    <p><strong>Class:</strong> ${info.className}</p>
-    <p><strong>Project:</strong> ${info.project || 'N/A'}</p>
-    <p><strong>Rental Period:</strong> ${info.dateFrom} to ${info.dateTo}</p>
-    <p><strong>Items Requested:</strong> ${items.length}</p>
-    <p><strong>Total (excl. VAT):</strong> ${totalPrice} kr</p>
-    <h3>Equipment List</h3>
-    <ul>${itemsList}</ul>
-    <p><em>A full booking inquiry PDF is attached to this email for your records.</em></p>
-    <hr/>
-    <p style="color: #888; font-size: 12px;">This is an inquiry confirmation and does not guarantee that all items are accepted or available. You will be contacted by the equipment manager regarding your booking.</p>
-  `;
-
   const pdfBase64 = await blobToBase64(pdfBlob);
 
   const response = await fetch('/api/send-email', {
@@ -94,8 +76,6 @@ export async function sendEmail(
       html,
       pdfBase64,
       filename,
-      confirmationTo: info.email,
-      confirmationHtml,
     }),
   });
 

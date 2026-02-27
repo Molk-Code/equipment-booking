@@ -8,12 +8,12 @@ interface ProductCardProps {
 }
 
 const categoryFallbacks: Record<string, string> = {
-  CAMERA: '/images/image13.png',
-  GRIP: '/images/image44.png',
-  LIGHTS: '/images/image60.jpg',
-  SOUND: '/images/image112.jpg',
-  LOCATION: '/images/image123.jpg',
-  BOOKS: '/images/image134.jpg',
+  CAMERA: '',
+  GRIP: '',
+  LIGHTS: '',
+  SOUND: '',
+  LOCATION: '',
+  BOOKS: '',
 };
 
 export default function ProductCard({ equipment }: ProductCardProps) {
@@ -35,8 +35,12 @@ export default function ProductCard({ equipment }: ProductCardProps) {
   return (
     <>
       <div className={`product-card ${added ? 'card-added' : ''}`}>
-        <div className="product-image" onClick={() => setShowImage(true)} style={{ cursor: 'pointer' }}>
-          <img src={imageUrl} alt={equipment.name} loading="lazy" />
+        <div className="product-image" onClick={() => imageUrl && setShowImage(true)} style={{ cursor: imageUrl ? 'pointer' : 'default' }}>
+          {imageUrl ? (
+            <img src={imageUrl} alt={equipment.name} loading="lazy" />
+          ) : (
+            <div className="image-placeholder">{equipment.name}</div>
+          )}
           <span className="product-category-tag">{equipment.category}</span>
           {equipment.filmYear2 && (
             <span className="film-year2-badge">

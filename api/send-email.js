@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { to, subject, html, pdfBase64, filename, confirmationTo, confirmationHtml } = req.body;
+    const { to, subject, html, pdfBase64, filename } = req.body;
 
     if (!to || !subject || !pdfBase64 || !filename) {
       return res.status(400).json({ error: 'Missing required fields: to, subject, pdfBase64, filename' });
@@ -55,40 +55,10 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: msg });
     }
 
-    // Send confirmation email with PDF to the booker/student
-    if (confirmationTo) {
-      const confirmPayload = {
-        from: 'Molkom Rental House <onboarding@resend.dev>',
-        to: [confirmationTo],
-        subject: `Booking Confirmation — ${subject.replace('Equipment Booking Inquiry — ', '')}`,
-        html: confirmationHtml || '<p>Thank you for your booking inquiry. See attached PDF for details.</p>',
-        attachments: [
-          {
-            filename: filename,
-            content: pdfBase64,
-          },
-        ],
-      };
-
-      try {
-        const confirmResponse = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(confirmPayload),
-        });
-
-        if (!confirmResponse.ok) {
-          const confirmData = await confirmResponse.json();
-          console.error('Confirmation email error:', JSON.stringify(confirmData));
-          // Don't fail the whole request if confirmation email fails
-        }
-      } catch (confirmErr) {
-        console.error('Confirmation email error:', confirmErr.message || confirmErr);
-      }
-    }
+    // Note: Resend free tier (onboarding@resend.dev) can only send to the
+    // account owner's email. Confirmation emails to students are skipped here.
+    // To enable sending to students, verify a domain at resend.com/domains
+    // and update the "from" address above.
 
     return res.status(200).json({ success: true, id: data.id });
   } catch (err) {

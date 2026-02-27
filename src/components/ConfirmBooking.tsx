@@ -204,12 +204,16 @@ export default function ConfirmBooking() {
         <p style="color: #888; font-size: 12px;">Best regards,<br/>Molkom Rental House</p>
       `;
 
+      // Send to equipment manager (Resend free tier only allows sending to account owner).
+      // To send directly to students, verify a domain at resend.com/domains.
+      const MANAGER_EMAIL = 'fredrik.fridlund@regionvarmland.se';
+
       const response = await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: data.email,
-          subject: `Booking Confirmed — ${data.name} (${data.className}) — ${data.dateFrom}`,
+          to: MANAGER_EMAIL,
+          subject: `Booking Confirmed — ${data.name} (${data.className}) — ${data.dateFrom} — Forward to ${data.email}`,
           html: confirmationHtml,
           pdfBase64,
           filename,
@@ -249,7 +253,7 @@ export default function ConfirmBooking() {
           <CheckCircle size={48} />
         </div>
         <h2>Confirmation Sent!</h2>
-        <p>The booking confirmation email with PDF has been sent to <strong>{data?.email}</strong>.</p>
+        <p>The booking confirmation email with PDF has been sent to your inbox. Please forward it to <strong>{data?.email}</strong>.</p>
       </div>
     );
   }
@@ -308,7 +312,7 @@ export default function ConfirmBooking() {
               style={{ width: '100%' }}
             >
               {sending ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-              {sending ? 'Sending...' : `Send Confirmation Email with PDF to ${data.email}`}
+              {sending ? 'Sending...' : `Send Confirmation Email (forward to ${data.email})`}
             </button>
           </div>
         </div>

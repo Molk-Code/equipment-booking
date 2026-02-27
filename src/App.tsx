@@ -6,7 +6,7 @@ import ProductCard from './components/ProductCard';
 import CartDrawer from './components/CartDrawer';
 import Checkout from './components/Checkout';
 import ConfirmBooking from './components/ConfirmBooking';
-import { fetchEquipment } from './utils/sheets';
+import { fetchEquipment, startPolling } from './utils/sheets';
 import type { Equipment, Category } from './types';
 
 export default function App() {
@@ -26,6 +26,11 @@ export default function App() {
       setEquipment(data);
       setLoading(false);
     });
+    // Poll Google Sheets every 10 seconds for new/changed items
+    const unsubscribe = startPolling((updatedItems) => {
+      setEquipment(updatedItems);
+    });
+    return unsubscribe;
   }, [isConfirmPage]);
 
   const counts = useMemo(() => {

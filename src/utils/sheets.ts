@@ -4,6 +4,8 @@ import fallbackData from '../data/equipment.json';
 const SHEET_ID = '1rKKqBm0jRJ_KixzhIXZrwJk7UbuqWFWtJzdBCk91sv4';
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=0`;
 
+const POLL_INTERVAL = 10_000; // 10 seconds
+
 function parsePrice(raw: string): number {
   if (!raw) return 0;
   const cleaned = raw.replace(/\s/g, '').replace(/kr$/i, '').replace(/,/g, '');
@@ -55,46 +57,92 @@ function parseCSV(csv: string): string[][] {
   return rows;
 }
 
+// --- Image manifest: maps image base-names → paths ---
+
+let imageManifest: Record<string, string> = {};
+let manifestLoaded = false;
+
+async function loadManifest(): Promise<void> {
+  if (manifestLoaded) return;
+  try {
+    const res = await fetch('/bilder/manifest.json');
+    if (res.ok) {
+      imageManifest = await res.json();
+      manifestLoaded = true;
+    }
+  } catch {
+    console.warn('Could not load image manifest');
+  }
+}
+
+// Force re-fetch of manifest (picks up newly added images)
+async function reloadManifest(): Promise<void> {
+  try {
+    const res = await fetch('/bilder/manifest.json?t=' + Date.now());
+    if (res.ok) {
+      imageManifest = await res.json();
+      manifestLoaded = true;
+    }
+  } catch {
+    // keep existing manifest
+  }
+}
+
 function normalizeName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/\s*\(.*?\)\s*/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// Build image lookup from old equipment.json
-const imageMap = new Map<string, string>();
-const baseImageMap = new Map<string, string>();
-
-(fallbackData as Equipment[]).forEach(item => {
-  if (!item.image) return;
-  const norm = normalizeName(item.name);
-  if (!imageMap.has(norm)) {
-    imageMap.set(norm, item.image);
-  }
-  const base = norm.replace(/\s*#\d+\s*$/, '').trim();
-  if (base !== norm && !baseImageMap.has(base)) {
-    baseImageMap.set(base, item.image);
-  }
-});
-
 function findImage(sheetName: string): string {
-  const norm = normalizeName(sheetName);
+  // 1. Exact match (case-sensitive, as stored in manifest)
+  if (imageManifest[sheetName]) return imageManifest[sheetName];
 
-  if (imageMap.has(norm)) return imageMap.get(norm)!;
+  // 2. Exact match without trailing whitespace
+  const trimmed = sheetName.trim();
+  if (imageManifest[trimmed]) return imageManifest[trimmed];
 
-  const rangeStripped = norm.replace(/\s*#\d+-#\d+\s*$/, '').trim();
-  if (rangeStripped !== norm) {
-    if (baseImageMap.has(rangeStripped)) return baseImageMap.get(rangeStripped)!;
-    if (imageMap.has(rangeStripped)) return imageMap.get(rangeStripped)!;
+  // 3. Case-insensitive match
+  const lower = normalizeName(sheetName);
+  for (const [key, path] of Object.entries(imageManifest)) {
+    if (normalizeName(key) === lower) return path;
   }
 
-  const baseNorm = norm.replace(/\s*#\d+\s*$/, '').trim();
-  if (baseNorm !== norm && baseImageMap.has(baseNorm)) return baseImageMap.get(baseNorm)!;
+  // 4. Strip #N suffix (e.g., "Tilta Nucleus Nano Follow Focus #1" → base)
+  const baseNoNum = trimmed.replace(/\s*#\d+\s*$/, '').trim();
+  if (baseNoNum !== trimmed) {
+    if (imageManifest[baseNoNum]) return imageManifest[baseNoNum];
+    const baseLower = normalizeName(baseNoNum);
+    for (const [key, path] of Object.entries(imageManifest)) {
+      if (normalizeName(key) === baseLower) return path;
+    }
+  }
 
-  for (const [key, img] of imageMap) {
-    if (key.startsWith(norm) || norm.startsWith(key)) return img;
+  // 5. Strip #N-#M range suffix
+  const baseNoRange = trimmed.replace(/\s*#\d+-#\d+\s*$/, '').trim();
+  if (baseNoRange !== trimmed && baseNoRange !== baseNoNum) {
+    if (imageManifest[baseNoRange]) return imageManifest[baseNoRange];
+    const rangeLower = normalizeName(baseNoRange);
+    for (const [key, path] of Object.entries(imageManifest)) {
+      if (normalizeName(key) === rangeLower) return path;
+    }
+  }
+
+  // 6. Strip parenthesized quantity/contents suffix: "Item (3 available)" → "Item"
+  const baseNoParens = trimmed.replace(/\s*\(.*?\)\s*$/, '').trim();
+  if (baseNoParens !== trimmed) {
+    if (imageManifest[baseNoParens]) return imageManifest[baseNoParens];
+    const parenLower = normalizeName(baseNoParens);
+    for (const [key, path] of Object.entries(imageManifest)) {
+      if (normalizeName(key) === parenLower) return path;
+    }
+  }
+
+  // 7. Prefix matching — either the manifest key starts with the item name or vice versa
+  for (const [key, path] of Object.entries(imageManifest)) {
+    const kl = normalizeName(key);
+    if (kl.startsWith(lower) || lower.startsWith(kl)) return path;
   }
 
   return '';
@@ -110,109 +158,160 @@ function getBaseName(name: string): string {
     .trim();
 }
 
+async function fetchFromSheet(): Promise<Equipment[]> {
+  const response = await fetch(CSV_URL);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const csv = await response.text();
+  const rows = parseCSV(csv);
+
+  const rawItems: Equipment[] = [];
+  let currentCategory = 'CAMERA';
+  let id = 1;
+  let isFirstRow = true;
+
+  const validCategories = new Set(['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS']);
+
+  for (const row of rows) {
+    const colB = (row[1] || '').trim();
+    const colC = (row[2] || '').trim();
+    const colD = (row[3] || '').trim();
+    const colE = (row[4] || '').trim();
+    const colF = (row[5] || '').trim();
+    const colG = (row[6] || '').trim();
+
+    if (isFirstRow) {
+      isFirstRow = false;
+      continue;
+    }
+
+    const catUpper = colB.toUpperCase().trim();
+    if (validCategories.has(catUpper)) {
+      currentCategory = catUpper;
+      if (!colD) continue;
+    }
+
+    if (!colD || colD === 'Product:' || colD === 'Contains:') continue;
+    if (!currentCategory) continue;
+
+    const dayRate = parsePrice(colF);
+    const weeklyRate = parsePrice(colG);
+    const priceInclVat = weeklyRate || (dayRate > 0 ? Math.round(dayRate * 5 * 0.85) : 0);
+
+    const filmYear2 = colC.toLowerCase().includes('film year 2');
+    const image = findImage(colD);
+
+    rawItems.push({
+      id: id++,
+      name: colD,
+      category: currentCategory,
+      description: colE,
+      priceExclVat: dayRate,
+      priceInclVat: priceInclVat,
+      image,
+      filmYear2,
+    });
+  }
+
+  // Deduplicate: merge items with same base name + category into one
+  const deduped = new Map<string, Equipment>();
+  const countMap = new Map<string, number>();
+
+  for (const item of rawItems) {
+    const base = getBaseName(item.name);
+    const key = `${item.category}::${base.toLowerCase()}`;
+
+    const existing = deduped.get(key);
+    if (existing) {
+      countMap.set(key, (countMap.get(key) || 1) + 1);
+      const isNumber1 = /\s*#1(\s|$|\()/.test(item.name) || item.name.endsWith('#1');
+      if (isNumber1 && item.image) {
+        existing.image = item.image;
+      } else if (!existing.image && item.image) {
+        existing.image = item.image;
+      }
+      if (item.filmYear2) {
+        existing.filmYear2 = true;
+      }
+      if (!existing.description && item.description) {
+        existing.description = item.description;
+      }
+    } else {
+      deduped.set(key, { ...item, name: base || item.name });
+      countMap.set(key, 1);
+    }
+  }
+
+  const items: Equipment[] = [];
+  let finalId = 1;
+  for (const [key, item] of deduped) {
+    const count = countMap.get(key) || 1;
+    items.push({
+      ...item,
+      id: finalId++,
+      name: count > 1 ? `${item.name} (${count} available)` : item.name,
+    });
+  }
+
+  return items;
+}
+
 export async function fetchEquipment(): Promise<Equipment[]> {
+  await loadManifest();
   try {
-    const response = await fetch(CSV_URL);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const csv = await response.text();
-    const rows = parseCSV(csv);
-
-    const rawItems: Equipment[] = [];
-    let currentCategory = 'CAMERA';
-    let id = 1;
-    let isFirstRow = true;
-
-    const validCategories = new Set(['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS']);
-
-    for (const row of rows) {
-      const colB = (row[1] || '').trim();
-      const colC = (row[2] || '').trim();
-      const colD = (row[3] || '').trim();
-      const colE = (row[4] || '').trim();
-      const colF = (row[5] || '').trim();
-      const colG = (row[6] || '').trim();
-
-      if (isFirstRow) {
-        isFirstRow = false;
-        continue;
-      }
-
-      const catUpper = colB.toUpperCase().trim();
-      if (validCategories.has(catUpper)) {
-        currentCategory = catUpper;
-        if (!colD) continue;
-      }
-
-      if (!colD || colD === 'Product:' || colD === 'Contains:') continue;
-      if (!currentCategory) continue;
-
-      const dayRate = parsePrice(colF);
-      const weeklyRate = parsePrice(colG);
-      const priceInclVat = weeklyRate || (dayRate > 0 ? Math.round(dayRate * 5 * 0.85) : 0);
-
-      const filmYear2 = colC.toLowerCase().includes('film year 2');
-      const image = findImage(colD);
-
-      rawItems.push({
-        id: id++,
-        name: colD,
-        category: currentCategory,
-        description: colE,
-        priceExclVat: dayRate,
-        priceInclVat: priceInclVat,
-        image,
-        filmYear2,
-      });
-    }
-
-    // Deduplicate: merge items with same base name + category into one
-    // Only the #1 variant (or the first non-numbered variant) is kept for display
-    const deduped = new Map<string, Equipment>();
-    const countMap = new Map<string, number>();
-
-    for (const item of rawItems) {
-      const base = getBaseName(item.name);
-      const key = `${item.category}::${base.toLowerCase()}`;
-
-      const existing = deduped.get(key);
-      if (existing) {
-        countMap.set(key, (countMap.get(key) || 1) + 1);
-        // Prefer the #1 variant's image (or the first item with an image)
-        const isNumber1 = /\s*#1(\s|$|\()/.test(item.name) || item.name.endsWith('#1');
-        if (isNumber1 && item.image) {
-          existing.image = item.image;
-        } else if (!existing.image && item.image) {
-          existing.image = item.image;
-        }
-        // Keep filmYear2 if any variant has it
-        if (item.filmYear2) {
-          existing.filmYear2 = true;
-        }
-        // Keep better description
-        if (!existing.description && item.description) {
-          existing.description = item.description;
-        }
-      } else {
-        deduped.set(key, { ...item, name: base || item.name });
-        countMap.set(key, 1);
-      }
-    }
-
-    // Build final list with quantity in name
-    const items: Equipment[] = [];
-    let finalId = 1;
-    for (const [key, item] of deduped) {
-      const count = countMap.get(key) || 1;
-      items.push({
-        ...item,
-        id: finalId++,
-        name: count > 1 ? `${item.name} (${count} available)` : item.name,
-      });
-    }
-
+    const items = await fetchFromSheet();
     return items.length > 0 ? items : (fallbackData as Equipment[]);
   } catch (err) {
     console.error('Failed to fetch from Google Sheets, using fallback data:', err);
     return fallbackData as Equipment[];
   }
+}
+
+// --- Auto-polling: re-fetch equipment every 10 seconds ---
+
+type EquipmentListener = (items: Equipment[]) => void;
+
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+let listeners: EquipmentListener[] = [];
+let latestItems: Equipment[] | null = null;
+
+function itemsChanged(a: Equipment[], b: Equipment[]): boolean {
+  if (a.length !== b.length) return true;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].name !== b[i].name || a[i].image !== b[i].image ||
+        a[i].category !== b[i].category || a[i].priceExclVat !== b[i].priceExclVat ||
+        a[i].description !== b[i].description) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function poll() {
+  try {
+    await reloadManifest();
+    const items = await fetchFromSheet();
+    if (items.length > 0) {
+      if (!latestItems || itemsChanged(latestItems, items)) {
+        latestItems = items;
+        listeners.forEach(fn => fn(items));
+      }
+    }
+  } catch {
+    // silently retry next interval
+  }
+}
+
+export function startPolling(onUpdate: EquipmentListener): () => void {
+  listeners.push(onUpdate);
+  if (!pollTimer) {
+    pollTimer = setInterval(poll, POLL_INTERVAL);
+  }
+  // return unsubscribe function
+  return () => {
+    listeners = listeners.filter(fn => fn !== onUpdate);
+    if (listeners.length === 0 && pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+  };
 }
