@@ -3,7 +3,7 @@ import type { CartItem, Equipment } from '../types';
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (equipment: Equipment, days: number) => void;
+  addItem: (equipment: Equipment, days: number, quantity?: number) => void;
   removeItem: (equipmentId: number) => void;
   updateDays: (equipmentId: number, days: number) => void;
   clearCart: () => void;
@@ -16,15 +16,15 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addItem = useCallback((equipment: Equipment, days: number) => {
+  const addItem = useCallback((equipment: Equipment, days: number, quantity?: number) => {
     setItems(prev => {
       const existing = prev.find(item => item.equipment.id === equipment.id);
       if (existing) {
         return prev.map(item =>
-          item.equipment.id === equipment.id ? { ...item, days } : item
+          item.equipment.id === equipment.id ? { ...item, days, quantity: quantity || 1 } : item
         );
       }
-      return [...prev, { equipment, days }];
+      return [...prev, { equipment, days, quantity: quantity || 1 }];
     });
   }, []);
 
@@ -45,7 +45,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.length;
 
   const totalPrice = items.reduce((sum, item) => {
-    return sum + calculatePrice(item.equipment.priceExclVat, item.days);
+    const qty = item.quantity || 1;
+    return sum + calculatePrice(item.equipment.priceExclVat, item.days) * qty;
   }, 0);
 
   return (

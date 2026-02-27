@@ -340,8 +340,9 @@ input {
 .product-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.4s ease;
+  padding: 0.25rem;
 }
 
 .image-placeholder {
@@ -409,6 +410,13 @@ input {
   color: var(--text-primary);
 }
 
+.product-available {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
 .product-description {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -443,6 +451,17 @@ input {
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem;
 }
 
 .day-selector {

@@ -7,27 +7,20 @@ interface ProductCardProps {
   equipment: Equipment;
 }
 
-const categoryFallbacks: Record<string, string> = {
-  CAMERA: '',
-  GRIP: '',
-  LIGHTS: '',
-  SOUND: '',
-  LOCATION: '',
-  BOOKS: '',
-};
-
 export default function ProductCard({ equipment }: ProductCardProps) {
   const { items, addItem } = useCart();
   const [days, setDays] = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showImage, setShowImage] = useState(false);
 
   const inCart = items.some(item => item.equipment.id === equipment.id);
-  const price = calculatePrice(equipment.priceExclVat, days);
-  const imageUrl = equipment.image || categoryFallbacks[equipment.category] || categoryFallbacks.CAMERA;
+  const price = calculatePrice(equipment.priceExclVat, days) * quantity;
+  const imageUrl = equipment.image || '';
+  const maxQty = equipment.available || 1;
 
   const handleAdd = () => {
-    addItem(equipment, days);
+    addItem(equipment, days, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -51,6 +44,9 @@ export default function ProductCard({ equipment }: ProductCardProps) {
         </div>
         <div className="product-info">
           <h3 className="product-name">{equipment.name}</h3>
+          {maxQty > 1 && (
+            <p className="product-available">{maxQty} available</p>
+          )}
           {equipment.description && (
             <p className="product-description">{equipment.description}</p>
           )}
@@ -82,6 +78,25 @@ export default function ProductCard({ equipment }: ProductCardProps) {
                 <Plus size={14} />
               </button>
             </div>
+            {maxQty > 1 && (
+              <div className="qty-selector">
+                <button
+                  className="day-btn"
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  aria-label="Decrease quantity"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="day-count">{quantity} {quantity === 1 ? 'unit' : 'units'}</span>
+                <button
+                  className="day-btn"
+                  onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+                  aria-label="Increase quantity"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            )}
             {equipment.priceExclVat > 0 && (
               <span className="subtotal">{price} kr</span>
             )}

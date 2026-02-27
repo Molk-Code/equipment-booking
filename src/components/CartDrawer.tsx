@@ -31,11 +31,12 @@ export default function CartDrawer({ open, onClose, onCheckout }: CartDrawerProp
           <>
             <div className="cart-items">
               {items.map(item => {
-                const itemPrice = calculatePrice(item.equipment.priceExclVat, item.days);
+                const qty = item.quantity || 1;
+                const itemPrice = calculatePrice(item.equipment.priceExclVat, item.days) * qty;
                 return (
                   <div key={item.equipment.id} className="cart-item">
                     <div className="cart-item-info">
-                      <h4>{item.equipment.name}</h4>
+                      <h4>{item.equipment.name}{qty > 1 ? ` x${qty}` : ''}</h4>
                       <span className="cart-item-category">{item.equipment.category}</span>
                       <div className="cart-item-days">
                         <button

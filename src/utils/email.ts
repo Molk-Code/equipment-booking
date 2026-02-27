@@ -9,25 +9,37 @@ export function getPdfFilename(info: CheckoutInfo): string {
   return `${name}_Equipment_${today}.pdf`;
 }
 
-function buildConfirmPageUrl(items: CartItem[], info: CheckoutInfo, totalPrice: number): string {
-  const confirmData = {
-    name: info.name,
-    email: info.email,
-    className: info.className,
-    project: info.project,
-    dateFrom: info.dateFrom,
-    dateTo: info.dateTo,
-    totalPrice,
-    items: items.map(item => ({
-      name: item.equipment.name,
-      category: item.equipment.category,
-      days: item.days,
-      priceExclVat: item.equipment.priceExclVat,
-    })),
-  };
-  const encoded = btoa(encodeURIComponent(JSON.stringify(confirmData)));
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://equipment-booking-pi.vercel.app';
-  return `${baseUrl}/confirm?data=${encoded}`;
+function buildMailtoLink(items: CartItem[], info: CheckoutInfo, totalPrice: number): string {
+  const itemLines = items
+    .map(item => {
+      const price = calculatePrice(item.equipment.priceExclVat, item.days);
+      const qty = item.quantity && item.quantity > 1 ? ` x${item.quantity}` : '';
+      return `- ${item.equipment.name}${qty} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}`;
+    })
+    .join('\n');
+
+  const subject = `Booking Confirmed — ${info.name} (${info.className}) — ${info.dateFrom}`;
+
+  const body = `Hi ${info.name},
+
+Your equipment booking at Molkom Rental House has been approved.
+
+Booking Details:
+Class: ${info.className}
+Project: ${info.project || 'N/A'}
+Rental Period: ${info.dateFrom} to ${info.dateTo}
+Items: ${items.length}
+Total (excl. VAT): ${totalPrice} kr
+
+Equipment List:
+${itemLines}
+
+Please pick up the equipment at the scheduled time.
+
+Best regards,
+Molkom Rental House`;
+
+  return `mailto:${encodeURIComponent(info.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export async function sendEmail(
@@ -41,11 +53,12 @@ export async function sendEmail(
   const itemsList = items
     .map(item => {
       const price = calculatePrice(item.equipment.priceExclVat, item.days);
-      return `<li>${item.equipment.name} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}</li>`;
+      const qty = item.quantity && item.quantity > 1 ? ` x${item.quantity}` : '';
+      return `<li>${item.equipment.name}${qty} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}</li>`;
     })
     .join('\n');
 
-  const confirmPageUrl = buildConfirmPageUrl(items, info, totalPrice);
+  const mailtoLink = buildMailtoLink(items, info, totalPrice);
 
   const html = `
     <h2>Equipment Booking Inquiry</h2>
@@ -58,11 +71,10 @@ export async function sendEmail(
     <p><strong>Total (excl. VAT):</strong> ${totalPrice} kr</p>
     <h3>Equipment List</h3>
     <ul>${itemsList}</ul>
-    <p><em>See attached PDF for the full booking inquiry document.</em></p>
     <hr/>
-    <p><strong>To confirm this booking, click the button below:</strong></p>
-    <p><a href="${confirmPageUrl}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">Confirm Booking &amp; Send PDF to ${info.email}</a></p>
-    <p style="color:#888;font-size:12px;">This will open a confirmation page where you can send the approval email with the booking PDF attached.</p>
+    <p><strong>To confirm this booking, click below to open a pre-filled email:</strong></p>
+    <p><a href="${mailtoLink}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">Confirm Booking — Email ${info.email}</a></p>
+    <p style="color:#888;font-size:12px;">This will open your email client with a pre-filled confirmation email to the student.</p>
   `;
 
   const pdfBase64 = await blobToBase64(pdfBlob);

@@ -7,11 +7,13 @@ export interface Equipment {
   priceInclVat: number;
   image?: string;
   filmYear2?: boolean;
+  available?: number;
 }
 
 export interface CartItem {
   equipment: Equipment;
   days: number;
+  quantity?: number;
 }
 
 export interface CheckoutInfo {

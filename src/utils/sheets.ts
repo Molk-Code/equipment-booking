@@ -111,27 +111,28 @@ function fuzzyNormalize(name: string): string {
     .trim();
 }
 
-function findImage(sheetName: string): string {
-  // 1. Exact match (case-sensitive, as stored in manifest)
-  if (imageManifest[sheetName]) return imageManifest[sheetName];
+// Cache for image probing results (item name → resolved URL or '')
+const imageProbeCache = new Map<string, string>();
 
-  // 2. Exact match without trailing whitespace
-  const trimmed = sheetName.trim();
+function findImageInManifest(name: string): string {
+  // 1. Exact match
+  if (imageManifest[name]) return imageManifest[name];
+  const trimmed = name.trim();
   if (imageManifest[trimmed]) return imageManifest[trimmed];
 
-  // 3. Case-insensitive match
-  const lower = normalizeName(sheetName);
+  // 2. Case-insensitive
+  const lower = normalizeName(name);
   for (const [key, path] of Object.entries(imageManifest)) {
     if (normalizeName(key) === lower) return path;
   }
 
-  // 4. Fuzzy match (handles colons, plus signs, spacing around dashes, accents)
-  const fuzzy = fuzzyNormalize(sheetName);
+  // 3. Fuzzy match
+  const fuzzy = fuzzyNormalize(name);
   for (const [key, path] of Object.entries(imageManifest)) {
     if (fuzzyNormalize(key) === fuzzy) return path;
   }
 
-  // 5. Strip #N suffix (e.g., "Tilta Nucleus Nano Follow Focus #1" → base)
+  // 4. Strip #N suffix
   const baseNoNum = trimmed.replace(/\s*#\d+\s*$/, '').trim();
   if (baseNoNum !== trimmed) {
     const baseFuzzy = fuzzyNormalize(baseNoNum);
@@ -140,7 +141,7 @@ function findImage(sheetName: string): string {
     }
   }
 
-  // 6. Strip #N-#M range suffix
+  // 5. Strip #N-#M range
   const baseNoRange = trimmed.replace(/\s*#\d+-#\d+\s*$/, '').trim();
   if (baseNoRange !== trimmed && baseNoRange !== baseNoNum) {
     const rangeFuzzy = fuzzyNormalize(baseNoRange);
@@ -149,7 +150,7 @@ function findImage(sheetName: string): string {
     }
   }
 
-  // 7. Strip parenthesized content at end: "Item (contents)" → "Item"
+  // 6. Strip parenthesized content
   const baseNoParens = trimmed.replace(/\s*\(.*?\)\s*$/, '').trim();
   if (baseNoParens !== trimmed) {
     const parenFuzzy = fuzzyNormalize(baseNoParens);
@@ -158,7 +159,7 @@ function findImage(sheetName: string): string {
     }
   }
 
-  // 8. Combined: strip #N AND parenthesized content
+  // 7. Combined: strip #N + parenthesized
   const baseStripped = baseNoNum.replace(/\s*\(.*?\)\s*$/, '').trim();
   if (baseStripped !== baseNoNum && baseStripped !== baseNoParens) {
     const strippedFuzzy = fuzzyNormalize(baseStripped);
@@ -167,12 +168,58 @@ function findImage(sheetName: string): string {
     }
   }
 
-  // 9. Prefix matching (fuzzy) — manifest key starts with item or vice versa
+  // 8. Prefix matching
   for (const [key, path] of Object.entries(imageManifest)) {
     const kf = fuzzyNormalize(key);
     if (kf.startsWith(fuzzy) || fuzzy.startsWith(kf)) return path;
   }
 
+  return '';
+}
+
+function findImage(sheetName: string): string {
+  // Try manifest first
+  const fromManifest = findImageInManifest(sheetName);
+  if (fromManifest) return fromManifest;
+
+  // Return empty for now; probeImage will try loading directly
+  return '';
+}
+
+// Probe for an image by trying to HEAD-request common extensions.
+// This finds images that were added after the manifest was built.
+const EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+
+async function probeImage(name: string): Promise<string> {
+  // Check cache
+  if (imageProbeCache.has(name)) return imageProbeCache.get(name)!;
+
+  // Try the name itself and stripped variants
+  const candidates = [
+    name.trim(),
+    name.trim().replace(/\s*#\d+\s*$/, '').trim(),
+    name.trim().replace(/\s*\(.*?\)\s*$/, '').trim(),
+    name.trim().replace(/\s*#\d+\s*$/, '').replace(/\s*\(.*?\)\s*$/, '').trim(),
+  ];
+  // Deduplicate
+  const unique = [...new Set(candidates)];
+
+  for (const candidate of unique) {
+    for (const ext of EXTENSIONS) {
+      const url = `/bilder/${candidate}${ext}`;
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        if (res.ok) {
+          imageProbeCache.set(name, url);
+          return url;
+        }
+      } catch {
+        // continue
+      }
+    }
+  }
+
+  imageProbeCache.set(name, '');
   return '';
 }
 
@@ -276,9 +323,20 @@ async function fetchFromSheet(): Promise<Equipment[]> {
     items.push({
       ...item,
       id: finalId++,
-      name: count > 1 ? `${item.name} (${count} available)` : item.name,
+      name: item.name,
+      available: count,
     });
   }
+
+  // Probe for missing images (items not found in manifest)
+  await Promise.all(
+    items.map(async (item) => {
+      if (!item.image) {
+        const probed = await probeImage(item.name);
+        if (probed) item.image = probed;
+      }
+    })
+  );
 
   return items;
 }

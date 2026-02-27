@@ -76,6 +76,7 @@ export function generatePDF(
   doc.setTextColor(255);
   doc.rect(20, y - 4, pageWidth - 40, 8, 'F');
   doc.text('Item', 22, y);
+  doc.text('Qty', 100, y);
   doc.text('Category', 110, y);
   doc.text('Days', 140, y);
   doc.text('Price', 165, y, { align: 'right' });
@@ -96,15 +97,17 @@ export function generatePDF(
       doc.rect(20, y - 4, pageWidth - 40, 7, 'F');
     }
 
-    const name = item.equipment.name.length > 50
-      ? item.equipment.name.substring(0, 47) + '...'
+    const qty = item.quantity || 1;
+    const name = item.equipment.name.length > 45
+      ? item.equipment.name.substring(0, 42) + '...'
       : item.equipment.name;
 
     doc.text(name, 22, y);
+    doc.text(String(qty), 100, y);
     doc.text(item.equipment.category, 110, y);
     doc.text(String(item.days), 140, y);
 
-    const price = calculatePrice(item.equipment.priceExclVat, item.days);
+    const price = calculatePrice(item.equipment.priceExclVat, item.days) * qty;
     doc.text(
       item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free',
       165,

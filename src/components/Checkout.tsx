@@ -169,19 +169,23 @@ export default function Checkout({ onBack }: CheckoutProps) {
         <div className="checkout-summary">
           <h3>Order Summary</h3>
           <div className="summary-items">
-            {items.map(item => (
-              <div key={item.equipment.id} className="summary-item">
-                <div>
-                  <span className="summary-name">{item.equipment.name}</span>
-                  <span className="summary-days">{item.days} {item.days === 1 ? 'day' : 'days'}</span>
+            {items.map(item => {
+              const qty = item.quantity || 1;
+              const itemPrice = calculatePrice(item.equipment.priceExclVat, item.days) * qty;
+              return (
+                <div key={item.equipment.id} className="summary-item">
+                  <div>
+                    <span className="summary-name">{item.equipment.name}{qty > 1 ? ` x${qty}` : ''}</span>
+                    <span className="summary-days">{item.days} {item.days === 1 ? 'day' : 'days'}</span>
+                  </div>
+                  <span className="summary-price">
+                    {item.equipment.priceExclVat > 0
+                      ? `${itemPrice} kr`
+                      : 'Free'}
+                  </span>
                 </div>
-                <span className="summary-price">
-                  {item.equipment.priceExclVat > 0
-                    ? `${calculatePrice(item.equipment.priceExclVat, item.days)} kr`
-                    : 'Free'}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="summary-total">
             <span>Total (excl. VAT)</span>
