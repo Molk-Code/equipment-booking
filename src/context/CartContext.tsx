@@ -1,5 +1,20 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { CartItem, Equipment } from '../types';
+
+const CART_STORAGE_KEY = 'molkom-rental-cart';
+
+function loadCart(): CartItem[] {
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // corrupted data — start fresh
+  }
+  return [];
+}
 
 interface CartContextType {
   items: CartItem[];
@@ -14,7 +29,16 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
+
+  // Persist cart to localStorage whenever it changes
+  useEffect(() => {
+    if (items.length > 0) {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } else {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    }
+  }, [items]);
 
   const addItem = useCallback((equipment: Equipment, days: number, quantity?: number) => {
     setItems(prev => {
