@@ -3,6 +3,20 @@
 
 const FOLDER_ID = '1_mWbPzJF-mAAehJTtRAJnrLJGVvhJvHH';
 
+// Decode HTML entities that Google Drive embeds in filenames
+// e.g. &amp; → &, &#39; → ', &lt; → <, etc.
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'");
+}
+
 export default async function handler(req, res) {
   // Allow CORS from any origin (our Vercel frontend)
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,7 +51,7 @@ export default async function handler(req, res) {
     let match;
     while ((match = entryRegex.exec(html)) !== null) {
       const fileId = match[1];
-      const rawName = match[2].trim();
+      const rawName = decodeHtmlEntities(match[2].trim());
 
       // Only include image files
       if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(rawName)) continue;
@@ -56,7 +70,7 @@ export default async function handler(req, res) {
       const fallbackRegex = /id="entry-([^"]+)"[\s\S]*?<div class="flip-entry-title">([^<]+)<\/div>/g;
       while ((match = fallbackRegex.exec(html)) !== null) {
         const fileId = match[1];
-        const rawName = match[2].trim();
+        const rawName = decodeHtmlEntities(match[2].trim());
         if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(rawName)) continue;
         const baseName = rawName.replace(/\.[^.]*$/, '');
         const imageUrl = `https://lh3.googleusercontent.com/d/${fileId}=w800`;
