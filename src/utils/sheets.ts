@@ -57,7 +57,9 @@ function parseCSV(csv: string): string[][] {
   return rows;
 }
 
-// --- Image manifest: maps image base-names → paths ---
+// --- Google Drive image manifest ---
+// Fetched from our /api/drive-images endpoint which reads the public Google Drive folder.
+// Maps image base-names (without extension) → direct image URLs on Google's CDN.
 
 let imageManifest: Record<string, string> = {};
 let manifestLoaded = false;
@@ -65,23 +67,29 @@ let manifestLoaded = false;
 async function loadManifest(): Promise<void> {
   if (manifestLoaded) return;
   try {
-    const res = await fetch('/bilder/manifest.json');
+    const res = await fetch('/api/drive-images');
     if (res.ok) {
-      imageManifest = await res.json();
-      manifestLoaded = true;
+      const data = await res.json();
+      if (!data.error) {
+        imageManifest = data;
+        manifestLoaded = true;
+      }
     }
   } catch {
-    console.warn('Could not load image manifest');
+    console.warn('Could not load image manifest from Google Drive');
   }
 }
 
-// Force re-fetch of manifest (picks up newly added images)
+// Force re-fetch of manifest (picks up newly added images in Google Drive)
 async function reloadManifest(): Promise<void> {
   try {
-    const res = await fetch('/bilder/manifest.json?t=' + Date.now());
+    const res = await fetch('/api/drive-images?t=' + Date.now());
     if (res.ok) {
-      imageManifest = await res.json();
-      manifestLoaded = true;
+      const data = await res.json();
+      if (!data.error) {
+        imageManifest = data;
+        manifestLoaded = true;
+      }
     }
   } catch {
     // keep existing manifest
@@ -110,9 +118,6 @@ function fuzzyNormalize(name: string): string {
     .replace(/\s+/g, ' ')           // collapse whitespace
     .trim();
 }
-
-// Cache for image probing results (item name → resolved URL or '')
-const imageProbeCache = new Map<string, string>();
 
 function findImageInManifest(name: string): string {
   // 1. Exact match
@@ -178,49 +183,7 @@ function findImageInManifest(name: string): string {
 }
 
 function findImage(sheetName: string): string {
-  // Try manifest first
-  const fromManifest = findImageInManifest(sheetName);
-  if (fromManifest) return fromManifest;
-
-  // Return empty for now; probeImage will try loading directly
-  return '';
-}
-
-// Probe for an image by trying to HEAD-request common extensions.
-// This finds images that were added after the manifest was built.
-const EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-
-async function probeImage(name: string): Promise<string> {
-  // Check cache
-  if (imageProbeCache.has(name)) return imageProbeCache.get(name)!;
-
-  // Try the name itself and stripped variants
-  const candidates = [
-    name.trim(),
-    name.trim().replace(/\s*#\d+\s*$/, '').trim(),
-    name.trim().replace(/\s*\(.*?\)\s*$/, '').trim(),
-    name.trim().replace(/\s*#\d+\s*$/, '').replace(/\s*\(.*?\)\s*$/, '').trim(),
-  ];
-  // Deduplicate
-  const unique = [...new Set(candidates)];
-
-  for (const candidate of unique) {
-    for (const ext of EXTENSIONS) {
-      const url = `/bilder/${candidate}${ext}`;
-      try {
-        const res = await fetch(url, { method: 'HEAD' });
-        if (res.ok) {
-          imageProbeCache.set(name, url);
-          return url;
-        }
-      } catch {
-        // continue
-      }
-    }
-  }
-
-  imageProbeCache.set(name, '');
-  return '';
+  return findImageInManifest(sheetName);
 }
 
 // Get the base name without #N or #N-#M suffix for deduplication
@@ -327,16 +290,6 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       available: count,
     });
   }
-
-  // Probe for missing images (items not found in manifest)
-  await Promise.all(
-    items.map(async (item) => {
-      if (!item.image) {
-        const probed = await probeImage(item.name);
-        if (probed) item.image = probed;
-      }
-    })
-  );
 
   return items;
 }
