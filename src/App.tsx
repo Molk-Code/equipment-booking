@@ -61,10 +61,16 @@ export default function App() {
   const goHome = () => {
     if (isConfirmPage) {
       window.location.href = '/';
-    } else {
+    } else if (showCheckout) {
       setShowCheckout(false);
       setCategory('ALL');
       setSearch('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Already on the main page — scroll to top
+      setCategory('ALL');
+      setSearch('');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

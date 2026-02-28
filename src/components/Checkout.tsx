@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, Send, FileText, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ArrowLeft, Send, FileText, Loader2, AlertTriangle } from 'lucide-react';
 import { useCart, calculatePrice } from '../context/CartContext';
 import { generatePDF } from '../utils/pdf';
 import { sendEmail, downloadPdf, getPdfFilename } from '../utils/email';
@@ -22,6 +22,12 @@ export default function Checkout({ onBack }: CheckoutProps) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+
+  const hasFilmYear2Items = useMemo(
+    () => items.some(item => item.equipment.filmYear2),
+    [items]
+  );
+  const showYear2Warning = info.className === 'Film Year 1' && hasFilmYear2Items;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +112,12 @@ export default function Checkout({ onBack }: CheckoutProps) {
               <option value="Film Year 1">Film Year 1</option>
               <option value="Film Year 2">Film Year 2</option>
             </select>
+            {showYear2Warning && (
+              <p className="year2-warning">
+                <AlertTriangle size={14} />
+                You've selected an item only available to Film Year 2. Please review your cart.
+              </p>
+            )}
           </div>
           <div className="form-group">
             <label htmlFor="project">Project</label>
