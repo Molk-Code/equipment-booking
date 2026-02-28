@@ -8,6 +8,7 @@ export interface Equipment {
   image?: string;
   filmYear2?: boolean;
   available?: number;
+  notes?: string;
 }
 
 export interface CartItem {

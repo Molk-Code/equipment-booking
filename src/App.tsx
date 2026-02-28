@@ -58,10 +58,20 @@ export default function App() {
     return items;
   }, [category, search, equipment]);
 
+  const goHome = () => {
+    if (isConfirmPage) {
+      window.location.href = '/';
+    } else {
+      setShowCheckout(false);
+      setCategory('ALL');
+      setSearch('');
+    }
+  };
+
   if (isConfirmPage) {
     return (
       <div className="app">
-        <Header onCartClick={() => {}} />
+        <Header onCartClick={() => {}} onLogoClick={goHome} />
         <main className="main">
           <ConfirmBooking />
         </main>
@@ -72,7 +82,7 @@ export default function App() {
   if (showCheckout) {
     return (
       <div className="app">
-        <Header onCartClick={() => setCartOpen(true)} />
+        <Header onCartClick={() => setCartOpen(true)} onLogoClick={goHome} />
         <main className="main">
           <Checkout onBack={() => setShowCheckout(false)} />
         </main>
@@ -89,7 +99,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header onCartClick={() => setCartOpen(true)} />
+      <Header onCartClick={() => setCartOpen(true)} onLogoClick={goHome} />
       <main className="main">
         <div className="toolbar">
           <CategoryFilter active={category} onSelect={setCategory} counts={counts} />

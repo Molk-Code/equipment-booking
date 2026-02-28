@@ -3,15 +3,24 @@ import { useCart } from '../context/CartContext';
 
 interface HeaderProps {
   onCartClick: () => void;
+  onLogoClick?: () => void;
 }
 
-export default function Header({ onCartClick }: HeaderProps) {
+export default function Header({ onCartClick, onLogoClick }: HeaderProps) {
   const { totalItems } = useCart();
+
+  const handleLogoClick = () => {
+    if (onLogoClick) {
+      onLogoClick();
+    } else {
+      window.location.href = '/';
+    }
+  };
 
   return (
     <header className="header">
       <div className="header-inner">
-        <div className="logo">
+        <div className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
           <Film size={28} />
           <div>
             <h1>Molkom Rental House</h1>

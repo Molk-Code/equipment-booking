@@ -44,6 +44,9 @@ export default function ProductCard({ equipment }: ProductCardProps) {
         </div>
         <div className="product-info">
           <h3 className="product-name">{equipment.name}</h3>
+          {equipment.notes && (
+            <p className="product-notes">{equipment.notes}</p>
+          )}
           {maxQty > 1 && (
             <p className="product-available">{maxQty} available</p>
           )}
