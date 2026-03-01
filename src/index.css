@@ -334,7 +334,7 @@ input {
   position: relative;
   height: 180px;
   overflow: hidden;
-  background: var(--bg-secondary);
+  background: #ffffff;
 }
 
 .product-image img {
@@ -457,6 +457,7 @@ input {
 .product-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 0.25rem;
   flex-wrap: wrap;
@@ -1277,6 +1278,9 @@ input {
   max-width: 90vw;
   max-height: 90vh;
   cursor: default;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .image-modal img {
@@ -1284,6 +1288,12 @@ input {
   max-height: 80vh;
   object-fit: contain;
   border-radius: var(--radius);
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.image-modal:has(.image-modal-included) img {
+  max-height: 55vh;
 }
 
 .image-modal-close {
@@ -1320,6 +1330,9 @@ input {
   border-radius: var(--radius-sm);
   width: 100%;
   box-sizing: border-box;
+  max-height: 25vh;
+  overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .image-modal-included h4 {

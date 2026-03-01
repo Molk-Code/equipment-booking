@@ -86,7 +86,7 @@ export default function ProductCard({ equipment }: ProductCardProps) {
               onClick={handleAdd}
             >
               {inCart ? <Check size={16} /> : <ShoppingCart size={16} />}
-              {inCart ? 'Update' : 'Add'}
+              {inCart ? 'Added to cart' : 'Add'}
             </button>
           </div>
         </div>
