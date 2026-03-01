@@ -216,7 +216,8 @@ async function fetchFromSheet(): Promise<Equipment[]> {
     const colE = (row[4] || '').trim();
     const colF = (row[5] || '').trim();
     const colG = (row[6] || '').trim();
-    const colH = (row[7] || '').trim(); // Notes column
+    const colH = (row[7] || '').trim(); // Included column
+    const colI = (row[8] || '').trim(); // Notes column
 
     if (isFirstRow) {
       isFirstRow = false;
@@ -238,7 +239,10 @@ async function fetchFromSheet(): Promise<Equipment[]> {
 
     const filmYear2 = colC.toLowerCase().includes('film year 2');
     const image = findImage(colD);
-    const notes = colH || undefined;
+    const included = colH
+      ? colH.split(',').map(s => s.trim()).filter(Boolean)
+      : undefined;
+    const notes = colI || undefined;
 
     rawItems.push({
       id: id++,
@@ -249,6 +253,7 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       priceInclVat: priceInclVat,
       image,
       filmYear2,
+      included,
       notes,
     });
   }
@@ -275,6 +280,9 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       }
       if (!existing.description && item.description) {
         existing.description = item.description;
+      }
+      if (!existing.included && item.included) {
+        existing.included = item.included;
       }
       if (!existing.notes && item.notes) {
         existing.notes = item.notes;

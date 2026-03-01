@@ -94,12 +94,22 @@ export default function ProductCard({ equipment }: ProductCardProps) {
 
       {showImage && (
         <div className="image-modal-overlay" onClick={() => setShowImage(false)}>
-          <div className="image-modal">
+          <div className="image-modal" onClick={e => e.stopPropagation()}>
             <button className="image-modal-close" onClick={() => setShowImage(false)}>
               <X size={24} />
             </button>
             <img src={imageUrl} alt={equipment.name} />
             <p className="image-modal-name">{equipment.name}</p>
+            {equipment.included && equipment.included.length > 0 && (
+              <div className="image-modal-included">
+                <h4>Included</h4>
+                <ul>
+                  {equipment.included.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
