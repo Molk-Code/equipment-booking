@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Send, FileText, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Send, FileText, Loader2, AlertTriangle, Calendar } from 'lucide-react';
 import { useCart, calculatePrice } from '../context/CartContext';
 import { generatePDF } from '../utils/pdf';
 import { sendEmail, downloadPdf, getPdfFilename } from '../utils/email';
@@ -10,14 +10,12 @@ interface CheckoutProps {
 }
 
 export default function Checkout({ onBack }: CheckoutProps) {
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, dateFrom, dateTo, rentalDays } = useCart();
   const [info, setInfo] = useState<CheckoutInfo>({
     name: '',
     email: '',
     className: '',
     project: '',
-    dateFrom: '',
-    dateTo: '',
   });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -35,8 +33,9 @@ export default function Checkout({ onBack }: CheckoutProps) {
     setSending(true);
 
     try {
-      const pdfBlob = generatePDF(items, info, totalPrice);
-      await sendEmail(pdfBlob, items, info, totalPrice);
+      const fullInfo = { ...info, dateFrom, dateTo };
+      const pdfBlob = generatePDF(items, fullInfo, totalPrice, rentalDays);
+      await sendEmail(pdfBlob, items, fullInfo, totalPrice, rentalDays);
       setSent(true);
       clearCart();
     } catch (err: unknown) {
@@ -49,8 +48,9 @@ export default function Checkout({ onBack }: CheckoutProps) {
   };
 
   const handleDownloadPDF = () => {
-    const pdfBlob = generatePDF(items, info, totalPrice);
-    downloadPdf(pdfBlob, getPdfFilename(info));
+    const fullInfo = { ...info, dateFrom, dateTo };
+    const pdfBlob = generatePDF(items, fullInfo, totalPrice, rentalDays);
+    downloadPdf(pdfBlob, getPdfFilename(fullInfo));
   };
 
   if (sent) {
@@ -76,6 +76,15 @@ export default function Checkout({ onBack }: CheckoutProps) {
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
+          {/* Rental period confirmation */}
+          <div className="checkout-dates-confirm">
+            <Calendar size={18} />
+            <div>
+              <span className="dates-label">Rental Period</span>
+              <span className="dates-value">{dateFrom} — {dateTo} ({rentalDays} {rentalDays === 1 ? 'day' : 'days'})</span>
+            </div>
+          </div>
+
           <h3>Borrower Information</h3>
           <div className="form-group">
             <label htmlFor="name">Name</label>
@@ -131,31 +140,6 @@ export default function Checkout({ onBack }: CheckoutProps) {
             />
           </div>
 
-          <h3>Rental Period</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="dateFrom">From</label>
-              <input
-                id="dateFrom"
-                type="date"
-                required
-                value={info.dateFrom}
-                onChange={e => setInfo(prev => ({ ...prev, dateFrom: e.target.value }))}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="dateTo">To</label>
-              <input
-                id="dateTo"
-                type="date"
-                required
-                value={info.dateTo}
-                min={info.dateFrom}
-                onChange={e => setInfo(prev => ({ ...prev, dateTo: e.target.value }))}
-              />
-            </div>
-          </div>
-
           {error && <p className="error-msg">{error}</p>}
 
           <div className="checkout-buttons">
@@ -163,7 +147,7 @@ export default function Checkout({ onBack }: CheckoutProps) {
               type="button"
               className="secondary-btn"
               onClick={handleDownloadPDF}
-              disabled={!info.name || !info.email || !info.className || !info.project || !info.dateFrom || !info.dateTo}
+              disabled={!info.name || !info.email || !info.className || !info.project}
             >
               <FileText size={18} /> Download PDF
             </button>
@@ -183,12 +167,12 @@ export default function Checkout({ onBack }: CheckoutProps) {
           <div className="summary-items">
             {items.map(item => {
               const qty = item.quantity || 1;
-              const itemPrice = calculatePrice(item.equipment.priceExclVat, item.days) * qty;
+              const itemPrice = calculatePrice(item.equipment.priceExclVat, rentalDays) * qty;
               return (
                 <div key={item.equipment.id} className="summary-item">
                   <div>
                     <span className="summary-name">{item.equipment.name}{qty > 1 ? ` x${qty}` : ''}</span>
-                    <span className="summary-days">{item.days} {item.days === 1 ? 'day' : 'days'}</span>
+                    <span className="summary-days">{rentalDays} {rentalDays === 1 ? 'day' : 'days'}</span>
                   </div>
                   <span className="summary-price">
                     {item.equipment.priceExclVat > 0

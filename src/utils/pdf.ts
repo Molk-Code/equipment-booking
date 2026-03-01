@@ -1,11 +1,21 @@
 import jsPDF from 'jspdf';
-import type { CartItem, CheckoutInfo } from '../types';
+import type { CartItem } from '../types';
 import { calculatePrice } from '../context/CartContext';
+
+interface PdfInfo {
+  name: string;
+  email: string;
+  className: string;
+  project: string;
+  dateFrom: string;
+  dateTo: string;
+}
 
 export function generatePDF(
   items: CartItem[],
-  info: CheckoutInfo,
-  totalPrice: number
+  info: PdfInfo,
+  totalPrice: number,
+  rentalDays: number
 ): Blob {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -45,7 +55,7 @@ export function generatePDF(
   y += 6;
   doc.text(`Project: ${info.project || 'N/A'}`, 20, y);
   y += 6;
-  doc.text(`Rental Period: ${info.dateFrom} to ${info.dateTo}`, 20, y);
+  doc.text(`Rental Period: ${info.dateFrom} to ${info.dateTo} (${rentalDays} days)`, 20, y);
   y += 12;
 
   // Inquiry disclaimer
@@ -76,9 +86,8 @@ export function generatePDF(
   doc.setTextColor(255);
   doc.rect(20, y - 4, pageWidth - 40, 8, 'F');
   doc.text('Item', 22, y);
-  doc.text('Qty', 100, y);
-  doc.text('Category', 110, y);
-  doc.text('Days', 140, y);
+  doc.text('Qty', 110, y);
+  doc.text('Category', 122, y);
   doc.text('Price', 165, y, { align: 'right' });
   y += 8;
 
@@ -98,16 +107,15 @@ export function generatePDF(
     }
 
     const qty = item.quantity || 1;
-    const name = item.equipment.name.length > 45
-      ? item.equipment.name.substring(0, 42) + '...'
+    const name = item.equipment.name.length > 50
+      ? item.equipment.name.substring(0, 47) + '...'
       : item.equipment.name;
 
     doc.text(name, 22, y);
-    doc.text(String(qty), 100, y);
-    doc.text(item.equipment.category, 110, y);
-    doc.text(String(item.days), 140, y);
+    doc.text(String(qty), 110, y);
+    doc.text(item.equipment.category, 122, y);
 
-    const price = calculatePrice(item.equipment.priceExclVat, item.days) * qty;
+    const price = calculatePrice(item.equipment.priceExclVat, rentalDays) * qty;
     doc.text(
       item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free',
       165,

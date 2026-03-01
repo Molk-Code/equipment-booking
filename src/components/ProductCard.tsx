@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Minus, ShoppingCart, Check, Lock, X } from 'lucide-react';
-import { useCart, calculatePrice, getWeekRate } from '../context/CartContext';
+import { useCart, getWeekRate } from '../context/CartContext';
 import type { Equipment } from '../types';
 
 interface ProductCardProps {
@@ -9,18 +9,16 @@ interface ProductCardProps {
 
 export default function ProductCard({ equipment }: ProductCardProps) {
   const { items, addItem } = useCart();
-  const [days, setDays] = useState(1);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showImage, setShowImage] = useState(false);
 
   const inCart = items.some(item => item.equipment.id === equipment.id);
-  const price = calculatePrice(equipment.priceExclVat, days) * quantity;
   const imageUrl = equipment.image || '';
   const maxQty = equipment.available || 1;
 
   const handleAdd = () => {
-    addItem(equipment, days, quantity);
+    addItem(equipment, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -64,23 +62,6 @@ export default function ProductCard({ equipment }: ProductCardProps) {
             )}
           </div>
           <div className="product-actions">
-            <div className="day-selector">
-              <button
-                className="day-btn"
-                onClick={() => setDays(d => Math.max(1, d - 1))}
-                aria-label="Decrease days"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="day-count">{days} {days === 1 ? 'day' : 'days'}</span>
-              <button
-                className="day-btn"
-                onClick={() => setDays(d => d + 1)}
-                aria-label="Increase days"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
             {maxQty > 1 && (
               <div className="qty-selector">
                 <button
@@ -99,9 +80,6 @@ export default function ProductCard({ equipment }: ProductCardProps) {
                   <Plus size={14} />
                 </button>
               </div>
-            )}
-            {equipment.priceExclVat > 0 && (
-              <span className="subtotal">{price} kr</span>
             )}
             <button
               className={`add-to-cart-btn ${inCart ? 'in-cart' : ''}`}

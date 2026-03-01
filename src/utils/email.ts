@@ -1,20 +1,30 @@
-import type { CartItem, CheckoutInfo } from '../types';
+import type { CartItem } from '../types';
 import { calculatePrice } from '../context/CartContext';
 
 const RECIPIENT_EMAIL = 'fredrik.fridlund@regionvarmland.se';
 
-export function getPdfFilename(info: CheckoutInfo): string {
+interface EmailInfo {
+  name: string;
+  email: string;
+  className: string;
+  project: string;
+  dateFrom: string;
+  dateTo: string;
+}
+
+export function getPdfFilename(info: EmailInfo): string {
   const name = info.name.replace(/\s+/g, '');
   const today = new Date().toISOString().split('T')[0];
   return `${name}_Equipment_${today}.pdf`;
 }
 
-function buildMailtoLink(items: CartItem[], info: CheckoutInfo, totalPrice: number): string {
+function buildMailtoLink(items: CartItem[], info: EmailInfo, totalPrice: number, rentalDays: number): string {
   const itemLines = items
     .map(item => {
-      const price = calculatePrice(item.equipment.priceExclVat, item.days);
-      const qty = item.quantity && item.quantity > 1 ? ` x${item.quantity}` : '';
-      return `- ${item.equipment.name}${qty} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}`;
+      const qty = item.quantity || 1;
+      const price = calculatePrice(item.equipment.priceExclVat, rentalDays) * qty;
+      const qtyLabel = qty > 1 ? ` x${qty}` : '';
+      return `- ${item.equipment.name}${qtyLabel} (${item.equipment.category}) — ${rentalDays} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}`;
     })
     .join('\n');
 
@@ -27,7 +37,7 @@ Your equipment booking at Molkom Rental House has been approved.
 Booking Details:
 Class: ${info.className}
 Project: ${info.project || 'N/A'}
-Rental Period: ${info.dateFrom} to ${info.dateTo}
+Rental Period: ${info.dateFrom} to ${info.dateTo} (${rentalDays} days)
 Items: ${items.length}
 Total (excl. VAT): ${totalPrice} kr
 
@@ -45,20 +55,22 @@ Molkom Rental House`;
 export async function sendEmail(
   pdfBlob: Blob,
   items: CartItem[],
-  info: CheckoutInfo,
-  totalPrice: number
+  info: EmailInfo,
+  totalPrice: number,
+  rentalDays: number
 ): Promise<void> {
   const filename = getPdfFilename(info);
 
   const itemsList = items
     .map(item => {
-      const price = calculatePrice(item.equipment.priceExclVat, item.days);
-      const qty = item.quantity && item.quantity > 1 ? ` x${item.quantity}` : '';
-      return `<li>${item.equipment.name}${qty} (${item.equipment.category}) — ${item.days} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}</li>`;
+      const qty = item.quantity || 1;
+      const price = calculatePrice(item.equipment.priceExclVat, rentalDays) * qty;
+      const qtyLabel = qty > 1 ? ` x${qty}` : '';
+      return `<li>${item.equipment.name}${qtyLabel} (${item.equipment.category}) — ${rentalDays} days — ${item.equipment.priceExclVat > 0 ? `${price} kr` : 'Free'}</li>`;
     })
     .join('\n');
 
-  const mailtoLink = buildMailtoLink(items, info, totalPrice);
+  const mailtoLink = buildMailtoLink(items, info, totalPrice, rentalDays);
 
   const html = `
     <h2>Equipment Booking Inquiry</h2>
@@ -66,7 +78,7 @@ export async function sendEmail(
     <p><strong>Student Email:</strong> ${info.email}</p>
     <p><strong>Class:</strong> ${info.className}</p>
     <p><strong>Project:</strong> ${info.project || 'N/A'}</p>
-    <p><strong>Period:</strong> ${info.dateFrom} to ${info.dateTo}</p>
+    <p><strong>Period:</strong> ${info.dateFrom} to ${info.dateTo} (${rentalDays} days)</p>
     <p><strong>Items:</strong> ${items.length}</p>
     <p><strong>Total (excl. VAT):</strong> ${totalPrice} kr</p>
     <h3>Equipment List</h3>

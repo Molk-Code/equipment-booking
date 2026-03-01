@@ -721,6 +721,82 @@ input {
   color: var(--danger);
 }
 
+/* Cart rental period date picker */
+.cart-rental-period {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.cart-rental-period h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.cart-date-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cart-date-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cart-date-field label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cart-date-field input[type="date"] {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.cart-date-field input[type="date"]:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.cart-rental-days {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+}
+
+.cart-dates-hint {
+  font-size: 0.78rem;
+  color: var(--warning);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .cart-footer {
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--border);
@@ -758,6 +834,41 @@ input {
 }
 
 /* ===== Checkout ===== */
+.checkout-dates-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.checkout-dates-confirm svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.checkout-dates-confirm div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dates-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dates-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .checkout {
   max-width: 900px;
   margin: 0 auto;

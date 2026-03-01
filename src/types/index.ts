@@ -13,7 +13,6 @@ export interface Equipment {
 
 export interface CartItem {
   equipment: Equipment;
-  days: number;
   quantity?: number;
 }
 
@@ -22,8 +21,6 @@ export interface CheckoutInfo {
   email: string;
   className: string;
   project: string;
-  dateFrom: string;
-  dateTo: string;
 }
 
 export type Category = 'ALL' | 'CAMERA' | 'GRIP' | 'LIGHTS' | 'SOUND' | 'LOCATION' | 'BOOKS';
