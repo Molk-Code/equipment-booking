@@ -8,7 +8,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ equipment }: ProductCardProps) {
-  const { items, addItem } = useCart();
+  const { items, addItem, removeItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [showImage, setShowImage] = useState(false);
@@ -83,7 +83,7 @@ export default function ProductCard({ equipment }: ProductCardProps) {
             )}
             <button
               className={`add-to-cart-btn ${inCart ? 'in-cart' : ''}`}
-              onClick={handleAdd}
+              onClick={inCart ? () => removeItem(equipment.id) : handleAdd}
             >
               {inCart ? <Check size={16} /> : <ShoppingCart size={16} />}
               {inCart ? 'Added to cart' : 'Add'}
