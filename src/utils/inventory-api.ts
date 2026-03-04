@@ -1,18 +1,27 @@
+// localStorage-only inventory API
+// All data is stored locally in the browser — no server-side writes needed
+
 import type { InventoryProject, ProjectItem, ItemStatus, ProjectStatus } from '../types';
 
-const API_URL = '/api/sheets-write';
+const LS_PROJECTS = 'inventory_projects';
+const LS_ITEMS = 'inventory_items';
 
-async function apiCall(body: Record<string, unknown>): Promise<unknown> {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error((err as { error?: string }).error || `HTTP ${res.status}`);
-  }
-  return res.json();
+function readProjects(): InventoryProject[] {
+  try { return JSON.parse(localStorage.getItem(LS_PROJECTS) || '[]'); }
+  catch { return []; }
+}
+
+function writeProjects(projects: InventoryProject[]) {
+  localStorage.setItem(LS_PROJECTS, JSON.stringify(projects));
+}
+
+function readItems(): ProjectItem[] {
+  try { return JSON.parse(localStorage.getItem(LS_ITEMS) || '[]'); }
+  catch { return []; }
+}
+
+function writeItems(items: ProjectItem[]) {
+  localStorage.setItem(LS_ITEMS, JSON.stringify(items));
 }
 
 function generateId(): string {
@@ -28,10 +37,9 @@ export async function createProject(data: {
   checkoutDate: string;
   returnDate: string;
 }): Promise<InventoryProject> {
-  const id = generateId();
   const now = new Date().toISOString();
   const project: InventoryProject = {
-    id,
+    id: generateId(),
     name: data.name,
     borrowers: data.borrowers,
     checkoutDate: data.checkoutDate,
@@ -40,37 +48,23 @@ export async function createProject(data: {
     createdAt: now,
     updatedAt: now,
   };
-
-  await apiCall({
-    action: 'appendRow',
-    sheetName: 'Projects',
-    values: [
-      project.id,
-      project.name,
-      project.borrowers.join(', '),
-      project.checkoutDate,
-      project.returnDate,
-      project.status,
-      project.createdAt,
-      project.updatedAt,
-    ],
-  });
-
+  const projects = readProjects();
+  projects.push(project);
+  writeProjects(projects);
   return project;
 }
 
 export async function updateProjectStatus(
   projectId: string,
-  status: ProjectStatus,
-  rowIndex: number
+  status: ProjectStatus
 ): Promise<void> {
-  const now = new Date().toISOString();
-  await apiCall({
-    action: 'updateCell',
-    sheetName: 'Projects',
-    range: `F${rowIndex}:H${rowIndex}`,
-    values: [status, '', now],
-  });
+  const projects = readProjects();
+  const idx = projects.findIndex(p => p.id === projectId);
+  if (idx >= 0) {
+    projects[idx].status = status;
+    projects[idx].updatedAt = new Date().toISOString();
+    writeProjects(projects);
+  }
 }
 
 export async function addProjectItem(item: {
@@ -78,18 +72,16 @@ export async function addProjectItem(item: {
   equipmentName: string;
   checkoutTimestamp: string;
 }): Promise<void> {
-  await apiCall({
-    action: 'appendRow',
-    sheetName: 'Project Items',
-    values: [
-      item.projectId,
-      item.equipmentName,
-      item.checkoutTimestamp,
-      '', // checkinTimestamp
-      'checked-out',
-      '', // damageNotes
-    ],
+  const items = readItems();
+  items.push({
+    projectId: item.projectId,
+    equipmentName: item.equipmentName,
+    checkoutTimestamp: item.checkoutTimestamp,
+    checkinTimestamp: '',
+    status: 'checked-out',
+    damageNotes: '',
   });
+  writeItems(items);
 }
 
 export async function updateProjectItem(
@@ -99,36 +91,16 @@ export async function updateProjectItem(
     checkinTimestamp?: string;
     status?: ItemStatus;
     damageNotes?: string;
-  },
-  rowIndex: number
+  }
 ): Promise<void> {
-  // Update columns D-F (checkin, status, damage)
-  await apiCall({
-    action: 'updateCell',
-    sheetName: 'Project Items',
-    range: `D${rowIndex}:F${rowIndex}`,
-    values: [
-      updates.checkinTimestamp || '',
-      updates.status || 'checked-out',
-      updates.damageNotes || '',
-    ],
-  });
-}
-
-export async function batchUpdateItems(
-  updates: Array<{
-    rowIndex: number;
-    checkinTimestamp: string;
-    status: ItemStatus;
-    damageNotes: string;
-  }>
-): Promise<void> {
-  await apiCall({
-    action: 'batchUpdate',
-    sheetName: 'Project Items',
-    updates: updates.map(u => ({
-      range: `D${u.rowIndex}:F${u.rowIndex}`,
-      values: [u.checkinTimestamp, u.status, u.damageNotes],
-    })),
-  });
+  const items = readItems();
+  const idx = items.findIndex(
+    i => i.projectId === projectId && i.equipmentName === equipmentName
+  );
+  if (idx >= 0) {
+    if (updates.checkinTimestamp !== undefined) items[idx].checkinTimestamp = updates.checkinTimestamp;
+    if (updates.status !== undefined) items[idx].status = updates.status;
+    if (updates.damageNotes !== undefined) items[idx].damageNotes = updates.damageNotes;
+    writeItems(items);
+  }
 }

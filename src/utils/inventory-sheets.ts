@@ -1,4 +1,4 @@
-import type { InventoryProject, ProjectItem, QRScanEntry, ProjectStatus, ItemStatus } from '../types';
+import type { QRScanEntry } from '../types';
 
 const SHEET_ID = '1rKKqBm0jRJ_KixzhIXZrwJk7UbuqWFWtJzdBCk91sv4';
 const CONTRACT_GID = '1545651444';
@@ -91,56 +91,4 @@ export function startScanPolling(
   }, SCAN_POLL_INTERVAL);
 
   return () => clearInterval(timer);
-}
-
-// Fetch projects from "Projects" tab
-export async function fetchProjects(projectsGid: string): Promise<InventoryProject[]> {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${projectsGid}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const csv = await response.text();
-  const rows = parseCSV(csv);
-
-  const projects: InventoryProject[] = [];
-  for (let i = 1; i < rows.length; i++) { // skip header
-    const row = rows[i];
-    const id = (row[0] || '').trim();
-    if (!id) continue;
-    projects.push({
-      id,
-      name: (row[1] || '').trim(),
-      borrowers: (row[2] || '').split(',').map(s => s.trim()).filter(Boolean),
-      checkoutDate: (row[3] || '').trim(),
-      returnDate: (row[4] || '').trim(),
-      status: ((row[5] || '').trim() || 'active') as ProjectStatus,
-      createdAt: (row[6] || '').trim(),
-      updatedAt: (row[7] || '').trim(),
-    });
-  }
-  return projects;
-}
-
-// Fetch project items from "Project Items" tab
-export async function fetchProjectItems(itemsGid: string): Promise<ProjectItem[]> {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${itemsGid}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const csv = await response.text();
-  const rows = parseCSV(csv);
-
-  const items: ProjectItem[] = [];
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    const projectId = (row[0] || '').trim();
-    if (!projectId) continue;
-    items.push({
-      projectId,
-      equipmentName: (row[1] || '').trim(),
-      checkoutTimestamp: (row[2] || '').trim(),
-      checkinTimestamp: (row[3] || '').trim(),
-      status: ((row[4] || '').trim() || 'checked-out') as ItemStatus,
-      damageNotes: (row[5] || '').trim(),
-    });
-  }
-  return items;
 }

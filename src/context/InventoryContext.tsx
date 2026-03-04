@@ -1,13 +1,8 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus } from '../types';
-import { fetchProjects, fetchProjectItems, fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
+import { fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
 import { fetchEquipment } from '../utils/sheets';
 import * as api from '../utils/inventory-api';
-
-// GIDs for the new tabs - these need to be set after creating the tabs in Google Sheets
-// For now, we store projects/items in localStorage as fallback and in sheets when API is available
-const PROJECTS_GID = localStorage.getItem('inventory_projects_gid') || '';
-const ITEMS_GID = localStorage.getItem('inventory_items_gid') || '';
 
 interface InventoryContextType {
   projects: InventoryProject[];
@@ -18,9 +13,6 @@ interface InventoryContextType {
   recentScans: QRScanEntry[];
   loading: boolean;
 
-  loadProjects: () => Promise<void>;
-  loadProjectItems: () => Promise<void>;
-  loadEquipment: () => Promise<void>;
   createProject: (data: { name: string; borrowers: string[]; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
   updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
   startScanning: (projectId: string, mode: 'checkout' | 'checkin') => void;
@@ -34,8 +26,7 @@ interface InventoryContextType {
   getDamagedItems: () => ProjectItem[];
   getMostBorrowed: () => { name: string; count: number }[];
   getCheckedOutEquipment: () => { item: ProjectItem; project: InventoryProject }[];
-  setProjectsGid: (gid: string) => void;
-  setItemsGid: (gid: string) => void;
+  loadEquipment: () => Promise<void>;
 }
 
 const InventoryContext = createContext<InventoryContextType | null>(null);
@@ -44,9 +35,8 @@ const LS_PROJECTS = 'inventory_projects';
 const LS_ITEMS = 'inventory_items';
 
 function loadLocalProjects(): InventoryProject[] {
-  try {
-    return JSON.parse(localStorage.getItem(LS_PROJECTS) || '[]');
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(LS_PROJECTS) || '[]'); }
+  catch { return []; }
 }
 
 function saveLocalProjects(projects: InventoryProject[]) {
@@ -54,9 +44,8 @@ function saveLocalProjects(projects: InventoryProject[]) {
 }
 
 function loadLocalItems(): ProjectItem[] {
-  try {
-    return JSON.parse(localStorage.getItem(LS_ITEMS) || '[]');
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(LS_ITEMS) || '[]'); }
+  catch { return []; }
 }
 
 function saveLocalItems(items: ProjectItem[]) {
@@ -72,35 +61,10 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [recentScans, setRecentScans] = useState<QRScanEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [stopPoll, setStopPoll] = useState<(() => void) | null>(null);
-  const [activeScanProjectId, setActiveScanProjectId] = useState<string | null>(null);
 
   // Persist to localStorage whenever projects/items change
   useEffect(() => { saveLocalProjects(projects); }, [projects]);
   useEffect(() => { saveLocalItems(projectItems); }, [projectItems]);
-
-  const loadProjects = useCallback(async () => {
-    if (!PROJECTS_GID) return;
-    try {
-      const data = await fetchProjects(PROJECTS_GID);
-      if (data.length > 0) {
-        setProjects(data);
-      }
-    } catch {
-      // use local data
-    }
-  }, []);
-
-  const loadProjectItems = useCallback(async () => {
-    if (!ITEMS_GID) return;
-    try {
-      const data = await fetchProjectItems(ITEMS_GID);
-      if (data.length > 0) {
-        setProjectItems(data);
-      }
-    } catch {
-      // use local data
-    }
-  }, []);
 
   const loadEquipment = useCallback(async () => {
     setLoading(true);
@@ -113,42 +77,20 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Load equipment on mount
-  useEffect(() => {
-    loadEquipment();
-    loadProjects();
-    loadProjectItems();
-  }, [loadEquipment, loadProjects, loadProjectItems]);
+  useEffect(() => { loadEquipment(); }, [loadEquipment]);
 
   const createProjectFn = useCallback(async (data: { name: string; borrowers: string[]; checkoutDate: string; returnDate: string }) => {
-    try {
-      const project = await api.createProject(data);
-      setProjects(prev => [...prev, project]);
-      return project;
-    } catch {
-      // Fallback: save locally
-      const id = `proj_${Math.random().toString(16).slice(2, 10)}`;
-      const now = new Date().toISOString();
-      const project: InventoryProject = {
-        id, ...data, status: 'active', createdAt: now, updatedAt: now,
-      };
-      setProjects(prev => [...prev, project]);
-      return project;
-    }
+    const project = await api.createProject(data);
+    setProjects(prev => [...prev, project]);
+    return project;
   }, []);
 
   const updateProjectStatusFn = useCallback(async (id: string, status: ProjectStatus) => {
     setProjects(prev => prev.map(p =>
       p.id === id ? { ...p, status, updatedAt: new Date().toISOString() } : p
     ));
-    try {
-      const idx = projects.findIndex(p => p.id === id);
-      if (idx >= 0) {
-        await api.updateProjectStatus(id, status, idx + 2); // +2 for header row + 1-indexed
-      }
-    } catch {
-      // local update already done
-    }
-  }, [projects]);
+    await api.updateProjectStatus(id, status);
+  }, []);
 
   const startScanning = useCallback((projectId: string, mode: 'checkout' | 'checkin') => {
     // Build set of known scans
@@ -159,7 +101,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       if (i.checkinTimestamp) known.add(`${i.checkinTimestamp}|${i.equipmentName}`);
     });
 
-    // Also mark all currently known contract scans as known to only catch new ones
+    // Mark all currently known contract scans as known to only catch new ones
     fetchContractScans().then(scans => {
       scans.forEach(s => known.add(`${s.timestamp}|${s.equipmentName}`));
     }).catch(() => {});
@@ -167,7 +109,6 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     setIsScanning(true);
     setScanMode(mode);
     setRecentScans([]);
-    setActiveScanProjectId(projectId);
 
     const stop = startScanPolling((newScans) => {
       setRecentScans(prev => [...newScans, ...prev]);
@@ -181,7 +122,6 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     setIsScanning(false);
     setScanMode(null);
     setStopPoll(null);
-    setActiveScanProjectId(null);
   }, [stopPoll]);
 
   const addItemFromScan = useCallback(async (projectId: string, scan: QRScanEntry) => {
@@ -194,15 +134,11 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       damageNotes: '',
     };
     setProjectItems(prev => [...prev, newItem]);
-    try {
-      await api.addProjectItem({
-        projectId,
-        equipmentName: scan.equipmentName,
-        checkoutTimestamp: scan.timestamp,
-      });
-    } catch {
-      // local update already done
-    }
+    await api.addProjectItem({
+      projectId,
+      equipmentName: scan.equipmentName,
+      checkoutTimestamp: scan.timestamp,
+    });
   }, []);
 
   const markCheckinItem = useCallback(async (projectId: string, equipmentName: string, checkinTimestamp: string) => {
@@ -211,7 +147,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         ? { ...i, checkinTimestamp, status: 'returned' as ItemStatus }
         : i
     ));
-    // API call would go here with row index
+    await api.updateProjectItem(projectId, equipmentName, { checkinTimestamp, status: 'returned' });
   }, []);
 
   const updateItemStatusFn = useCallback(async (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string) => {
@@ -220,6 +156,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         ? { ...i, status, damageNotes: damageNotes || i.damageNotes }
         : i
     ));
+    await api.updateProjectItem(projectId, equipmentName, { status, damageNotes });
   }, []);
 
   const getProjectItems = useCallback((projectId: string) => {
@@ -261,25 +198,16 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       .filter(x => x.project);
   }, [projects, projectItems]);
 
-  const setProjectsGid = useCallback((gid: string) => {
-    localStorage.setItem('inventory_projects_gid', gid);
-  }, []);
-
-  const setItemsGid = useCallback((gid: string) => {
-    localStorage.setItem('inventory_items_gid', gid);
-  }, []);
-
   return (
     <InventoryContext.Provider value={{
       projects, projectItems, allEquipment, isScanning, scanMode, recentScans, loading,
-      loadProjects, loadProjectItems, loadEquipment,
+      loadEquipment,
       createProject: createProjectFn,
       updateProjectStatus: updateProjectStatusFn,
       startScanning, stopScanning,
       addItemFromScan, updateItemStatus: updateItemStatusFn, markCheckinItem,
       getProjectItems, getActiveProjects, getArchivedProjects,
       getDamagedItems, getMostBorrowed, getCheckedOutEquipment,
-      setProjectsGid, setItemsGid,
     }}>
       {children}
     </InventoryContext.Provider>
