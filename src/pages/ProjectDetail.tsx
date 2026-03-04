@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Radio, RotateCcw, FileText, Archive,
-  Calendar, Users, Package, Download
+  Calendar, Users, Package, Download, AlertTriangle, Trash2
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
@@ -18,12 +18,17 @@ export default function ProjectDetail() {
     projects, isScanning, scanMode, recentScans,
     getProjectItems, startScanning, stopScanning,
     addItemFromScan, updateProjectStatus, updateItemStatus,
+    removeProjectItem,
   } = useInventory();
 
   const [checkinScans, setCheckinScans] = useState<QRScanEntry[]>([]);
+  const [showMissingWarning, setShowMissingWarning] = useState(false);
 
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
+
+  // Count missing items for archived projects
+  const missingCount = items.filter(i => i.status === 'missing').length;
 
   // Auto-add scanned items during checkout
   useEffect(() => {
@@ -60,14 +65,36 @@ export default function ProjectDetail() {
     if (scanMode === 'checkout' && projectId) {
       updateProjectStatus(projectId, 'checked-out');
     }
+    // Show warning if check-in scan has missing items
+    if (scanMode === 'checkin' && items.length > 0) {
+      const returnedNames = new Set(checkinScans.map(s => s.equipmentName));
+      const missingItems = items.filter(i =>
+        i.status !== 'damaged' && i.status !== 'returned' && !returnedNames.has(i.equipmentName)
+      );
+      if (missingItems.length > 0) {
+        setShowMissingWarning(true);
+      }
+    }
     stopScanning();
-  }, [scanMode, projectId, updateProjectStatus, stopScanning]);
+  }, [scanMode, projectId, updateProjectStatus, stopScanning, items, checkinScans]);
 
   const handleMarkDamaged = useCallback((equipmentName: string, notes: string) => {
     if (projectId) {
       updateItemStatus(projectId, equipmentName, 'damaged', notes);
     }
   }, [projectId, updateItemStatus]);
+
+  const handleRemoveScan = useCallback((equipmentName: string, timestamp: string) => {
+    if (projectId) {
+      removeProjectItem(projectId, equipmentName, timestamp);
+    }
+  }, [projectId, removeProjectItem]);
+
+  const handleRemoveItem = useCallback((equipmentName: string, checkoutTimestamp: string) => {
+    if (projectId && confirm(`Remove "${equipmentName}" from this project?`)) {
+      removeProjectItem(projectId, equipmentName, checkoutTimestamp);
+    }
+  }, [projectId, removeProjectItem]);
 
   const handleCompleteCheckin = useCallback(() => {
     if (!projectId) return;
@@ -82,6 +109,7 @@ export default function ProjectDetail() {
     });
     updateProjectStatus(projectId, 'archived');
     stopScanning();
+    setShowMissingWarning(false);
   }, [projectId, items, checkinScans, updateItemStatus, updateProjectStatus, stopScanning]);
 
   const handleDownloadPDF = useCallback((mode: 'checkout' | 'checkin') => {
@@ -135,6 +163,27 @@ export default function ProjectDetail() {
           </span>
         </div>
 
+        {/* Missing items warning for archived projects */}
+        {isArchived && missingCount > 0 && (
+          <div className="missing-warning-banner">
+            <AlertTriangle size={18} />
+            <span>
+              <strong>{missingCount} item{missingCount > 1 ? 's' : ''} missing</strong> from check-in
+            </span>
+          </div>
+        )}
+
+        {/* Warning after stopping check-in scan with missing items */}
+        {showMissingWarning && (
+          <div className="missing-warning-banner">
+            <AlertTriangle size={18} />
+            <span>
+              <strong>Warning:</strong> Some items were not scanned back in. They will be marked as missing when you complete the check-in.
+            </span>
+            <button className="missing-warning-dismiss" onClick={() => setShowMissingWarning(false)}>×</button>
+          </div>
+        )}
+
         {/* Actions */}
         {!isArchived && !isScanning && (
           <div className="project-actions">
@@ -166,6 +215,7 @@ export default function ProjectDetail() {
             recentScans={recentScans}
             mode={scanMode || 'checkout'}
             onStop={handleStopScanning}
+            onRemoveScan={handleRemoveScan}
           />
         )}
 
@@ -207,6 +257,15 @@ export default function ProjectDetail() {
                   <span className={`project-item-status item-status-${item.status}`}>
                     {item.status}
                   </span>
+                  {!isArchived && (
+                    <button
+                      className="project-item-remove-btn"
+                      onClick={() => handleRemoveItem(item.equipmentName, item.checkoutTimestamp)}
+                      title="Remove item"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

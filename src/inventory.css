@@ -60,6 +60,10 @@
   color: var(--warning);
 }
 
+.inv-stat-card.danger {
+  color: var(--danger);
+}
+
 .inv-stat-value {
   display: block;
   font-size: 1.5rem;
@@ -954,6 +958,228 @@
   border-radius: var(--radius-sm);
 }
 
+/* ===== Scan Remove Button ===== */
+.scan-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.scan-remove-btn:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
+/* ===== Project Item Remove Button ===== */
+.project-item-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.project-item-remove-btn:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
+/* ===== Missing Warning Banner ===== */
+.missing-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: var(--radius);
+  color: var(--danger);
+  margin-bottom: 1.25rem;
+  font-size: 0.88rem;
+}
+
+.missing-warning-banner strong {
+  font-weight: 700;
+}
+
+.missing-warning-dismiss {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  color: var(--danger);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.missing-warning-dismiss:hover {
+  background: rgba(255, 71, 87, 0.2);
+}
+
+/* ===== Project Card Missing Badge ===== */
+.project-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.project-missing-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+  letter-spacing: 0.03em;
+}
+
+/* ===== Archived Project Delete Button ===== */
+.archived-project-wrapper {
+  position: relative;
+}
+
+.archived-delete-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  z-index: 10;
+}
+
+.archived-delete-btn:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
+/* ===== Inline Damage Input (Check-in) ===== */
+.checkin-inline-damage {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem 0.5rem 2.75rem;
+  animation: scan-slide-in 0.2s ease;
+}
+
+.checkin-damage-input {
+  flex: 1;
+  padding: 0.45rem 0.7rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.82rem;
+}
+
+.checkin-damage-input:focus {
+  border-color: var(--warning);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 165, 2, 0.2);
+}
+
+.checkin-damage-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.7rem;
+  background: rgba(255, 165, 2, 0.15);
+  color: var(--warning);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.checkin-damage-save-btn:hover:not(:disabled) {
+  background: rgba(255, 165, 2, 0.25);
+}
+
+.checkin-damage-save-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== Missing Items List (Statistics) ===== */
+.missing-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.missing-items-info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.missing-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-sm);
+}
+
+.missing-item-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.missing-item-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.missing-item-project {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.missing-item-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ===== Equipment Status Grid — Missing ===== */
+.equip-grid-row.row-missing {
+  background: rgba(255, 71, 87, 0.06);
+}
+
+.equip-grid-status.status-missing {
+  color: var(--danger);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .inv-nav {
@@ -1005,6 +1231,15 @@
   .checkin-summary-bar {
     flex-direction: column;
     gap: 0.4rem;
+  }
+
+  .checkin-inline-damage {
+    flex-direction: column;
+    padding-left: 0.75rem;
+  }
+
+  .inv-tabs {
+    overflow-x: auto;
   }
 }
 

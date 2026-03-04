@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Folder, Calendar, Users, ChevronRight } from 'lucide-react';
+import { Folder, Calendar, Users, ChevronRight, AlertTriangle } from 'lucide-react';
 import type { InventoryProject } from '../../types';
 
 interface Props {
   project: InventoryProject;
   itemCount: number;
+  missingCount?: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -21,14 +22,22 @@ const statusClasses: Record<string, string> = {
   archived: 'status-archived',
 };
 
-export default function ProjectCard({ project, itemCount }: Props) {
+export default function ProjectCard({ project, itemCount, missingCount = 0 }: Props) {
   return (
     <Link to={`/inventory/project/${project.id}`} className="project-card">
       <div className="project-card-header">
         <Folder size={20} />
-        <span className={`project-status-badge ${statusClasses[project.status]}`}>
-          {statusLabels[project.status]}
-        </span>
+        <div className="project-card-badges">
+          {missingCount > 0 && (
+            <span className="project-missing-badge">
+              <AlertTriangle size={12} />
+              {missingCount} missing
+            </span>
+          )}
+          <span className={`project-status-badge ${statusClasses[project.status]}`}>
+            {statusLabels[project.status]}
+          </span>
+        </div>
       </div>
       <h3 className="project-card-name">{project.name}</h3>
       <div className="project-card-meta">

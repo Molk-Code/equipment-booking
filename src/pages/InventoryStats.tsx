@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
@@ -7,11 +7,12 @@ import { useInventory } from '../context/InventoryContext';
 
 export default function InventoryStats() {
   const navigate = useNavigate();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getCheckedOutEquipment, projects } = useInventory();
-  const [activeTab, setActiveTab] = useState<'overview' | 'equipment' | 'damaged'>('overview');
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects } = useInventory();
+  const [activeTab, setActiveTab] = useState<'overview' | 'equipment' | 'damaged' | 'missing'>('overview');
 
   const mostBorrowed = getMostBorrowed();
   const damaged = getDamagedItems();
+  const missingItems = getMissingItems();
   const checkedOut = getCheckedOutEquipment();
 
   return (
@@ -51,6 +52,15 @@ export default function InventoryStats() {
               <span className="inv-stat-label">Damaged Items</span>
             </div>
           </div>
+          {missingItems.length > 0 && (
+            <div className="inv-stat-card danger">
+              <XCircle size={20} />
+              <div>
+                <span className="inv-stat-value">{missingItems.length}</span>
+                <span className="inv-stat-label">Missing Items</span>
+              </div>
+            </div>
+          )}
           <div className="inv-stat-card">
             <BarChart3 size={20} />
             <div>
@@ -79,6 +89,12 @@ export default function InventoryStats() {
             onClick={() => setActiveTab('damaged')}
           >
             Damaged Items ({damaged.length})
+          </button>
+          <button
+            className={`inv-tab ${activeTab === 'missing' ? 'active' : ''}`}
+            onClick={() => setActiveTab('missing')}
+          >
+            Missing Items ({missingItems.length})
           </button>
         </div>
 
@@ -116,6 +132,7 @@ export default function InventoryStats() {
             <EquipmentStatusGrid
               equipment={allEquipment}
               checkedOut={checkedOut}
+              missingItems={missingItems}
             />
           </section>
         )}
@@ -140,6 +157,32 @@ export default function InventoryStats() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === 'missing' && (
+          <section className="inv-section">
+            <h3 className="inv-section-title">
+              <XCircle size={18} />
+              Missing Items
+            </h3>
+            {missingItems.length === 0 ? (
+              <div className="inv-empty">No missing items. All equipment accounted for.</div>
+            ) : (
+              <div className="missing-items-list">
+                <p className="missing-items-info">
+                  Items marked as missing after check-in. If an item is checked out again in a new project, it is automatically removed from this list.
+                </p>
+                {missingItems.map((mi, i) => (
+                  <div key={i} className="missing-item-row">
+                    <XCircle size={16} className="missing-item-icon" />
+                    <span className="missing-item-name">{mi.item.equipmentName}</span>
+                    <span className="missing-item-project">{mi.project.name}</span>
+                    <span className="missing-item-date">Since {mi.item.checkoutTimestamp.split(' ')[0]}</span>
+                  </div>
+                ))}
               </div>
             )}
           </section>

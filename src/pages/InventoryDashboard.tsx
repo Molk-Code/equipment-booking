@@ -1,17 +1,31 @@
 import { useState } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
 import { useInventory } from '../context/InventoryContext';
 
 export default function InventoryDashboard() {
-  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems } = useInventory();
+  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject } = useInventory();
   const [showArchived, setShowArchived] = useState(false);
 
   const active = getActiveProjects();
   const archived = getArchivedProjects();
   const checkedOut = getCheckedOutEquipment();
   const damaged = getDamagedItems();
+  const missingItems = getMissingItems();
+
+  const handleDeleteProject = (e: React.MouseEvent, projectId: string, projectName: string) => {
+    e.preventDefault(); // Prevent navigating to project detail
+    e.stopPropagation();
+    if (confirm(`Delete "${projectName}" and all its items? This cannot be undone.`)) {
+      deleteProject(projectId);
+    }
+  };
+
+  // Get missing item count per project
+  const getMissingCountForProject = (projectId: string) => {
+    return getProjectItems(projectId).filter(i => i.status === 'missing').length;
+  };
 
   return (
     <div className="app">
@@ -40,6 +54,15 @@ export default function InventoryDashboard() {
               <span className="inv-stat-label">Damaged</span>
             </div>
           </div>
+          {missingItems.length > 0 && (
+            <div className="inv-stat-card danger">
+              <XCircle size={20} />
+              <div>
+                <span className="inv-stat-value">{missingItems.length}</span>
+                <span className="inv-stat-label">Missing</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Active Projects */}
@@ -103,11 +126,20 @@ export default function InventoryDashboard() {
             {showArchived && (
               <div className="project-grid">
                 {archived.map(p => (
-                  <ProjectCard
-                    key={p.id}
-                    project={p}
-                    itemCount={getProjectItems(p.id).length}
-                  />
+                  <div key={p.id} className="archived-project-wrapper">
+                    <ProjectCard
+                      project={p}
+                      itemCount={getProjectItems(p.id).length}
+                      missingCount={getMissingCountForProject(p.id)}
+                    />
+                    <button
+                      className="archived-delete-btn"
+                      onClick={(e) => handleDeleteProject(e, p.id, p.name)}
+                      title="Delete project"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}

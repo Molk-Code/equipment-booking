@@ -15,15 +15,18 @@ interface InventoryContextType {
 
   createProject: (data: { name: string; borrowers: string[]; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
   updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
+  deleteProject: (id: string) => void;
   startScanning: (projectId: string, mode: 'checkout' | 'checkin') => void;
   stopScanning: () => void;
   addItemFromScan: (projectId: string, scan: QRScanEntry) => Promise<void>;
+  removeProjectItem: (projectId: string, equipmentName: string, checkoutTimestamp: string) => void;
   updateItemStatus: (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string) => Promise<void>;
   markCheckinItem: (projectId: string, equipmentName: string, checkinTimestamp: string) => Promise<void>;
   getProjectItems: (projectId: string) => ProjectItem[];
   getActiveProjects: () => InventoryProject[];
   getArchivedProjects: () => InventoryProject[];
   getDamagedItems: () => ProjectItem[];
+  getMissingItems: () => { item: ProjectItem; project: InventoryProject }[];
   getMostBorrowed: () => { name: string; count: number }[];
   getCheckedOutEquipment: () => { item: ProjectItem; project: InventoryProject }[];
   loadEquipment: () => Promise<void>;
@@ -92,6 +95,13 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     await api.updateProjectStatus(id, status);
   }, []);
 
+  // Delete a project and all its items
+  const deleteProjectFn = useCallback((id: string) => {
+    setProjects(prev => prev.filter(p => p.id !== id));
+    setProjectItems(prev => prev.filter(i => i.projectId !== id));
+    api.deleteProject(id);
+  }, []);
+
   const startScanning = useCallback((projectId: string, mode: 'checkout' | 'checkin') => {
     // Build set of known scans
     const known = new Set<string>();
@@ -141,6 +151,18 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Remove a single item from a project (for correcting scan errors)
+  const removeProjectItemFn = useCallback((projectId: string, equipmentName: string, checkoutTimestamp: string) => {
+    setProjectItems(prev => prev.filter(i =>
+      !(i.projectId === projectId && i.equipmentName === equipmentName && i.checkoutTimestamp === checkoutTimestamp)
+    ));
+    // Also remove from recent scans display
+    setRecentScans(prev => prev.filter(s =>
+      !(s.equipmentName === equipmentName && s.timestamp === checkoutTimestamp)
+    ));
+    api.removeProjectItem(projectId, equipmentName, checkoutTimestamp);
+  }, []);
+
   const markCheckinItem = useCallback(async (projectId: string, equipmentName: string, checkinTimestamp: string) => {
     setProjectItems(prev => prev.map(i =>
       i.projectId === projectId && i.equipmentName === equipmentName && !i.checkinTimestamp
@@ -175,6 +197,28 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     return projectItems.filter(i => i.status === 'damaged');
   }, [projectItems]);
 
+  // Get missing items — items marked 'missing' that haven't been checked out again in a newer project
+  const getMissingItems = useCallback(() => {
+    const missingItems = projectItems.filter(i => i.status === 'missing');
+    // Check if any missing item was later checked out in another project (meaning it came back)
+    return missingItems
+      .filter(missingItem => {
+        const laterCheckouts = projectItems.filter(i =>
+          i.equipmentName === missingItem.equipmentName &&
+          i.projectId !== missingItem.projectId &&
+          i.status === 'checked-out' &&
+          i.checkoutTimestamp > missingItem.checkoutTimestamp
+        );
+        // If the item was checked out again later, it came back — not missing anymore
+        return laterCheckouts.length === 0;
+      })
+      .map(item => ({
+        item,
+        project: projects.find(p => p.id === item.projectId)!,
+      }))
+      .filter(x => x.project);
+  }, [projects, projectItems]);
+
   const getMostBorrowed = useCallback(() => {
     const counts: Record<string, number> = {};
     projectItems.forEach(i => {
@@ -204,10 +248,13 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       loadEquipment,
       createProject: createProjectFn,
       updateProjectStatus: updateProjectStatusFn,
+      deleteProject: deleteProjectFn,
       startScanning, stopScanning,
-      addItemFromScan, updateItemStatus: updateItemStatusFn, markCheckinItem,
+      addItemFromScan,
+      removeProjectItem: removeProjectItemFn,
+      updateItemStatus: updateItemStatusFn, markCheckinItem,
       getProjectItems, getActiveProjects, getArchivedProjects,
-      getDamagedItems, getMostBorrowed, getCheckedOutEquipment,
+      getDamagedItems, getMissingItems, getMostBorrowed, getCheckedOutEquipment,
     }}>
       {children}
     </InventoryContext.Provider>

@@ -11,6 +11,8 @@ interface Props {
 
 export default function CheckinComparison({ checkoutItems, checkinScans, onMarkDamaged }: Props) {
   const [damageModal, setDamageModal] = useState<string | null>(null);
+  const [inlineDamage, setInlineDamage] = useState<Record<string, string>>({});
+  const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
 
   // Build a set of returned equipment names
   const returnedNames = new Set(checkinScans.map(s => s.equipmentName));
@@ -20,6 +22,15 @@ export default function CheckinComparison({ checkoutItems, checkinScans, onMarkD
   const missing = checkoutItems.filter(i =>
     !returnedNames.has(i.equipmentName) && i.status !== 'returned' && i.status !== 'damaged'
   );
+
+  const handleInlineDamageSave = (equipmentName: string) => {
+    const notes = inlineDamage[equipmentName]?.trim();
+    if (notes) {
+      onMarkDamaged(equipmentName, notes);
+      setShowDamageInput(prev => ({ ...prev, [equipmentName]: false }));
+      setInlineDamage(prev => ({ ...prev, [equipmentName]: '' }));
+    }
+  };
 
   return (
     <div className="checkin-comparison">
@@ -40,32 +51,63 @@ export default function CheckinComparison({ checkoutItems, checkinScans, onMarkD
           const isReturned = returnedNames.has(item.equipmentName) || item.status === 'returned';
           const isDamaged = item.status === 'damaged';
           const isMissing = !isReturned && !isDamaged;
+          const showInput = showDamageInput[item.equipmentName];
 
           return (
-            <div
-              key={`${item.equipmentName}-${i}`}
-              className={`checkin-item ${isReturned ? 'item-returned' : ''} ${isDamaged ? 'item-damaged' : ''} ${isMissing ? 'item-missing' : ''}`}
-            >
-              <div className="checkin-item-icon">
-                {isDamaged ? <AlertTriangle size={18} /> :
-                 isReturned ? <CheckCircle size={18} /> :
-                 <XCircle size={18} />}
-              </div>
-              <div className="checkin-item-info">
-                <span className="checkin-item-name">{item.equipmentName}</span>
-                {isDamaged && item.damageNotes && (
-                  <span className="checkin-item-damage">{item.damageNotes}</span>
+            <div key={`${item.equipmentName}-${i}`}>
+              <div
+                className={`checkin-item ${isReturned ? 'item-returned' : ''} ${isDamaged ? 'item-damaged' : ''} ${isMissing ? 'item-missing' : ''}`}
+              >
+                <div className="checkin-item-icon">
+                  {isDamaged ? <AlertTriangle size={18} /> :
+                   isReturned ? <CheckCircle size={18} /> :
+                   <XCircle size={18} />}
+                </div>
+                <div className="checkin-item-info">
+                  <span className="checkin-item-name">{item.equipmentName}</span>
+                  {isDamaged && item.damageNotes && (
+                    <span className="checkin-item-damage">{item.damageNotes}</span>
+                  )}
+                  {isMissing && <span className="checkin-item-status">MISSING</span>}
+                </div>
+                {!isDamaged && isReturned && (
+                  <button
+                    className="checkin-damage-btn"
+                    onClick={() => {
+                      setShowDamageInput(prev => ({
+                        ...prev,
+                        [item.equipmentName]: !prev[item.equipmentName]
+                      }));
+                    }}
+                    title="Report damage"
+                  >
+                    <Wrench size={14} />
+                  </button>
                 )}
-                {isMissing && <span className="checkin-item-status">MISSING</span>}
               </div>
-              {!isDamaged && isReturned && (
-                <button
-                  className="checkin-damage-btn"
-                  onClick={() => setDamageModal(item.equipmentName)}
-                  title="Report damage"
-                >
-                  <Wrench size={14} />
-                </button>
+              {/* Inline damage description input for returned items */}
+              {showInput && isReturned && !isDamaged && (
+                <div className="checkin-inline-damage">
+                  <input
+                    type="text"
+                    className="checkin-damage-input"
+                    placeholder="Describe the damage..."
+                    value={inlineDamage[item.equipmentName] || ''}
+                    onChange={e => setInlineDamage(prev => ({ ...prev, [item.equipmentName]: e.target.value }))}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleInlineDamageSave(item.equipmentName);
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    className="checkin-damage-save-btn"
+                    onClick={() => handleInlineDamageSave(item.equipmentName)}
+                    disabled={!inlineDamage[item.equipmentName]?.trim()}
+                  >
+                    <AlertTriangle size={14} />
+                    Mark Damaged
+                  </button>
+                </div>
               )}
             </div>
           );

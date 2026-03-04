@@ -67,6 +67,14 @@ export async function updateProjectStatus(
   }
 }
 
+// Delete a project and all its items from localStorage
+export function deleteProject(projectId: string): void {
+  const projects = readProjects();
+  writeProjects(projects.filter(p => p.id !== projectId));
+  const items = readItems();
+  writeItems(items.filter(i => i.projectId !== projectId));
+}
+
 export async function addProjectItem(item: {
   projectId: string;
   equipmentName: string;
@@ -82,6 +90,18 @@ export async function addProjectItem(item: {
     damageNotes: '',
   });
   writeItems(items);
+}
+
+// Remove a single item from a project (for correcting scan errors)
+export function removeProjectItem(
+  projectId: string,
+  equipmentName: string,
+  checkoutTimestamp: string
+): void {
+  const items = readItems();
+  writeItems(items.filter(i =>
+    !(i.projectId === projectId && i.equipmentName === equipmentName && i.checkoutTimestamp === checkoutTimestamp)
+  ));
 }
 
 export async function updateProjectItem(

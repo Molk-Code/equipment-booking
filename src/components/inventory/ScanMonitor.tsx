@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Radio, Package, StopCircle } from 'lucide-react';
+import { Radio, Package, StopCircle, Trash2 } from 'lucide-react';
 import type { QRScanEntry } from '../../types';
 
 interface Props {
@@ -7,9 +7,10 @@ interface Props {
   recentScans: QRScanEntry[];
   mode: 'checkout' | 'checkin';
   onStop: () => void;
+  onRemoveScan?: (equipmentName: string, timestamp: string) => void;
 }
 
-export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: Props) {
+export default function ScanMonitor({ isScanning, recentScans, mode, onStop, onRemoveScan }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Play beep on new scan
@@ -67,6 +68,15 @@ export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: P
               <Package size={16} />
               <span className="scan-entry-name">{scan.equipmentName}</span>
               <span className="scan-entry-time">{scan.timestamp}</span>
+              {onRemoveScan && (
+                <button
+                  className="scan-remove-btn"
+                  onClick={() => onRemoveScan(scan.equipmentName, scan.timestamp)}
+                  title="Remove this item"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
           ))}
         </div>

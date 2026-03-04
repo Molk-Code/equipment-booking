@@ -50,6 +50,7 @@ function parseCSV(csv: string): string[][] {
 
 // Fetch scans from Equipment Contract tab (gid=1545651444)
 // Rows 1-10 are header, scans start from row 11
+// Supports both QR-scanned rows (timestamp + name) and manually added rows (any text + name)
 export async function fetchContractScans(): Promise<QRScanEntry[]> {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${CONTRACT_GID}`;
   const response = await fetch(url);
@@ -60,10 +61,17 @@ export async function fetchContractScans(): Promise<QRScanEntry[]> {
   const scans: QRScanEntry[] = [];
   // Skip header rows (first 10 rows = indices 0-9), start from index 10
   for (let i = 10; i < rows.length; i++) {
-    const timestamp = (rows[i][0] || '').trim();
-    const name = (rows[i][1] || '').trim();
-    if (timestamp && name) {
-      scans.push({ timestamp, equipmentName: name });
+    const col0 = (rows[i][0] || '').trim();
+    const col1 = (rows[i][1] || '').trim();
+
+    // Accept any row that has content in column B (equipment name)
+    // Column A can be a QR timestamp, a manual date, or any identifier text
+    if (col1) {
+      const timestamp = col0 || `manual_row_${i}`;
+      scans.push({ timestamp, equipmentName: col1 });
+    } else if (col0 && !col1) {
+      // If only column A has content, treat it as equipment name (single-column manual entry)
+      scans.push({ timestamp: `manual_row_${i}`, equipmentName: col0 });
     }
   }
   return scans;
