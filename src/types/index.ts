@@ -25,3 +25,33 @@ export interface CheckoutInfo {
 }
 
 export type Category = 'ALL' | 'CAMERA' | 'GRIP' | 'LIGHTS' | 'SOUND' | 'LOCATION' | 'BOOKS';
+
+// ---- Inventory System Types ----
+
+export type ProjectStatus = 'active' | 'checked-out' | 'returned' | 'archived';
+export type ItemStatus = 'checked-out' | 'returned' | 'damaged' | 'missing';
+
+export interface InventoryProject {
+  id: string;
+  name: string;
+  borrowers: string[];
+  checkoutDate: string;
+  returnDate: string;
+  status: ProjectStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectItem {
+  projectId: string;
+  equipmentName: string;
+  checkoutTimestamp: string;
+  checkinTimestamp: string;
+  status: ItemStatus;
+  damageNotes: string;
+}
+
+export interface QRScanEntry {
+  timestamp: string;
+  equipmentName: string;
+}
