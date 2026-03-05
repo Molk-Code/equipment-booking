@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, Circle, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { Equipment, ProjectItem, InventoryProject } from '../../types';
 
 interface Props {
@@ -65,15 +66,15 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
               </span>
               <span className="equip-grid-project">
                 {co ? (
-                  <>
+                  <Link to={`/inventory/project/${co.project.id}`} className="clickable-project">
                     {co.project.name}
                     <ArrowUpRight size={12} />
-                  </>
+                  </Link>
                 ) : mi ? (
-                  <>
+                  <Link to={`/inventory/project/${mi.project.id}`} className="clickable-project">
                     {mi.project.name}
                     <ArrowUpRight size={12} />
-                  </>
+                  </Link>
                 ) : '—'}
               </span>
             </div>

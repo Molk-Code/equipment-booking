@@ -51,6 +51,7 @@ function parseCSV(csv: string): string[][] {
 // Fetch scans from Equipment Contract tab (gid=1545651444)
 // Rows 1-10 are header, scans start from row 11
 // Supports both QR-scanned rows (timestamp + name) and manually added rows (any text + name)
+// Skips rows where col0 is "sign" (empty sheet state after reset)
 export async function fetchContractScans(): Promise<QRScanEntry[]> {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${CONTRACT_GID}`;
   const response = await fetch(url);
@@ -63,6 +64,9 @@ export async function fetchContractScans(): Promise<QRScanEntry[]> {
   for (let i = 10; i < rows.length; i++) {
     const col0 = (rows[i][0] || '').trim();
     const col1 = (rows[i][1] || '').trim();
+
+    // Skip rows where col0 is "sign" (empty sheet after reset)
+    if (col0.toLowerCase() === 'sign') continue;
 
     // Accept any row that has content in column B (equipment name)
     // Column A can be a QR timestamp, a manual date, or any identifier text
@@ -77,21 +81,45 @@ export async function fetchContractScans(): Promise<QRScanEntry[]> {
   return scans;
 }
 
-// Poll for new scans at 3-second intervals
+// Poll for scan changes at 3-second intervals
+// Detects both additions and removals from Google Sheets
 export function startScanPolling(
   onNewScans: (scans: QRScanEntry[]) => void,
+  onRemovedScans: (scans: QRScanEntry[]) => void,
   knownScans: Set<string>
 ): () => void {
   const timer = setInterval(async () => {
     try {
       const allScans = await fetchContractScans();
+
+      // Build set of current scan keys
+      const currentKeys = new Set(allScans.map(s => `${s.timestamp}|${s.equipmentName}`));
+
+      // Detect new scans (in sheets but not in known)
       const newScans = allScans.filter(s => {
         const key = `${s.timestamp}|${s.equipmentName}`;
         return !knownScans.has(key);
       });
+
+      // Detect removed scans (in known but no longer in sheets)
+      const removedScans: QRScanEntry[] = [];
+      knownScans.forEach(key => {
+        if (!currentKeys.has(key)) {
+          const [timestamp, ...nameParts] = key.split('|');
+          const equipmentName = nameParts.join('|');
+          removedScans.push({ timestamp, equipmentName });
+        }
+      });
+
+      // Update known scans set to match current state
       if (newScans.length > 0) {
         newScans.forEach(s => knownScans.add(`${s.timestamp}|${s.equipmentName}`));
         onNewScans(newScans);
+      }
+
+      if (removedScans.length > 0) {
+        removedScans.forEach(s => knownScans.delete(`${s.timestamp}|${s.equipmentName}`));
+        onRemovedScans(removedScans);
       }
     } catch {
       // silently retry

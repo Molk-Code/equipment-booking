@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Radio, RotateCcw, FileText, Archive,
-  Calendar, Users, Package, Download, AlertTriangle, Trash2
+  Calendar, Users, Package, Download, AlertTriangle
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
@@ -18,7 +18,6 @@ export default function ProjectDetail() {
     projects, isScanning, scanMode, recentScans,
     getProjectItems, startScanning, stopScanning,
     addItemFromScan, updateProjectStatus, updateItemStatus,
-    removeProjectItem,
   } = useInventory();
 
   const [checkinScans, setCheckinScans] = useState<QRScanEntry[]>([]);
@@ -83,18 +82,6 @@ export default function ProjectDetail() {
       updateItemStatus(projectId, equipmentName, 'damaged', notes);
     }
   }, [projectId, updateItemStatus]);
-
-  const handleRemoveScan = useCallback((equipmentName: string, timestamp: string) => {
-    if (projectId) {
-      removeProjectItem(projectId, equipmentName, timestamp);
-    }
-  }, [projectId, removeProjectItem]);
-
-  const handleRemoveItem = useCallback((equipmentName: string, checkoutTimestamp: string) => {
-    if (projectId && confirm(`Remove "${equipmentName}" from this project?`)) {
-      removeProjectItem(projectId, equipmentName, checkoutTimestamp);
-    }
-  }, [projectId, removeProjectItem]);
 
   const handleCompleteCheckin = useCallback(() => {
     if (!projectId) return;
@@ -215,7 +202,6 @@ export default function ProjectDetail() {
             recentScans={recentScans}
             mode={scanMode || 'checkout'}
             onStop={handleStopScanning}
-            onRemoveScan={handleRemoveScan}
           />
         )}
 
@@ -257,15 +243,6 @@ export default function ProjectDetail() {
                   <span className={`project-item-status item-status-${item.status}`}>
                     {item.status}
                   </span>
-                  {!isArchived && (
-                    <button
-                      className="project-item-remove-btn"
-                      onClick={() => handleRemoveItem(item.equipmentName, item.checkoutTimestamp)}
-                      title="Remove item"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
                 </div>
               ))}
             </div>

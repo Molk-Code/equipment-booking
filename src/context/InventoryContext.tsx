@@ -102,14 +102,11 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     api.deleteProject(id);
   }, []);
 
+  const [scanningProjectId, setScanningProjectId] = useState<string | null>(null);
+
   const startScanning = useCallback((projectId: string, mode: 'checkout' | 'checkin') => {
-    // Build set of known scans
+    // Build set of known scans from what's currently in sheets
     const known = new Set<string>();
-    const existingScans = projectItems.filter(i => i.projectId === projectId);
-    existingScans.forEach(i => {
-      if (i.checkoutTimestamp) known.add(`${i.checkoutTimestamp}|${i.equipmentName}`);
-      if (i.checkinTimestamp) known.add(`${i.checkinTimestamp}|${i.equipmentName}`);
-    });
 
     // Mark all currently known contract scans as known to only catch new ones
     fetchContractScans().then(scans => {
@@ -118,14 +115,34 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
     setIsScanning(true);
     setScanMode(mode);
+    setScanningProjectId(projectId);
     setRecentScans([]);
 
-    const stop = startScanPolling((newScans) => {
-      setRecentScans(prev => [...newScans, ...prev]);
-    }, known);
+    const stop = startScanPolling(
+      // On new scans added to sheets
+      (newScans) => {
+        setRecentScans(prev => [...newScans, ...prev]);
+      },
+      // On scans removed from sheets
+      (removedScans) => {
+        // Remove from recent scans display
+        setRecentScans(prev => prev.filter(s => {
+          const key = `${s.timestamp}|${s.equipmentName}`;
+          return !removedScans.some(r => `${r.timestamp}|${r.equipmentName}` === key);
+        }));
+        // Remove from project items
+        removedScans.forEach(removed => {
+          setProjectItems(prevItems => prevItems.filter(i =>
+            !(i.projectId === projectId && i.equipmentName === removed.equipmentName && i.checkoutTimestamp === removed.timestamp)
+          ));
+          api.removeProjectItem(projectId, removed.equipmentName, removed.timestamp);
+        });
+      },
+      known
+    );
 
     setStopPoll(() => stop);
-  }, [projectItems]);
+  }, []);
 
   const stopScanning = useCallback(() => {
     if (stopPoll) stopPoll();

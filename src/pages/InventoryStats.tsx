@@ -1,14 +1,26 @@
-import { useState } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2 } from 'lucide-react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
 import { useInventory } from '../context/InventoryContext';
 
+type TabType = 'overview' | 'equipment' | 'damaged' | 'missing';
+
 export default function InventoryStats() {
   const navigate = useNavigate();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects } = useInventory();
-  const [activeTab, setActiveTab] = useState<'overview' | 'equipment' | 'damaged' | 'missing'>('overview');
+  const [searchParams] = useSearchParams();
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, updateItemStatus } = useInventory();
+  const initialTab = (searchParams.get('tab') as TabType) || 'overview';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // Sync tab with URL param when it changes
+  useEffect(() => {
+    const tab = searchParams.get('tab') as TabType;
+    if (tab && ['overview', 'equipment', 'damaged', 'missing'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const mostBorrowed = getMostBorrowed();
   const damaged = getDamagedItems();
@@ -152,7 +164,13 @@ export default function InventoryStats() {
                   return (
                     <div key={i} className="damaged-item-row">
                       <span className="damaged-item-name">{item.equipmentName}</span>
-                      <span className="damaged-item-project">{project?.name || 'Unknown'}</span>
+                      {project ? (
+                        <Link to={`/inventory/project/${project.id}`} className="damaged-item-project clickable-project">
+                          {project.name}
+                        </Link>
+                      ) : (
+                        <span className="damaged-item-project">Unknown</span>
+                      )}
                       <span className="damaged-item-notes">{item.damageNotes || 'No details'}</span>
                     </div>
                   );
@@ -179,8 +197,21 @@ export default function InventoryStats() {
                   <div key={i} className="missing-item-row">
                     <XCircle size={16} className="missing-item-icon" />
                     <span className="missing-item-name">{mi.item.equipmentName}</span>
-                    <span className="missing-item-project">{mi.project.name}</span>
+                    <Link to={`/inventory/project/${mi.project.id}`} className="missing-item-project clickable-project">
+                      {mi.project.name}
+                    </Link>
                     <span className="missing-item-date">Since {mi.item.checkoutTimestamp.split(' ')[0]}</span>
+                    <button
+                      className="missing-item-remove-btn"
+                      onClick={() => {
+                        if (confirm(`Mark "${mi.item.equipmentName}" as returned/found?`)) {
+                          updateItemStatus(mi.item.projectId, mi.item.equipmentName, 'returned');
+                        }
+                      }}
+                      title="Mark as found/returned"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 ))}
               </div>

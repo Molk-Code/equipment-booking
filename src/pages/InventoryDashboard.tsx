@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
 import { useInventory } from '../context/InventoryContext';
 
 export default function InventoryDashboard() {
+  const navigate = useNavigate();
   const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject } = useInventory();
   const [showArchived, setShowArchived] = useState(false);
 
@@ -40,14 +42,14 @@ export default function InventoryDashboard() {
               <span className="inv-stat-label">Active Projects</span>
             </div>
           </div>
-          <div className="inv-stat-card">
+          <div className="inv-stat-card clickable" onClick={() => navigate('/inventory/stats?tab=equipment')}>
             <Package size={20} />
             <div>
               <span className="inv-stat-value">{checkedOut.length}</span>
               <span className="inv-stat-label">Items Out</span>
             </div>
           </div>
-          <div className="inv-stat-card warning">
+          <div className="inv-stat-card warning clickable" onClick={() => navigate('/inventory/stats?tab=damaged')}>
             <AlertTriangle size={20} />
             <div>
               <span className="inv-stat-value">{damaged.length}</span>
@@ -55,7 +57,7 @@ export default function InventoryDashboard() {
             </div>
           </div>
           {missingItems.length > 0 && (
-            <div className="inv-stat-card danger">
+            <div className="inv-stat-card danger clickable" onClick={() => navigate('/inventory/stats?tab=missing')}>
               <XCircle size={20} />
               <div>
                 <span className="inv-stat-value">{missingItems.length}</span>
@@ -78,11 +80,19 @@ export default function InventoryDashboard() {
           ) : (
             <div className="project-grid">
               {active.map(p => (
-                <ProjectCard
-                  key={p.id}
-                  project={p}
-                  itemCount={getProjectItems(p.id).length}
-                />
+                <div key={p.id} className="archived-project-wrapper">
+                  <ProjectCard
+                    project={p}
+                    itemCount={getProjectItems(p.id).length}
+                  />
+                  <button
+                    className="archived-delete-btn"
+                    onClick={(e) => handleDeleteProject(e, p.id, p.name)}
+                    title="Delete project"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
             </div>
           )}
