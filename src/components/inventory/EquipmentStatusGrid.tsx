@@ -12,6 +12,17 @@ interface Props {
 export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [] }: Props) {
   const [search, setSearch] = useState('');
 
+  // Expand equipment with quantity > 1 into individual instances (#1, #2, etc.)
+  const expandedEquipment = equipment.flatMap(eq => {
+    const qty = eq.available || 1;
+    if (qty <= 1) return [eq];
+    return Array.from({ length: qty }, (_, i) => ({
+      ...eq,
+      id: eq.id * 1000 + i + 1, // unique id per instance
+      name: `${eq.name} #${i + 1}`,
+    }));
+  });
+
   // Build lookup: equipment name -> checked-out info
   const checkedOutMap = new Map<string, { item: ProjectItem; project: InventoryProject }>();
   checkedOut.forEach(co => {
@@ -24,7 +35,7 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     missingMap.set(mi.item.equipmentName.toLowerCase(), mi);
   });
 
-  const filtered = equipment.filter(e =>
+  const filtered = expandedEquipment.filter(e =>
     !search || e.name.toLowerCase().includes(search.toLowerCase()) ||
     e.category.toLowerCase().includes(search.toLowerCase())
   );

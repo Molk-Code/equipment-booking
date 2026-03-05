@@ -49,7 +49,7 @@ function parseCSV(csv: string): string[][] {
 }
 
 // Fetch scans from Equipment Contract tab (gid=1545651444)
-// Rows 1-10 are header, scans start from row 11
+// Rows 1-9 are header, scans start from row 10
 // Supports both QR-scanned rows (timestamp + name) and manually added rows (any text + name)
 // Skips rows where col0 is "sign" (empty sheet state after reset)
 export async function fetchContractScans(): Promise<QRScanEntry[]> {
@@ -60,8 +60,8 @@ export async function fetchContractScans(): Promise<QRScanEntry[]> {
   const rows = parseCSV(csv);
 
   const scans: QRScanEntry[] = [];
-  // Skip header rows (first 10 rows = indices 0-9), start from index 10
-  for (let i = 10; i < rows.length; i++) {
+  // Skip header rows (first 9 rows = indices 0-8), start from index 9 (row 10)
+  for (let i = 9; i < rows.length; i++) {
     const col0 = (rows[i][0] || '').trim();
     const col1 = (rows[i][1] || '').trim();
 

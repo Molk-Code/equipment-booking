@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2 } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
@@ -43,21 +43,21 @@ export default function InventoryStats() {
 
         {/* Stats Overview */}
         <div className="inv-stats-row">
-          <div className="inv-stat-card">
+          <div className="inv-stat-card clickable" onClick={() => setActiveTab('equipment')}>
             <Package size={20} />
             <div>
               <span className="inv-stat-value">{allEquipment.length}</span>
               <span className="inv-stat-label">Total Equipment</span>
             </div>
           </div>
-          <div className="inv-stat-card">
+          <div className="inv-stat-card clickable" onClick={() => setActiveTab('equipment')}>
             <TrendingUp size={20} />
             <div>
               <span className="inv-stat-value">{checkedOut.length}</span>
               <span className="inv-stat-label">Currently Out</span>
             </div>
           </div>
-          <div className="inv-stat-card warning">
+          <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('damaged')}>
             <AlertTriangle size={20} />
             <div>
               <span className="inv-stat-value">{damaged.length}</span>
@@ -65,7 +65,7 @@ export default function InventoryStats() {
             </div>
           </div>
           {missingItems.length > 0 && (
-            <div className="inv-stat-card danger">
+            <div className="inv-stat-card danger clickable" onClick={() => setActiveTab('missing')}>
               <XCircle size={20} />
               <div>
                 <span className="inv-stat-value">{missingItems.length}</span>
@@ -73,7 +73,7 @@ export default function InventoryStats() {
               </div>
             </div>
           )}
-          <div className="inv-stat-card">
+          <div className="inv-stat-card clickable" onClick={() => setActiveTab('overview')}>
             <BarChart3 size={20} />
             <div>
               <span className="inv-stat-value">{projects.length}</span>
@@ -172,6 +172,17 @@ export default function InventoryStats() {
                         <span className="damaged-item-project">Unknown</span>
                       )}
                       <span className="damaged-item-notes">{item.damageNotes || 'No details'}</span>
+                      <button
+                        className="missing-item-remove-btn"
+                        onClick={() => {
+                          if (confirm(`Mark "${item.equipmentName}" as returned (remove from damaged)?`)) {
+                            updateItemStatus(item.projectId, item.equipmentName, 'returned');
+                          }
+                        }}
+                        title="Mark as resolved/returned"
+                      >
+                        <CheckCircle size={14} />
+                      </button>
                     </div>
                   );
                 })}
