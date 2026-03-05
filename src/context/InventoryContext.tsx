@@ -102,8 +102,6 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     api.deleteProject(id);
   }, []);
 
-  const [scanningProjectId, setScanningProjectId] = useState<string | null>(null);
-
   const startScanning = useCallback((projectId: string, mode: 'checkout' | 'checkin') => {
     // Build set of known scans from what's currently in sheets
     const known = new Set<string>();
@@ -115,7 +113,6 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
     setIsScanning(true);
     setScanMode(mode);
-    setScanningProjectId(projectId);
     setRecentScans([]);
 
     const stop = startScanPolling(
