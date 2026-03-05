@@ -1229,6 +1229,156 @@
   color: var(--accent);
 }
 
+/* ===== Manual Add Section (Checkout) ===== */
+.manual-add-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.manual-add-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.manual-add-input {
+  flex: 1;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  transition: border-color var(--transition);
+}
+
+.manual-add-input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.manual-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 1rem;
+  background: var(--accent);
+  color: #000;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.manual-add-btn:hover:not(:disabled) {
+  background: #5ce06f;
+}
+
+.manual-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== Return Summary Bar ===== */
+.return-summary-bar {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+}
+
+.return-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.return-stat.returned { color: var(--accent); }
+.return-stat.checked-out { color: #4da6ff; }
+.return-stat.missing { color: var(--danger); }
+
+/* ===== Item Action Buttons (Return/Damage/Missing) ===== */
+.item-action-btns {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.item-return-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--accent);
+  transition: all var(--transition);
+}
+
+.item-return-btn:hover {
+  background: rgba(76, 217, 100, 0.15);
+  transform: scale(1.1);
+}
+
+.item-damage-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.item-damage-toggle-btn:hover {
+  background: rgba(255, 165, 2, 0.15);
+  color: var(--warning);
+}
+
+.item-missing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.item-missing-btn:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
+.item-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.item-remove-btn:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
 /* ===== Equipment Status Grid — Missing ===== */
 .equip-grid-row.row-missing {
   background: rgba(255, 71, 87, 0.06);
@@ -1286,7 +1436,8 @@
     flex-direction: column;
   }
 
-  .checkin-summary-bar {
+  .checkin-summary-bar,
+  .return-summary-bar {
     flex-direction: column;
     gap: 0.4rem;
   }
@@ -1294,6 +1445,10 @@
   .checkin-inline-damage {
     flex-direction: column;
     padding-left: 0.75rem;
+  }
+
+  .manual-add-row {
+    flex-direction: column;
   }
 
   .inv-tabs {
