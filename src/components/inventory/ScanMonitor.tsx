@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Radio, Package, StopCircle } from 'lucide-react';
+import { Radio, Package, CheckCircle } from 'lucide-react';
 import type { QRScanEntry } from '../../types';
 
 interface Props {
@@ -46,12 +46,6 @@ export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: P
               : 'Scanning Stopped'}
           </span>
         </div>
-        {isScanning && (
-          <button className="scan-stop-btn" onClick={onStop}>
-            <StopCircle size={16} />
-            Done Scanning
-          </button>
-        )}
       </div>
 
       {isScanning && recentScans.length === 0 && (
@@ -75,6 +69,13 @@ export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: P
       <div className="scan-count">
         {recentScans.length} {recentScans.length === 1 ? 'item' : 'items'} scanned
       </div>
+
+      {isScanning && (
+        <button className="scan-done-btn" onClick={onStop}>
+          <CheckCircle size={16} />
+          Done
+        </button>
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ export default function ProjectDetail() {
   const [manualItemName, setManualItemName] = useState('');
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
+  const [isAddingItems, setIsAddingItems] = useState(false);
 
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
@@ -50,11 +51,21 @@ export default function ProjectDetail() {
   }, [projectId, startScanning]);
 
   const handleStopScanning = useCallback(() => {
-    if (scanMode === 'checkout' && projectId) {
+    if (scanMode === 'checkout' && projectId && !isAddingItems) {
+      // Only update status on initial checkout, not when adding items later
       updateProjectStatus(projectId, 'checked-out');
     }
+    setIsAddingItems(false);
     stopScanning();
-  }, [scanMode, projectId, updateProjectStatus, stopScanning]);
+  }, [scanMode, projectId, isAddingItems, updateProjectStatus, stopScanning]);
+
+  // Start adding items to an already checked-out project
+  const handleStartAddItems = useCallback(() => {
+    if (projectId) {
+      setIsAddingItems(true);
+      startScanning(projectId, 'checkout');
+    }
+  }, [projectId, startScanning]);
 
   // Manual item add during checkout
   const handleAddManualItem = useCallback(() => {
@@ -184,10 +195,16 @@ export default function ProjectDetail() {
               </button>
             )}
             {isCheckedOut && (
-              <button className="secondary-btn" onClick={() => handleDownloadPDF('checkout')}>
-                <Download size={16} />
-                Download Contract PDF
-              </button>
+              <>
+                <button className="primary-btn" onClick={handleStartAddItems}>
+                  <Plus size={16} />
+                  Add Items
+                </button>
+                <button className="secondary-btn" onClick={() => handleDownloadPDF('checkout')}>
+                  <Download size={16} />
+                  Download Contract PDF
+                </button>
+              </>
             )}
           </div>
         )}
