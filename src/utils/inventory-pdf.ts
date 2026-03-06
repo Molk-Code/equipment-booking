@@ -45,10 +45,6 @@ export function generateContractPDF(
   y += 6;
   doc.text(`Borrowers: ${project.borrowers.join(', ')}`, 20, y);
   y += 6;
-  if (project.equipmentManager) {
-    doc.text(`Equipment Manager: ${project.equipmentManager}`, 20, y);
-    y += 6;
-  }
   doc.text(`Checkout Date: ${project.checkoutDate}`, 20, y);
   y += 6;
   doc.text(`Return Date: ${project.returnDate}`, 20, y);

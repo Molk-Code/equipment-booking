@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
@@ -9,6 +9,8 @@ export default function InventoryDashboard() {
   const navigate = useNavigate();
   const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject } = useInventory();
   const [showArchived, setShowArchived] = useState(false);
+  const [importMsg, setImportMsg] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const active = getActiveProjects();
   const archived = getArchivedProjects();
@@ -22,6 +24,51 @@ export default function InventoryDashboard() {
     if (confirm(`Delete "${projectName}" and all its items? This cannot be undone.`)) {
       deleteProject(projectId);
     }
+  };
+
+  // Export all inventory data as JSON backup
+  const handleExportBackup = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      projects: JSON.parse(localStorage.getItem('inventory_projects') || '[]'),
+      items: JSON.parse(localStorage.getItem('inventory_items') || '[]'),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `molkom_inventory_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import backup from JSON file
+  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        if (!data.projects || !data.items) {
+          setImportMsg('Invalid backup file format.');
+          return;
+        }
+        if (!confirm(`This will replace ALL current data with the backup from ${data.exportedAt ? new Date(data.exportedAt).toLocaleDateString('sv-SE') : 'unknown date'}. Are you sure?`)) {
+          return;
+        }
+        localStorage.setItem('inventory_projects', JSON.stringify(data.projects));
+        localStorage.setItem('inventory_items', JSON.stringify(data.items));
+        setImportMsg('Backup restored! Reloading...');
+        setTimeout(() => window.location.reload(), 1000);
+      } catch {
+        setImportMsg('Failed to read backup file.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   // Get missing item count per project
@@ -155,6 +202,33 @@ export default function InventoryDashboard() {
             )}
           </section>
         )}
+        {/* Backup / Restore */}
+        <section className="inv-section" style={{ marginTop: '2rem' }}>
+          <h2 className="inv-section-title" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            Data Backup
+          </h2>
+          <div className="backup-actions">
+            <button className="secondary-btn" onClick={handleExportBackup}>
+              <Download size={14} />
+              Export Backup
+            </button>
+            <button className="secondary-btn" onClick={() => fileInputRef.current?.click()}>
+              <Upload size={14} />
+              Import Backup
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              style={{ display: 'none' }}
+              onChange={handleImportBackup}
+            />
+          </div>
+          {importMsg && <p className="backup-msg">{importMsg}</p>}
+          <p className="backup-hint">
+            Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
+          </p>
+        </section>
       </main>
     </div>
   );

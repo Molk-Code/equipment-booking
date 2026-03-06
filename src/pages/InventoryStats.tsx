@@ -13,6 +13,7 @@ export default function InventoryStats() {
   const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, updateItemStatus } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+  const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
 
   // Sync tab with URL param when it changes
   useEffect(() => {
@@ -171,7 +172,13 @@ export default function InventoryStats() {
                       ) : (
                         <span className="damaged-item-project">Unknown</span>
                       )}
-                      <span className="damaged-item-notes">{item.damageNotes || 'No details'}</span>
+                      <span
+                        className="damaged-item-notes clickable-note"
+                        onClick={() => setExpandedNote({ name: item.equipmentName, notes: item.damageNotes || 'No details' })}
+                        title="Click to read full note"
+                      >
+                        {item.damageNotes || 'No details'}
+                      </span>
                       <button
                         className="missing-item-remove-btn"
                         onClick={() => {
@@ -228,6 +235,23 @@ export default function InventoryStats() {
               </div>
             )}
           </section>
+        )}
+        {/* Note popup overlay */}
+        {expandedNote && (
+          <div className="note-popup-overlay" onClick={() => setExpandedNote(null)}>
+            <div className="note-popup" onClick={e => e.stopPropagation()}>
+              <div className="note-popup-header">
+                <h4>{expandedNote.name}</h4>
+                <button className="note-popup-close" onClick={() => setExpandedNote(null)}>
+                  <XCircle size={18} />
+                </button>
+              </div>
+              <div className="note-popup-body">
+                <p className="note-popup-label">Damage Report:</p>
+                <p className="note-popup-text">{expandedNote.notes}</p>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

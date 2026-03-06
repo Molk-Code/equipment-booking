@@ -24,6 +24,7 @@ export default function ProjectDetail() {
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
+  const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
 
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
@@ -274,6 +275,17 @@ export default function ProjectDetail() {
                       {item.status}
                     </span>
 
+                    {/* Damage notes indicator (clickable to expand) */}
+                    {item.damageNotes && (
+                      <span
+                        className="damaged-item-notes clickable-note"
+                        onClick={() => setExpandedNote({ name: item.equipmentName, notes: item.damageNotes })}
+                        title="Click to read damage report"
+                      >
+                        {item.damageNotes}
+                      </span>
+                    )}
+
                     {/* Action buttons for checked-out projects */}
                     {isCheckedOut && !isScanning && item.status === 'checked-out' && (
                       <div className="item-action-btns">
@@ -372,6 +384,23 @@ export default function ProjectDetail() {
               <FileText size={16} />
               Download Original Contract PDF
             </button>
+          </div>
+        )}
+        {/* Note popup overlay */}
+        {expandedNote && (
+          <div className="note-popup-overlay" onClick={() => setExpandedNote(null)}>
+            <div className="note-popup" onClick={e => e.stopPropagation()}>
+              <div className="note-popup-header">
+                <h4>{expandedNote.name}</h4>
+                <button className="note-popup-close" onClick={() => setExpandedNote(null)}>
+                  <XCircle size={18} />
+                </button>
+              </div>
+              <div className="note-popup-body">
+                <p className="note-popup-label">Damage Report:</p>
+                <p className="note-popup-text">{expandedNote.notes}</p>
+              </div>
+            </div>
           </div>
         )}
       </main>

@@ -24,6 +24,29 @@ function stripParenthetical(name: string): string {
   return name.replace(/\s*\(.*\)\s*$/, '').trim();
 }
 
+// Fuzzy normalize: strips dashes, special chars, colons for aggressive matching
+// e.g. "Bmpcc 6k- Kit #1" → "bmpcc 6k kit #1" and "Bmpcc 6k #1" → "bmpcc 6k #1"
+function fuzzyNormalize(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s*-\s*/g, ' ')       // normalize dashes with surrounding spaces
+    .replace(/[:\/\\+]/g, ' ')      // colons, slashes, plus → space
+    .replace(/[^\w\s()#.,&!]/g, '') // strip remaining special chars
+    .replace(/\s+/g, ' ')           // collapse whitespace
+    .trim();
+}
+
+// Extract core name: strip #N, parenthetical, and fuzzy normalize
+function coreName(name: string): string {
+  return fuzzyNormalize(stripInstanceNumber(stripParenthetical(name)));
+}
+
+// Extract instance number from a name, e.g. "Bmpcc 6k #2" → 2, "Bmpcc 6k" → 0
+function getInstanceNumber(name: string): number {
+  const match = name.match(/#(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [] }: Props) {
   const [search, setSearch] = useState('');
 
@@ -38,82 +61,135 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     }));
   });
 
-  // Build lookup: normalized equipment name -> checked-out info
-  // Index by exact name AND by stripped-parenthetical name for matching
-  const checkedOutMap = new Map<string, { item: ProjectItem; project: InventoryProject }>();
-  checkedOut.forEach(co => {
-    const exact = normalizeName(co.item.equipmentName);
-    checkedOutMap.set(exact, co);
-    // Also index by name without parenthetical content
-    const stripped = normalizeName(stripParenthetical(co.item.equipmentName));
-    if (stripped !== exact && !checkedOutMap.has(stripped)) {
-      checkedOutMap.set(stripped, co);
-    }
-    // Also index by name without parenthetical AND without #N
-    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(co.item.equipmentName)));
-    if (strippedBase !== exact && strippedBase !== stripped && !checkedOutMap.has(strippedBase)) {
-      checkedOutMap.set(strippedBase, co);
-    }
-  });
+  // Build multi-level lookup for checked-out items
+  // Each item is indexed by: exact name, stripped name, fuzzy name, and core name + instance number
+  const checkedOutEntries = checkedOut.map(co => ({
+    co,
+    exact: normalizeName(co.item.equipmentName),
+    stripped: normalizeName(stripParenthetical(co.item.equipmentName)),
+    fuzzy: fuzzyNormalize(co.item.equipmentName),
+    fuzzyStripped: fuzzyNormalize(stripParenthetical(co.item.equipmentName)),
+    core: coreName(co.item.equipmentName),
+    instance: getInstanceNumber(co.item.equipmentName),
+  }));
 
-  const missingMap = new Map<string, { item: ProjectItem; project: InventoryProject }>();
-  missingItems.forEach(mi => {
-    const exact = normalizeName(mi.item.equipmentName);
-    missingMap.set(exact, mi);
-    const stripped = normalizeName(stripParenthetical(mi.item.equipmentName));
-    if (stripped !== exact && !missingMap.has(stripped)) {
-      missingMap.set(stripped, mi);
-    }
-    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(mi.item.equipmentName)));
-    if (strippedBase !== exact && strippedBase !== stripped && !missingMap.has(strippedBase)) {
-      missingMap.set(strippedBase, mi);
-    }
-  });
+  const missingEntries = missingItems.map(mi => ({
+    mi,
+    exact: normalizeName(mi.item.equipmentName),
+    stripped: normalizeName(stripParenthetical(mi.item.equipmentName)),
+    fuzzy: fuzzyNormalize(mi.item.equipmentName),
+    fuzzyStripped: fuzzyNormalize(stripParenthetical(mi.item.equipmentName)),
+    core: coreName(mi.item.equipmentName),
+    instance: getInstanceNumber(mi.item.equipmentName),
+  }));
 
-  // Find match for an equipment row: try exact name, then stripped parenthetical, then base name
+  // Find match for an equipment row using multi-level matching
   function findCheckedOut(eqName: string) {
     const normalized = normalizeName(eqName);
-    // Exact match
-    if (checkedOutMap.has(normalized)) return checkedOutMap.get(normalized)!;
-    // Try matching base name (without #N) if equipment has #N
-    const base = normalizeName(stripInstanceNumber(eqName));
-    if (base !== normalized && checkedOutMap.has(base)) return checkedOutMap.get(base)!;
-    // Try "starts with" matching for names with parenthetical content
-    for (const [key, value] of checkedOutMap) {
-      if (key.startsWith(normalized) || normalized.startsWith(key)) return value;
+    const fuzzy = fuzzyNormalize(eqName);
+    const fuzzyStripped = fuzzyNormalize(stripParenthetical(eqName));
+    const eqCore = coreName(eqName);
+    const eqInstance = getInstanceNumber(eqName);
+
+    // 1. Exact normalized match
+    const exact = checkedOutEntries.find(e => e.exact === normalized);
+    if (exact) return exact.co;
+
+    // 2. Stripped parenthetical match
+    const stripped = checkedOutEntries.find(e => e.stripped === normalized || e.exact === normalizeName(stripParenthetical(eqName)));
+    if (stripped) return stripped.co;
+
+    // 3. Fuzzy match (ignoring dashes, special chars)
+    const fuzzyMatch = checkedOutEntries.find(e => e.fuzzy === fuzzy || e.fuzzyStripped === fuzzy || e.fuzzy === fuzzyStripped || e.fuzzyStripped === fuzzyStripped);
+    if (fuzzyMatch) return fuzzyMatch.co;
+
+    // 4. Core name + instance number match (most aggressive: "bmpcc 6k" core with #1 matches regardless of "kit" etc.)
+    if (eqInstance > 0) {
+      const coreMatch = checkedOutEntries.find(e => e.core === eqCore && e.instance === eqInstance);
+      if (coreMatch) return coreMatch.co;
     }
+
+    // 5. Core name match (without instance, for single-quantity items)
+    if (eqInstance === 0) {
+      const coreMatch = checkedOutEntries.find(e => e.core === eqCore && e.instance === 0);
+      if (coreMatch) return coreMatch.co;
+    }
+
+    // 6. Starts-with matching on fuzzy names
+    for (const entry of checkedOutEntries) {
+      if (entry.fuzzyStripped.startsWith(fuzzyStripped) || fuzzyStripped.startsWith(entry.fuzzyStripped)) {
+        if (eqInstance === 0 || entry.instance === 0 || eqInstance === entry.instance) {
+          return entry.co;
+        }
+      }
+    }
+
     return undefined;
   }
 
   function findMissing(eqName: string) {
     const normalized = normalizeName(eqName);
-    if (missingMap.has(normalized)) return missingMap.get(normalized)!;
-    const base = normalizeName(stripInstanceNumber(eqName));
-    if (base !== normalized && missingMap.has(base)) return missingMap.get(base)!;
-    for (const [key, value] of missingMap) {
-      if (key.startsWith(normalized) || normalized.startsWith(key)) return value;
+    const fuzzy = fuzzyNormalize(eqName);
+    const fuzzyStripped = fuzzyNormalize(stripParenthetical(eqName));
+    const eqCore = coreName(eqName);
+    const eqInstance = getInstanceNumber(eqName);
+
+    const exact = missingEntries.find(e => e.exact === normalized);
+    if (exact) return exact.mi;
+
+    const stripped = missingEntries.find(e => e.stripped === normalized || e.exact === normalizeName(stripParenthetical(eqName)));
+    if (stripped) return stripped.mi;
+
+    const fuzzyMatch = missingEntries.find(e => e.fuzzy === fuzzy || e.fuzzyStripped === fuzzy || e.fuzzy === fuzzyStripped || e.fuzzyStripped === fuzzyStripped);
+    if (fuzzyMatch) return fuzzyMatch.mi;
+
+    if (eqInstance > 0) {
+      const coreMatch = missingEntries.find(e => e.core === eqCore && e.instance === eqInstance);
+      if (coreMatch) return coreMatch.mi;
     }
+
+    if (eqInstance === 0) {
+      const coreMatch = missingEntries.find(e => e.core === eqCore && e.instance === 0);
+      if (coreMatch) return coreMatch.mi;
+    }
+
+    for (const entry of missingEntries) {
+      if (entry.fuzzyStripped.startsWith(fuzzyStripped) || fuzzyStripped.startsWith(entry.fuzzyStripped)) {
+        if (eqInstance === 0 || entry.instance === 0 || eqInstance === entry.instance) {
+          return entry.mi;
+        }
+      }
+    }
+
     return undefined;
   }
 
   // Collect checked-out/missing items NOT in equipment list (manual adds, etc.)
-  const equipNames = new Set(expandedEquipment.map(e => normalizeName(e.name)));
-  // Also add base names for matching
+  // Build sets of names at multiple normalization levels
+  const equipNamesNormal = new Set(expandedEquipment.map(e => normalizeName(e.name)));
+  const equipNamesFuzzy = new Set(expandedEquipment.map(e => fuzzyNormalize(e.name)));
+  const equipCoreNames = new Set(expandedEquipment.map(e => coreName(e.name)));
   expandedEquipment.forEach(e => {
-    equipNames.add(normalizeName(stripInstanceNumber(e.name)));
+    equipNamesNormal.add(normalizeName(stripInstanceNumber(e.name)));
+    equipNamesFuzzy.add(fuzzyNormalize(stripInstanceNumber(e.name)));
   });
 
-  // Check if an item name matches any known equipment name (including starts-with)
+  // Check if an item name matches any known equipment name
   function matchesAnyEquipment(itemName: string): boolean {
     const normalized = normalizeName(itemName);
-    const base = normalizeName(stripInstanceNumber(itemName));
+    const fuzzy = fuzzyNormalize(itemName);
     const stripped = normalizeName(stripParenthetical(itemName));
-    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(itemName)));
-    if (equipNames.has(normalized) || equipNames.has(base) || equipNames.has(stripped) || equipNames.has(strippedBase)) return true;
-    // Also check starts-with in both directions
-    for (const name of equipNames) {
-      if (name.startsWith(normalized) || normalized.startsWith(name) ||
-          name.startsWith(stripped) || stripped.startsWith(name)) return true;
+    const fuzzyStripped = fuzzyNormalize(stripParenthetical(itemName));
+    const itemCore = coreName(itemName);
+
+    // Direct match at any level
+    if (equipNamesNormal.has(normalized) || equipNamesNormal.has(stripped)) return true;
+    if (equipNamesFuzzy.has(fuzzy) || equipNamesFuzzy.has(fuzzyStripped)) return true;
+    if (equipCoreNames.has(itemCore)) return true;
+
+    // Starts-with matching on fuzzy names
+    for (const name of equipNamesFuzzy) {
+      if (name.startsWith(fuzzyStripped) || fuzzyStripped.startsWith(name)) return true;
     }
     return false;
   }

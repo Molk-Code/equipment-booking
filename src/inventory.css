@@ -903,6 +903,96 @@
   white-space: nowrap;
 }
 
+.damaged-item-notes.clickable-note {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.damaged-item-notes.clickable-note:hover {
+  color: var(--accent);
+}
+
+/* ===== Note Popup Overlay ===== */
+.note-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.note-popup {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 12px);
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.note-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.note-popup-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.note-popup-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.note-popup-close:hover {
+  background: rgba(255, 71, 87, 0.15);
+  color: var(--danger);
+}
+
+.note-popup-body {
+  padding: 1.25rem;
+}
+
+.note-popup-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--warning);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem 0;
+}
+
+.note-popup-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* ===== Tabs ===== */
 .inv-tabs {
   display: flex;
@@ -1148,6 +1238,27 @@
 .archived-delete-btn:hover {
   background: rgba(255, 71, 87, 0.15);
   color: var(--danger);
+}
+
+/* ===== Backup Actions ===== */
+.backup-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.backup-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  line-height: 1.5;
+}
+
+.backup-msg {
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-top: 0.5rem;
+  font-weight: 500;
 }
 
 /* ===== Inline Damage Input (Check-in) ===== */
