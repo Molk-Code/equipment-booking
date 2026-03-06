@@ -35,6 +35,7 @@ export interface InventoryProject {
   id: string;
   name: string;
   borrowers: string[];
+  equipmentManager: string;
   checkoutDate: string;
   returnDate: string;
   status: ProjectStatus;

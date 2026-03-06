@@ -34,6 +34,7 @@ function generateId(): string {
 export async function createProject(data: {
   name: string;
   borrowers: string[];
+  equipmentManager: string;
   checkoutDate: string;
   returnDate: string;
 }): Promise<InventoryProject> {
@@ -42,6 +43,7 @@ export async function createProject(data: {
     id: generateId(),
     name: data.name,
     borrowers: data.borrowers,
+    equipmentManager: data.equipmentManager || '',
     checkoutDate: data.checkoutDate,
     returnDate: data.returnDate,
     status: 'active',

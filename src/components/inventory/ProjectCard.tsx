@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Folder, Calendar, Users, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Folder, Calendar, Users, ChevronRight, AlertTriangle, Wrench } from 'lucide-react';
 import type { InventoryProject } from '../../types';
 
 interface Props {
@@ -45,6 +45,12 @@ export default function ProjectCard({ project, itemCount, missingCount = 0 }: Pr
           <Users size={14} />
           {project.borrowers.join(', ')}
         </span>
+        {project.equipmentManager && (
+          <span className="project-card-meta-item">
+            <Wrench size={14} />
+            {project.equipmentManager}
+          </span>
+        )}
         <span className="project-card-meta-item">
           <Calendar size={14} />
           {project.checkoutDate} — {project.returnDate}

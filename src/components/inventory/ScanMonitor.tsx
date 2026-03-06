@@ -1,15 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Radio, Package, CheckCircle } from 'lucide-react';
+import { Radio, Package } from 'lucide-react';
 import type { QRScanEntry } from '../../types';
 
 interface Props {
   isScanning: boolean;
   recentScans: QRScanEntry[];
   mode: 'checkout' | 'checkin';
-  onStop: () => void;
 }
 
-export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: Props) {
+export default function ScanMonitor({ isScanning, recentScans, mode }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Play beep on new scan
@@ -70,12 +69,6 @@ export default function ScanMonitor({ isScanning, recentScans, mode, onStop }: P
         {recentScans.length} {recentScans.length === 1 ? 'item' : 'items'} scanned
       </div>
 
-      {isScanning && (
-        <button className="scan-done-btn" onClick={onStop}>
-          <CheckCircle size={16} />
-          Done
-        </button>
-      )}
     </div>
   );
 }

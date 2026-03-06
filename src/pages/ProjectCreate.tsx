@@ -10,6 +10,7 @@ export default function ProjectCreate() {
 
   const [name, setName] = useState('');
   const [borrowers, setBorrowers] = useState<string[]>(['']);
+  const [equipmentManager, setEquipmentManager] = useState('');
   const [checkoutDate, setCheckoutDate] = useState(new Date().toISOString().slice(0, 10));
   const [returnDate, setReturnDate] = useState('');
   const [saving, setSaving] = useState(false);
@@ -30,6 +31,7 @@ export default function ProjectCreate() {
     const validBorrowers = borrowers.filter(b => b.trim());
     if (!name.trim()) { setError('Project name is required'); return; }
     if (validBorrowers.length === 0) { setError('At least one borrower is required'); return; }
+    if (!equipmentManager) { setError('Equipment manager is required'); return; }
     if (!returnDate) { setError('Return date is required'); return; }
 
     setSaving(true);
@@ -37,6 +39,7 @@ export default function ProjectCreate() {
       const project = await createProject({
         name: name.trim(),
         borrowers: validBorrowers,
+        equipmentManager,
         checkoutDate,
         returnDate,
       });
@@ -99,6 +102,20 @@ export default function ProjectCreate() {
                   Add Borrower
                 </button>
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>Equipment Manager</label>
+              <select
+                value={equipmentManager}
+                onChange={e => setEquipmentManager(e.target.value)}
+                className="form-select"
+              >
+                <option value="">Select manager...</option>
+                <option value="Fredrik">Fredrik</option>
+                <option value="Karl">Karl</option>
+                <option value="Mats">Mats</option>
+              </select>
             </div>
 
             <div className="form-row">

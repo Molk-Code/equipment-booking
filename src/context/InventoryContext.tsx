@@ -13,7 +13,7 @@ interface InventoryContextType {
   recentScans: QRScanEntry[];
   loading: boolean;
 
-  createProject: (data: { name: string; borrowers: string[]; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
+  createProject: (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
   updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
   deleteProject: (id: string) => void;
   startScanning: (projectId: string, mode: 'checkout' | 'checkin') => void;
@@ -82,7 +82,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   // Load equipment on mount
   useEffect(() => { loadEquipment(); }, [loadEquipment]);
 
-  const createProjectFn = useCallback(async (data: { name: string; borrowers: string[]; checkoutDate: string; returnDate: string }) => {
+  const createProjectFn = useCallback(async (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => {
     const project = await api.createProject(data);
     setProjects(prev => [...prev, project]);
     return project;

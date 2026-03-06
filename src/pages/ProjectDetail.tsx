@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ArrowLeft, Radio, FileText, Archive,
+  ArrowLeft, FileText, Archive,
   Calendar, Users, Package, Download, AlertTriangle,
   CheckCircle, XCircle, Wrench, Plus, Trash2
 } from 'lucide-react';
@@ -28,6 +28,15 @@ export default function ProjectDetail() {
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
 
+  // Auto-start scanning for active projects (skip the "Start Scanning" button step)
+  useEffect(() => {
+    if (project && project.status === 'active' && projectId && !isScanning) {
+      startScanning(projectId, 'checkout');
+    }
+    // Only run once when project loads as active
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, project?.status]);
+
   // Count missing items for archived projects
   const missingCount = items.filter(i => i.status === 'missing').length;
   const returnedCount = items.filter(i => i.status === 'returned').length;
@@ -45,10 +54,6 @@ export default function ProjectDetail() {
       }
     });
   }, [recentScans, isScanning, scanMode, projectId, items, addItemFromScan]);
-
-  const handleStartCheckout = useCallback(() => {
-    if (projectId) startScanning(projectId, 'checkout');
-  }, [projectId, startScanning]);
 
   const handleStopScanning = useCallback(() => {
     if (scanMode === 'checkout' && projectId && !isAddingItems) {
@@ -166,6 +171,9 @@ export default function ProjectDetail() {
             <h2 className="inv-page-title">{project.name}</h2>
             <div className="project-detail-meta">
               <span><Users size={14} /> {project.borrowers.join(', ')}</span>
+              {project.equipmentManager && (
+                <span><Wrench size={14} /> Manager: {project.equipmentManager}</span>
+              )}
               <span><Calendar size={14} /> {project.checkoutDate} — {project.returnDate}</span>
               <span><Package size={14} /> {items.length} items</span>
             </div>
@@ -186,26 +194,16 @@ export default function ProjectDetail() {
         )}
 
         {/* Actions */}
-        {!isArchived && !isScanning && (
+        {!isArchived && !isScanning && isCheckedOut && (
           <div className="project-actions">
-            {project.status === 'active' && (
-              <button className="primary-btn" onClick={handleStartCheckout}>
-                <Radio size={16} />
-                Start Check-Out Scanning
-              </button>
-            )}
-            {isCheckedOut && (
-              <>
-                <button className="primary-btn" onClick={handleStartAddItems}>
-                  <Plus size={16} />
-                  Add Items
-                </button>
-                <button className="secondary-btn" onClick={() => handleDownloadPDF('checkout')}>
-                  <Download size={16} />
-                  Download Contract PDF
-                </button>
-              </>
-            )}
+            <button className="primary-btn" onClick={handleStartAddItems}>
+              <Plus size={16} />
+              Add Items
+            </button>
+            <button className="secondary-btn" onClick={() => handleDownloadPDF('checkout')}>
+              <Download size={16} />
+              Download Contract PDF
+            </button>
           </div>
         )}
 
@@ -215,7 +213,6 @@ export default function ProjectDetail() {
             isScanning={isScanning}
             recentScans={recentScans}
             mode={scanMode || 'checkout'}
-            onStop={handleStopScanning}
           />
         )}
 
@@ -351,9 +348,15 @@ export default function ProjectDetail() {
               <Archive size={16} />
               Complete Return & Archive Project
             </button>
-            <button className="secondary-btn" onClick={() => handleDownloadPDF('checkin')}>
-              <FileText size={16} />
-              Download Return Receipt PDF
+          </div>
+        )}
+
+        {/* Done button at the bottom of checkout process */}
+        {isScanning && (
+          <div className="project-actions" style={{ marginTop: '1rem' }}>
+            <button className="scan-done-btn" onClick={handleStopScanning}>
+              <CheckCircle size={16} />
+              Done
             </button>
           </div>
         )}

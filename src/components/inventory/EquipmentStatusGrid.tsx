@@ -19,6 +19,11 @@ function stripInstanceNumber(name: string): string {
   return name.replace(/\s*#\d+\s*$/, '').trim();
 }
 
+// Strip parenthetical content e.g. "(V-lock battery, SSD-disc, ...)"
+function stripParenthetical(name: string): string {
+  return name.replace(/\s*\(.*\)\s*$/, '').trim();
+}
+
 export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [] }: Props) {
   const [search, setSearch] = useState('');
 
@@ -34,18 +39,38 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
   });
 
   // Build lookup: normalized equipment name -> checked-out info
-  // Try exact match first, then base-name match for #N items
+  // Index by exact name AND by stripped-parenthetical name for matching
   const checkedOutMap = new Map<string, { item: ProjectItem; project: InventoryProject }>();
   checkedOut.forEach(co => {
-    checkedOutMap.set(normalizeName(co.item.equipmentName), co);
+    const exact = normalizeName(co.item.equipmentName);
+    checkedOutMap.set(exact, co);
+    // Also index by name without parenthetical content
+    const stripped = normalizeName(stripParenthetical(co.item.equipmentName));
+    if (stripped !== exact && !checkedOutMap.has(stripped)) {
+      checkedOutMap.set(stripped, co);
+    }
+    // Also index by name without parenthetical AND without #N
+    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(co.item.equipmentName)));
+    if (strippedBase !== exact && strippedBase !== stripped && !checkedOutMap.has(strippedBase)) {
+      checkedOutMap.set(strippedBase, co);
+    }
   });
 
   const missingMap = new Map<string, { item: ProjectItem; project: InventoryProject }>();
   missingItems.forEach(mi => {
-    missingMap.set(normalizeName(mi.item.equipmentName), mi);
+    const exact = normalizeName(mi.item.equipmentName);
+    missingMap.set(exact, mi);
+    const stripped = normalizeName(stripParenthetical(mi.item.equipmentName));
+    if (stripped !== exact && !missingMap.has(stripped)) {
+      missingMap.set(stripped, mi);
+    }
+    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(mi.item.equipmentName)));
+    if (strippedBase !== exact && strippedBase !== stripped && !missingMap.has(strippedBase)) {
+      missingMap.set(strippedBase, mi);
+    }
   });
 
-  // Find match for an equipment row: try exact name, then base name
+  // Find match for an equipment row: try exact name, then stripped parenthetical, then base name
   function findCheckedOut(eqName: string) {
     const normalized = normalizeName(eqName);
     // Exact match
@@ -53,6 +78,10 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     // Try matching base name (without #N) if equipment has #N
     const base = normalizeName(stripInstanceNumber(eqName));
     if (base !== normalized && checkedOutMap.has(base)) return checkedOutMap.get(base)!;
+    // Try "starts with" matching for names with parenthetical content
+    for (const [key, value] of checkedOutMap) {
+      if (key.startsWith(normalized) || normalized.startsWith(key)) return value;
+    }
     return undefined;
   }
 
@@ -61,6 +90,9 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     if (missingMap.has(normalized)) return missingMap.get(normalized)!;
     const base = normalizeName(stripInstanceNumber(eqName));
     if (base !== normalized && missingMap.has(base)) return missingMap.get(base)!;
+    for (const [key, value] of missingMap) {
+      if (key.startsWith(normalized) || normalized.startsWith(key)) return value;
+    }
     return undefined;
   }
 
@@ -71,20 +103,32 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     equipNames.add(normalizeName(stripInstanceNumber(e.name)));
   });
 
+  // Check if an item name matches any known equipment name (including starts-with)
+  function matchesAnyEquipment(itemName: string): boolean {
+    const normalized = normalizeName(itemName);
+    const base = normalizeName(stripInstanceNumber(itemName));
+    const stripped = normalizeName(stripParenthetical(itemName));
+    const strippedBase = normalizeName(stripInstanceNumber(stripParenthetical(itemName)));
+    if (equipNames.has(normalized) || equipNames.has(base) || equipNames.has(stripped) || equipNames.has(strippedBase)) return true;
+    // Also check starts-with in both directions
+    for (const name of equipNames) {
+      if (name.startsWith(normalized) || normalized.startsWith(name) ||
+          name.startsWith(stripped) || stripped.startsWith(name)) return true;
+    }
+    return false;
+  }
+
   const extraItems: { name: string; category: string; co?: { item: ProjectItem; project: InventoryProject }; mi?: { item: ProjectItem; project: InventoryProject } }[] = [];
 
   checkedOut.forEach(co => {
-    const normalized = normalizeName(co.item.equipmentName);
-    const base = normalizeName(stripInstanceNumber(co.item.equipmentName));
-    if (!equipNames.has(normalized) && !equipNames.has(base)) {
+    if (!matchesAnyEquipment(co.item.equipmentName)) {
       extraItems.push({ name: co.item.equipmentName, category: 'MANUAL', co });
     }
   });
 
   missingItems.forEach(mi => {
     const normalized = normalizeName(mi.item.equipmentName);
-    const base = normalizeName(stripInstanceNumber(mi.item.equipmentName));
-    if (!equipNames.has(normalized) && !equipNames.has(base) && !extraItems.some(e => normalizeName(e.name) === normalized)) {
+    if (!matchesAnyEquipment(mi.item.equipmentName) && !extraItems.some(e => normalizeName(e.name) === normalized)) {
       extraItems.push({ name: mi.item.equipmentName, category: 'MANUAL', mi });
     }
   });
