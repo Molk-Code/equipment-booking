@@ -91,8 +91,25 @@ export function generateContractPDF(
   doc.setTextColor(0);
   doc.setFont('helvetica', 'normal');
 
+  // Merge duplicate items by equipment name
+  const mergedItems: { name: string; quantity: number; representative: ProjectItem; }[] = [];
+  const itemGroups = new Map<string, { items: ProjectItem[]; quantity: number }>();
+  items.forEach(item => {
+    const key = item.equipmentName;
+    const existing = itemGroups.get(key);
+    if (existing) {
+      existing.items.push(item);
+      existing.quantity++;
+    } else {
+      itemGroups.set(key, { items: [item], quantity: 1 });
+    }
+  });
+  itemGroups.forEach((group, name) => {
+    mergedItems.push({ name, quantity: group.quantity, representative: group.items[0] });
+  });
+
   // Table rows
-  items.forEach((item, index) => {
+  mergedItems.forEach((merged, index) => {
     if (y > 265) {
       doc.addPage();
       y = 20;
@@ -103,24 +120,31 @@ export function generateContractPDF(
       doc.rect(20, y - 4, pageWidth - 40, 7, 'F');
     }
 
-    const name = item.equipmentName.length > 55
-      ? item.equipmentName.substring(0, 52) + '...'
-      : item.equipmentName;
+    const displayName = merged.quantity > 1
+      ? `${merged.quantity}x ${merged.name}`
+      : merged.name;
+    const truncatedName = displayName.length > 55
+      ? displayName.substring(0, 52) + '...'
+      : displayName;
 
     if (mode === 'checkout') {
+      const ts = merged.representative.checkoutTimestamp;
+      const displayTimestamp = ts.startsWith('manual_')
+        ? ts.replace('manual_', 'Manual ')
+        : ts;
       doc.text(String(index + 1), 22, y);
-      doc.text(name, 30, y);
-      doc.text(item.checkoutTimestamp || '', 140, y);
+      doc.text(truncatedName, 30, y);
+      doc.text(displayTimestamp || '', 140, y);
     } else {
       doc.text(String(index + 1), 22, y);
-      doc.text(name, 30, y);
+      doc.text(truncatedName, 30, y);
 
-      const statusText = item.status === 'returned' ? 'OK'
-        : item.status === 'damaged' ? 'DAMAGED'
-        : item.status === 'missing' ? 'MISSING'
+      const statusText = merged.representative.status === 'returned' ? 'OK'
+        : merged.representative.status === 'damaged' ? 'DAMAGED'
+        : merged.representative.status === 'missing' ? 'MISSING'
         : 'OUT';
 
-      if (item.status === 'damaged' || item.status === 'missing') {
+      if (merged.representative.status === 'damaged' || merged.representative.status === 'missing') {
         doc.setTextColor(200, 0, 0);
       } else {
         doc.setTextColor(0, 150, 0);
@@ -128,15 +152,18 @@ export function generateContractPDF(
       doc.text(statusText, 130, y);
       doc.setTextColor(0);
 
-      if (item.damageNotes) {
-        const truncated = item.damageNotes.length > 25
-          ? item.damageNotes.substring(0, 22) + '...'
-          : item.damageNotes;
+      if (merged.representative.damageNotes) {
+        const truncated = merged.representative.damageNotes.length > 25
+          ? merged.representative.damageNotes.substring(0, 22) + '...'
+          : merged.representative.damageNotes;
         doc.text(truncated, 155, y);
       }
     }
     y += 7;
   });
+
+  // Count total individual items for summary
+  const totalItemCount = items.length;
 
   y += 5;
 
@@ -147,7 +174,7 @@ export function generateContractPDF(
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Total items: ${items.length}`, 20, y);
+  doc.text(`Total items: ${totalItemCount}`, 20, y);
 
   if (mode === 'checkin') {
     const returned = items.filter(i => i.status === 'returned').length;

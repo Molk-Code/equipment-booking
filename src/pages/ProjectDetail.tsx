@@ -38,6 +38,29 @@ export default function ProjectDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, project?.status]);
 
+  // Merge duplicate items by equipment name into quantity groups
+  const mergedItems = (() => {
+    const groups = new Map<string, { items: typeof items; quantity: number }>();
+    items.forEach(item => {
+      const key = item.equipmentName;
+      const existing = groups.get(key);
+      if (existing) {
+        existing.items.push(item);
+        existing.quantity++;
+      } else {
+        groups.set(key, { items: [item], quantity: 1 });
+      }
+    });
+    return Array.from(groups.entries()).map(([name, { items: groupItems, quantity }]) => ({
+      name,
+      quantity,
+      displayName: quantity > 1 ? `${quantity}x ${name}` : name,
+      // Use the first item for status/timestamp display
+      representative: groupItems[0],
+      allItems: groupItems,
+    }));
+  })();
+
   // Count missing items for archived projects
   const missingCount = items.filter(i => i.status === 'missing').length;
   const returnedCount = items.filter(i => i.status === 'returned').length;
@@ -76,7 +99,9 @@ export default function ProjectDetail() {
   // Manual item add during checkout
   const handleAddManualItem = useCallback(() => {
     if (!projectId || !manualItemName.trim()) return;
-    const timestamp = `manual_${Date.now()}`;
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    const timestamp = `manual_${dateStr}`;
     addItemFromScan(projectId, { timestamp, equipmentName: manualItemName.trim() });
     setManualItemName('');
   }, [projectId, manualItemName, addItemFromScan]);
@@ -259,96 +284,100 @@ export default function ProjectDetail() {
         )}
 
         {/* Item List — interactive for checked-out projects */}
-        {items.length > 0 && (
+        {mergedItems.length > 0 && (
           <section className="inv-section" style={{ marginTop: '1rem' }}>
             <h3 className="inv-section-title">
               <Package size={18} />
               Equipment ({items.length})
             </h3>
             <div className="project-items-list">
-              {items.map((item, i) => (
-                <div key={i}>
-                  <div className={`project-item-row status-row-${item.status}`}>
-                    <span className="project-item-name">{item.equipmentName}</span>
-                    <span className="project-item-time">{item.checkoutTimestamp.startsWith('manual_') ? 'Manual' : item.checkoutTimestamp}</span>
-                    <span className={`project-item-status item-status-${item.status}`}>
-                      {item.status}
-                    </span>
-
-                    {/* Damage notes indicator (clickable to expand) */}
-                    {item.damageNotes && (
-                      <span
-                        className="damaged-item-notes clickable-note"
-                        onClick={() => setExpandedNote({ name: item.equipmentName, notes: item.damageNotes })}
-                        title="Click to read damage report"
-                      >
-                        {item.damageNotes}
+              {mergedItems.map((group, i) => {
+                const item = group.representative;
+                const ts = item.checkoutTimestamp;
+                return (
+                  <div key={i}>
+                    <div className={`project-item-row status-row-${item.status}`}>
+                      <span className="project-item-name">{group.displayName}</span>
+                      <span className="project-item-time">{ts.startsWith('manual_') ? ts.replace('manual_', 'Manual ') : ts}</span>
+                      <span className={`project-item-status item-status-${item.status}`}>
+                        {item.status}
                       </span>
-                    )}
 
-                    {/* Action buttons for checked-out projects */}
-                    {isCheckedOut && !isScanning && item.status === 'checked-out' && (
-                      <div className="item-action-btns">
-                        <button
-                          className="item-return-btn"
-                          onClick={() => handleMarkReturned(item.equipmentName)}
-                          title="Mark as returned"
+                      {/* Damage notes indicator (clickable to expand) */}
+                      {item.damageNotes && (
+                        <span
+                          className="damaged-item-notes clickable-note"
+                          onClick={() => setExpandedNote({ name: group.displayName, notes: item.damageNotes })}
+                          title="Click to read damage report"
                         >
-                          <CheckCircle size={16} />
+                          {item.damageNotes}
+                        </span>
+                      )}
+
+                      {/* Action buttons for checked-out projects */}
+                      {isCheckedOut && !isScanning && item.status === 'checked-out' && (
+                        <div className="item-action-btns">
+                          <button
+                            className="item-return-btn"
+                            onClick={() => handleMarkReturned(item.equipmentName)}
+                            title="Mark as returned"
+                          >
+                            <CheckCircle size={16} />
+                          </button>
+                          <button
+                            className="item-damage-toggle-btn"
+                            onClick={() => setShowDamageInput(prev => ({ ...prev, [item.equipmentName]: !prev[item.equipmentName] }))}
+                            title="Report damage"
+                          >
+                            <Wrench size={14} />
+                          </button>
+                          <button
+                            className="item-missing-btn"
+                            onClick={() => handleMarkMissing(item.equipmentName)}
+                            title="Mark as missing"
+                          >
+                            <XCircle size={14} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Remove button during scanning */}
+                      {isScanning && scanMode === 'checkout' && (
+                        <button
+                          className="item-remove-btn"
+                          onClick={() => handleRemoveItem(item.equipmentName, item.checkoutTimestamp)}
+                          title="Remove item"
+                        >
+                          <Trash2 size={14} />
                         </button>
+                      )}
+                    </div>
+
+                    {/* Inline damage input */}
+                    {showDamageInput[item.equipmentName] && item.status === 'checked-out' && (
+                      <div className="checkin-inline-damage">
+                        <input
+                          type="text"
+                          className="checkin-damage-input"
+                          placeholder="Describe the damage..."
+                          value={damageNotes[item.equipmentName] || ''}
+                          onChange={e => setDamageNotes(prev => ({ ...prev, [item.equipmentName]: e.target.value }))}
+                          onKeyDown={e => { if (e.key === 'Enter') handleMarkDamaged(item.equipmentName); }}
+                          autoFocus
+                        />
                         <button
-                          className="item-damage-toggle-btn"
-                          onClick={() => setShowDamageInput(prev => ({ ...prev, [item.equipmentName]: !prev[item.equipmentName] }))}
-                          title="Report damage"
+                          className="checkin-damage-save-btn"
+                          onClick={() => handleMarkDamaged(item.equipmentName)}
+                          disabled={!damageNotes[item.equipmentName]?.trim()}
                         >
-                          <Wrench size={14} />
-                        </button>
-                        <button
-                          className="item-missing-btn"
-                          onClick={() => handleMarkMissing(item.equipmentName)}
-                          title="Mark as missing"
-                        >
-                          <XCircle size={14} />
+                          <AlertTriangle size={14} />
+                          Mark Damaged
                         </button>
                       </div>
                     )}
-
-                    {/* Remove button during scanning */}
-                    {isScanning && scanMode === 'checkout' && (
-                      <button
-                        className="item-remove-btn"
-                        onClick={() => handleRemoveItem(item.equipmentName, item.checkoutTimestamp)}
-                        title="Remove item"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
                   </div>
-
-                  {/* Inline damage input */}
-                  {showDamageInput[item.equipmentName] && item.status === 'checked-out' && (
-                    <div className="checkin-inline-damage">
-                      <input
-                        type="text"
-                        className="checkin-damage-input"
-                        placeholder="Describe the damage..."
-                        value={damageNotes[item.equipmentName] || ''}
-                        onChange={e => setDamageNotes(prev => ({ ...prev, [item.equipmentName]: e.target.value }))}
-                        onKeyDown={e => { if (e.key === 'Enter') handleMarkDamaged(item.equipmentName); }}
-                        autoFocus
-                      />
-                      <button
-                        className="checkin-damage-save-btn"
-                        onClick={() => handleMarkDamaged(item.equipmentName)}
-                        disabled={!damageNotes[item.equipmentName]?.trim()}
-                      >
-                        <AlertTriangle size={14} />
-                        Mark Damaged
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

@@ -209,7 +209,14 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     }
   });
 
-  const filtered = expandedEquipment.filter(e =>
+  // Sort: checked out first, then missing, then available
+  const sortedEquipment = [...expandedEquipment].sort((a, b) => {
+    const aOut = findCheckedOut(a.name) ? 2 : findMissing(a.name) ? 1 : 0;
+    const bOut = findCheckedOut(b.name) ? 2 : findMissing(b.name) ? 1 : 0;
+    return bOut - aOut;
+  });
+
+  const filtered = sortedEquipment.filter(e =>
     !search || e.name.toLowerCase().includes(search.toLowerCase()) ||
     e.category.toLowerCase().includes(search.toLowerCase())
   );
