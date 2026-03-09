@@ -10,6 +10,14 @@ import ScanMonitor from '../components/inventory/ScanMonitor';
 import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
 
+// Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
+function formatTimestamp(ts: string): string {
+  let clean = ts.startsWith('manual_') ? ts.replace('manual_', '') : ts;
+  clean = clean.replace(/(\d{1,2})\.(\d{2})\.(\d{2})/, '$1:$2');
+  clean = clean.replace(/(\d{1,2}:\d{2}):\d{2}/, '$1');
+  return clean.trim();
+}
+
 export default function ProjectDetail() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
@@ -298,7 +306,7 @@ export default function ProjectDetail() {
                   <div key={i}>
                     <div className={`project-item-row status-row-${item.status}`}>
                       <span className="project-item-name">{group.displayName}</span>
-                      <span className="project-item-time">{ts.startsWith('manual_') ? ts.replace('manual_', 'Manual ') : ts}</span>
+                      <span className="project-item-time">{formatTimestamp(ts)}</span>
                       <span className={`project-item-status item-status-${item.status}`}>
                         {item.status}
                       </span>

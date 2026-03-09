@@ -1,9 +1,18 @@
-import { useState, useRef } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
 import { useInventory } from '../context/InventoryContext';
+import {
+  isFileSystemAccessSupported,
+  setupAutoBackup,
+  disableAutoBackup,
+  isAutoBackupConfigured,
+  startAutoExportTimer,
+  tryAutoImportOnStartup,
+  getLastExportTime,
+} from '../utils/auto-backup';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
@@ -11,6 +20,36 @@ export default function InventoryDashboard() {
   const [showArchived, setShowArchived] = useState(false);
   const [importMsg, setImportMsg] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [autoBackupEnabled, setAutoBackupEnabled] = useState(false);
+  const [lastAutoExport, setLastAutoExport] = useState<string | null>(null);
+  const fsSupported = isFileSystemAccessSupported();
+
+  // Check auto-backup status and start timer on mount
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
+    async function init() {
+      // Try to import from backup file if localStorage is empty
+      const imported = await tryAutoImportOnStartup();
+      if (imported) {
+        window.location.reload();
+        return;
+      }
+
+      const configured = await isAutoBackupConfigured();
+      setAutoBackupEnabled(configured);
+      setLastAutoExport(getLastExportTime());
+
+      if (configured) {
+        cleanup = startAutoExportTimer();
+        // Update display after a potential export
+        setTimeout(() => setLastAutoExport(getLastExportTime()), 3000);
+      }
+    }
+    init();
+
+    return () => { if (cleanup) cleanup(); };
+  }, []);
 
   const active = getActiveProjects();
   const archived = getArchivedProjects();
@@ -69,6 +108,30 @@ export default function InventoryDashboard() {
     reader.readAsText(file);
     // Reset input so same file can be re-selected
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Enable auto-backup: user picks a file location
+  const handleEnableAutoBackup = async () => {
+    const success = await setupAutoBackup();
+    if (success) {
+      setAutoBackupEnabled(true);
+      setLastAutoExport(getLastExportTime());
+      const cleanup = startAutoExportTimer();
+      // Store cleanup for later if needed
+      window.__autoBackupCleanup = cleanup;
+      setImportMsg('Auto-backup enabled! Saves every hour.');
+    }
+  };
+
+  // Disable auto-backup
+  const handleDisableAutoBackup = async () => {
+    await disableAutoBackup();
+    setAutoBackupEnabled(false);
+    setLastAutoExport(null);
+    if (window.__autoBackupCleanup) {
+      window.__autoBackupCleanup();
+    }
+    setImportMsg('Auto-backup disabled.');
   };
 
   // Get missing item count per project
@@ -207,14 +270,47 @@ export default function InventoryDashboard() {
           <h2 className="inv-section-title" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Data Backup
           </h2>
+
+          {/* Auto-backup controls */}
+          {fsSupported && (
+            <div className="auto-backup-section">
+              {autoBackupEnabled ? (
+                <div className="auto-backup-status">
+                  <span className="auto-backup-active">
+                    <RefreshCw size={14} />
+                    Auto-backup active
+                  </span>
+                  {lastAutoExport && (
+                    <span className="auto-backup-time">
+                      Last saved: {new Date(lastAutoExport).toLocaleString('sv-SE')}
+                    </span>
+                  )}
+                  <button className="secondary-btn small-btn" onClick={handleDisableAutoBackup}>
+                    Disable
+                  </button>
+                </div>
+              ) : (
+                <div className="auto-backup-setup">
+                  <button className="primary-btn" onClick={handleEnableAutoBackup}>
+                    <RefreshCw size={14} />
+                    Enable Auto-Backup
+                  </button>
+                  <span className="auto-backup-desc">
+                    Saves automatically every hour to a file on this computer. Restores on startup if browser data is cleared.
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="backup-actions">
             <button className="secondary-btn" onClick={handleExportBackup}>
               <Download size={14} />
-              Export Backup
+              Manual Export
             </button>
             <button className="secondary-btn" onClick={() => fileInputRef.current?.click()}>
               <Upload size={14} />
-              Import Backup
+              Manual Import
             </button>
             <input
               ref={fileInputRef}
@@ -225,9 +321,11 @@ export default function InventoryDashboard() {
             />
           </div>
           {importMsg && <p className="backup-msg">{importMsg}</p>}
-          <p className="backup-hint">
-            Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
-          </p>
+          {!fsSupported && (
+            <p className="backup-hint">
+              Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
+            </p>
+          )}
         </section>
       </main>
     </div>

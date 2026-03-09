@@ -1361,6 +1361,55 @@
   font-weight: 500;
 }
 
+/* ===== Auto Backup ===== */
+.auto-backup-section {
+  margin-bottom: 1rem;
+}
+
+.auto-backup-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+.auto-backup-active {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.auto-backup-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.auto-backup-setup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.auto-backup-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+.small-btn {
+  padding: 0.3rem 0.6rem !important;
+  font-size: 0.75rem !important;
+}
+
 /* ===== Inline Damage Input (Check-in) ===== */
 .checkin-inline-damage {
   display: flex;

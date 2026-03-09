@@ -1,6 +1,17 @@
 import jsPDF from 'jspdf';
 import type { InventoryProject, ProjectItem } from '../types';
 
+// Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
+function formatTimestamp(ts: string): string {
+  // Strip manual_ prefix
+  let clean = ts.startsWith('manual_') ? ts.replace('manual_', '') : ts;
+  // If it looks like a time with dots (22.34.09), convert to colon format
+  clean = clean.replace(/(\d{1,2})\.(\d{2})\.(\d{2})/, '$1:$2');
+  // If it looks like a time with colons and seconds (22:34:09), drop seconds
+  clean = clean.replace(/(\d{1,2}:\d{2}):\d{2}/, '$1');
+  return clean.trim();
+}
+
 const LEGAL_TEXT = 'The following items are loaned to the above-mentioned borrower. The borrowers are aware that by signing this agreement, they are responsible for handling, storing, and transporting the equipment in such a way that no damage or abnormal wear and tear occurs. If any damage occurs, it must be reported immediately to the school\'s representatives for loaned equipment. If the equipment is stolen or lost, it will be reported to the police immediately, followed by investigations from the police, the school, and the insurance company. The borrower may be required to cover all or part of the costs to compensate the school, which should be kept free of costs in the event of an incident. Molkom Folk High School applies full-value compensation if an item needs to be replaced, i.e., if damage occurs or the item is lost, the borrower will be charged the same cost as it would take to replace it with a new purchase.';
 
 export function generateContractPDF(
@@ -128,10 +139,7 @@ export function generateContractPDF(
       : displayName;
 
     if (mode === 'checkout') {
-      const ts = merged.representative.checkoutTimestamp;
-      const displayTimestamp = ts.startsWith('manual_')
-        ? ts.replace('manual_', 'Manual ')
-        : ts;
+      const displayTimestamp = formatTimestamp(merged.representative.checkoutTimestamp);
       doc.text(String(index + 1), 22, y);
       doc.text(truncatedName, 30, y);
       doc.text(displayTimestamp || '', 140, y);
