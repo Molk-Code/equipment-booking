@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw } from 'lucide-react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
@@ -13,6 +13,7 @@ import {
   tryAutoImportOnStartup,
   getLastExportTime,
 } from '../utils/auto-backup';
+import { generateUserGuidePDF } from '../utils/inventory-pdf';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
@@ -132,6 +133,17 @@ export default function InventoryDashboard() {
       window.__autoBackupCleanup();
     }
     setImportMsg('Auto-backup disabled.');
+  };
+
+  // Download user guide PDF
+  const handleDownloadGuide = () => {
+    const blob = generateUserGuidePDF();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Molkom_Inventory_User_Guide.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Get missing item count per project
@@ -326,6 +338,16 @@ export default function InventoryDashboard() {
               Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
             </p>
           )}
+        </section>
+
+        {/* User Guide */}
+        <section className="inv-section" style={{ marginTop: '1rem' }}>
+          <div className="backup-actions">
+            <button className="secondary-btn" onClick={handleDownloadGuide}>
+              <BookOpen size={14} />
+              Download User Guide (PDF)
+            </button>
+          </div>
         </section>
       </main>
     </div>
