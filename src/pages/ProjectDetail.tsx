@@ -33,6 +33,7 @@ export default function ProjectDetail() {
   const [equipSearch, setEquipSearch] = useState('');
   const [equipCategory, setEquipCategory] = useState('ALL');
   const equipSearchRef = useRef<HTMLInputElement>(null);
+  const [pickerAdded, setPickerAdded] = useState<Record<string, number>>({});
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -142,9 +143,10 @@ export default function ProjectDetail() {
   const handlePickerSelect = useCallback((eqName: string) => {
     if (!projectId || !eqName) return;
     const now = new Date();
-    const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const timestamp = `manual_${dateStr}`;
     addItemFromScan(projectId, { timestamp, equipmentName: eqName });
+    setPickerAdded(prev => ({ ...prev, [eqName]: (prev[eqName] || 0) + 1 }));
   }, [projectId, addItemFromScan]);
 
   // Focus search when picker opens
@@ -314,7 +316,7 @@ export default function ProjectDetail() {
             {allEquipment.length > 0 && (
               <button
                 className="equip-picker-open-btn"
-                onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); }}
+                onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); setPickerAdded({}); }}
               >
                 <Search size={16} />
                 Browse Equipment to Add...
@@ -555,7 +557,9 @@ export default function ProjectDetail() {
                   <div className="equip-picker-empty">No equipment found</div>
                 ) : (
                   filteredPickerEquipment.map(eq => {
-                    const count = itemCounts.get(eq.name) || 0;
+                    const existingCount = itemCounts.get(eq.name) || 0;
+                    const addedCount = pickerAdded[eq.name] || 0;
+                    const count = existingCount + addedCount;
                     return (
                       <button
                         key={eq.id}
