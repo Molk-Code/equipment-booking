@@ -129,6 +129,15 @@ export default function ProjectDetail() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   })();
 
+  // Count how many of each equipment name are already in the project
+  const itemCounts = (() => {
+    const counts = new Map<string, number>();
+    items.forEach(i => {
+      counts.set(i.equipmentName, (counts.get(i.equipmentName) || 0) + 1);
+    });
+    return counts;
+  })();
+
   // Handle picker item selection
   const handlePickerSelect = useCallback((eqName: string) => {
     if (!projectId || !eqName) return;
@@ -545,25 +554,31 @@ export default function ProjectDetail() {
                 {filteredPickerEquipment.length === 0 ? (
                   <div className="equip-picker-empty">No equipment found</div>
                 ) : (
-                  filteredPickerEquipment.map(eq => (
-                    <button
-                      key={eq.id}
-                      className="equip-picker-card"
-                      onClick={() => handlePickerSelect(eq.name)}
-                    >
-                      <div className="equip-picker-img">
-                        {eq.image ? (
-                          <img src={eq.image} alt={eq.name} loading="lazy" />
-                        ) : (
-                          <div className="equip-picker-placeholder">{eq.name}</div>
+                  filteredPickerEquipment.map(eq => {
+                    const count = itemCounts.get(eq.name) || 0;
+                    return (
+                      <button
+                        key={eq.id}
+                        className={`equip-picker-card${count > 0 ? ' equip-picker-selected' : ''}`}
+                        onClick={() => handlePickerSelect(eq.name)}
+                      >
+                        {count > 0 && (
+                          <span className="equip-picker-count">{count}</span>
                         )}
-                        <span className="equip-picker-cat-tag">{eq.category}</span>
-                      </div>
-                      <div className="equip-picker-info">
-                        <span className="equip-picker-name">{eq.name}</span>
-                      </div>
-                    </button>
-                  ))
+                        <div className="equip-picker-img">
+                          {eq.image ? (
+                            <img src={eq.image} alt={eq.name} loading="lazy" />
+                          ) : (
+                            <div className="equip-picker-placeholder">{eq.name}</div>
+                          )}
+                          <span className="equip-picker-cat-tag">{eq.category}</span>
+                        </div>
+                        <div className="equip-picker-info">
+                          <span className="equip-picker-name">{eq.name}</span>
+                        </div>
+                      </button>
+                    );
+                  }))
                 )}
               </div>
             </div>
