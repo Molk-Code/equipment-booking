@@ -563,7 +563,7 @@ export default function ProjectDetail() {
                         onClick={() => handlePickerSelect(eq.name)}
                       >
                         {count > 0 && (
-                          <span className="equip-picker-count">{count}</span>
+                          <span className="equip-picker-count">✓ {count}</span>
                         )}
                         <div className="equip-picker-img">
                           {eq.image ? (
