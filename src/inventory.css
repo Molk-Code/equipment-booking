@@ -1547,6 +1547,39 @@
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.manual-add-select {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  transition: border-color var(--transition);
+  cursor: pointer;
+}
+
+.manual-add-select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.manual-add-select optgroup {
+  font-weight: 700;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+.manual-add-select option {
+  font-weight: 400;
+  padding: 0.25rem 0.5rem;
 }
 
 .manual-add-row {

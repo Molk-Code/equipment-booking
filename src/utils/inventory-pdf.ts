@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import type { InventoryProject, ProjectItem } from '../types';
+import type { InventoryProject, ProjectItem, Equipment } from '../types';
 
 // Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
 function formatTimestamp(ts: string): string {
@@ -17,7 +17,8 @@ const LEGAL_TEXT = 'The following items are loaned to the above-mentioned borrow
 export function generateContractPDF(
   project: InventoryProject,
   items: ProjectItem[],
-  mode: 'checkout' | 'checkin' = 'checkout'
+  mode: 'checkout' | 'checkin' = 'checkout',
+  equipmentList: Equipment[] = []
 ): Blob {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -119,16 +120,37 @@ export function generateContractPDF(
     mergedItems.push({ name, quantity: group.quantity, representative: group.items[0] });
   });
 
+  // Build a lookup map for equipment "included" items
+  // Match by normalized name (lowercase, strip #N suffixes and parenthetical content)
+  const includedMap = new Map<string, string[]>();
+  equipmentList.forEach(eq => {
+    if (eq.included && eq.included.length > 0) {
+      const normName = eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+      if (!includedMap.has(normName)) {
+        includedMap.set(normName, eq.included);
+      }
+    }
+  });
+
+  function findIncluded(itemName: string): string[] | undefined {
+    const norm = itemName.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+    return includedMap.get(norm);
+  }
+
   // Table rows
   mergedItems.forEach((merged, index) => {
-    if (y > 265) {
+    const included = findIncluded(merged.name);
+    const includedLineCount = included ? included.length : 0;
+    const rowHeight = 7 + includedLineCount * 4;
+
+    if (y + rowHeight > 265) {
       doc.addPage();
       y = 20;
     }
 
     if (index % 2 === 0) {
       doc.setFillColor(245, 245, 245);
-      doc.rect(20, y - 4, pageWidth - 40, 7, 'F');
+      doc.rect(20, y - 4, pageWidth - 40, rowHeight, 'F');
     }
 
     const displayName = merged.quantity > 1
@@ -140,10 +162,16 @@ export function generateContractPDF(
 
     if (mode === 'checkout') {
       const displayTimestamp = formatTimestamp(merged.representative.checkoutTimestamp);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
       doc.text(String(index + 1), 22, y);
       doc.text(truncatedName, 30, y);
       doc.text(displayTimestamp || '', 140, y);
     } else {
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
       doc.text(String(index + 1), 22, y);
       doc.text(truncatedName, 30, y);
 
@@ -168,6 +196,26 @@ export function generateContractPDF(
       }
     }
     y += 7;
+
+    // Show included items below the equipment name
+    if (included && included.length > 0) {
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(100);
+      const includesText = 'Includes: ' + included.join(', ');
+      const includesLines = doc.splitTextToSize(includesText, pageWidth - 60);
+      includesLines.forEach((line: string) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, 34, y);
+        y += 4;
+      });
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+    }
   });
 
   // Count total individual items for summary

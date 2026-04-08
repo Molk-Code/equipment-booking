@@ -25,10 +25,11 @@ export default function ProjectDetail() {
     projects, isScanning, scanMode, recentScans,
     getProjectItems, startScanning, stopScanning,
     addItemFromScan, updateProjectStatus, updateItemStatus,
-    removeProjectItem,
+    removeProjectItem, allEquipment,
   } = useInventory();
 
   const [manualItemName, setManualItemName] = useState('');
+  const [selectedEquipment, setSelectedEquipment] = useState('');
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -104,7 +105,33 @@ export default function ProjectDetail() {
     }
   }, [projectId, startScanning]);
 
-  // Manual item add during checkout
+  // Group equipment by category for the dropdown
+  const equipmentByCategory = (() => {
+    const categoryOrder = ['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS'];
+    const groups = new Map<string, string[]>();
+    allEquipment.forEach(eq => {
+      const cat = eq.category || 'OTHER';
+      if (!groups.has(cat)) groups.set(cat, []);
+      groups.get(cat)!.push(eq.name);
+    });
+    // Sort categories by predefined order, then alphabetically within each
+    return categoryOrder
+      .filter(cat => groups.has(cat))
+      .concat([...groups.keys()].filter(k => !categoryOrder.includes(k)))
+      .map(cat => ({ category: cat, items: groups.get(cat)!.sort((a, b) => a.localeCompare(b)) }));
+  })();
+
+  // Handle dropdown selection
+  const handleDropdownSelect = useCallback((value: string) => {
+    if (!projectId || !value) return;
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+    const timestamp = `manual_${dateStr}`;
+    addItemFromScan(projectId, { timestamp, equipmentName: value });
+    setSelectedEquipment('');
+  }, [projectId, addItemFromScan]);
+
+  // Manual item add during checkout (free text)
   const handleAddManualItem = useCallback(() => {
     if (!projectId || !manualItemName.trim()) return;
     const now = new Date();
@@ -164,14 +191,14 @@ export default function ProjectDetail() {
 
   const handleDownloadPDF = useCallback((mode: 'checkout' | 'checkin') => {
     if (!project) return;
-    const blob = generateContractPDF(project, items, mode);
+    const blob = generateContractPDF(project, items, mode, allEquipment);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `${project.name.replace(/\s+/g, '_')}_${mode}_contract.pdf`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [project, items]);
+  }, [project, items, allEquipment]);
 
   if (!project) {
     return (
@@ -253,11 +280,29 @@ export default function ProjectDetail() {
         {/* Manual add + remove during checkout scanning */}
         {isScanning && scanMode === 'checkout' && (
           <div className="manual-add-section">
+            {equipmentByCategory.length > 0 && (
+              <div className="manual-add-row">
+                <select
+                  className="manual-add-select"
+                  value={selectedEquipment}
+                  onChange={e => handleDropdownSelect(e.target.value)}
+                >
+                  <option value="">Select equipment to add...</option>
+                  {equipmentByCategory.map(group => (
+                    <optgroup key={group.category} label={group.category.charAt(0) + group.category.slice(1).toLowerCase()}>
+                      {group.items.map(name => (
+                        <option key={name} value={name}>{name}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="manual-add-row">
               <input
                 type="text"
                 className="manual-add-input"
-                placeholder="Add item manually..."
+                placeholder="Or type item name manually..."
                 value={manualItemName}
                 onChange={e => setManualItemName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleAddManualItem(); }}
