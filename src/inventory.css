@@ -1594,7 +1594,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--accent);
-  background: var(--bg-main);
+  background: var(--bg-card, #1a1a25);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
