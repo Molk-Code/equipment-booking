@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Archive,
   Calendar, Users, Package, Download, AlertTriangle,
-  CheckCircle, XCircle, Wrench, Plus, Trash2
+  CheckCircle, XCircle, Wrench, Plus, Trash2, Search, X
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
@@ -29,9 +29,10 @@ export default function ProjectDetail() {
   } = useInventory();
 
   const [manualItemName, setManualItemName] = useState('');
+  const [equipPickerOpen, setEquipPickerOpen] = useState(false);
   const [equipSearch, setEquipSearch] = useState('');
-  const [equipDropdownOpen, setEquipDropdownOpen] = useState(false);
-  const equipDropdownRef = useRef<HTMLDivElement>(null);
+  const [equipCategory, setEquipCategory] = useState('ALL');
+  const equipSearchRef = useRef<HTMLInputElement>(null);
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -107,57 +108,50 @@ export default function ProjectDetail() {
     }
   }, [projectId, startScanning]);
 
-  // Group equipment by category for the dropdown
-  const equipmentByCategory = (() => {
-    const categoryOrder = ['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS'];
-    const groups = new Map<string, string[]>();
-    allEquipment.forEach(eq => {
-      const cat = eq.category || 'OTHER';
-      if (!groups.has(cat)) groups.set(cat, []);
-      groups.get(cat)!.push(eq.name);
-    });
-    // Sort categories by predefined order, then alphabetically within each
-    return categoryOrder
-      .filter(cat => groups.has(cat))
-      .concat([...groups.keys()].filter(k => !categoryOrder.includes(k)))
-      .map(cat => ({ category: cat, items: groups.get(cat)!.sort((a, b) => a.localeCompare(b)) }));
+  // Available categories from equipment
+  const availableCategories = (() => {
+    const cats = new Set<string>();
+    allEquipment.forEach(eq => cats.add(eq.category || 'OTHER'));
+    const order = ['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS'];
+    return order.filter(c => cats.has(c)).concat([...cats].filter(c => !order.includes(c)));
   })();
 
-  // Handle dropdown item selection
-  const handleDropdownSelect = useCallback((value: string) => {
-    if (!projectId || !value) return;
+  // Filter equipment for the picker modal
+  const filteredPickerEquipment = (() => {
+    let list = allEquipment;
+    if (equipCategory !== 'ALL') {
+      list = list.filter(eq => (eq.category || 'OTHER') === equipCategory);
+    }
+    if (equipSearch.trim()) {
+      const q = equipSearch.toLowerCase();
+      list = list.filter(eq => eq.name.toLowerCase().includes(q));
+    }
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  })();
+
+  // Handle picker item selection
+  const handlePickerSelect = useCallback((eqName: string) => {
+    if (!projectId || !eqName) return;
     const now = new Date();
     const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
     const timestamp = `manual_${dateStr}`;
-    addItemFromScan(projectId, { timestamp, equipmentName: value });
-    setEquipSearch('');
-    setEquipDropdownOpen(false);
+    addItemFromScan(projectId, { timestamp, equipmentName: eqName });
   }, [projectId, addItemFromScan]);
 
-  // Filter equipment by search query
-  const filteredEquipment = (() => {
-    if (!equipSearch.trim()) return equipmentByCategory;
-    const q = equipSearch.toLowerCase();
-    return equipmentByCategory
-      .map(group => ({
-        category: group.category,
-        items: group.items.filter(name => name.toLowerCase().includes(q)),
-      }))
-      .filter(group => group.items.length > 0);
-  })();
-
-  // Close dropdown on click outside
+  // Focus search when picker opens
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (equipDropdownRef.current && !equipDropdownRef.current.contains(e.target as Node)) {
-        setEquipDropdownOpen(false);
-      }
+    if (equipPickerOpen && equipSearchRef.current) {
+      setTimeout(() => equipSearchRef.current?.focus(), 100);
     }
-    if (equipDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [equipPickerOpen]);
+
+  // Lock body scroll when picker is open
+  useEffect(() => {
+    if (equipPickerOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
     }
-  }, [equipDropdownOpen]);
+  }, [equipPickerOpen]);
 
   // Manual item add during checkout (free text)
   const handleAddManualItem = useCallback(() => {
@@ -308,39 +302,14 @@ export default function ProjectDetail() {
         {/* Manual add + remove during checkout scanning */}
         {isScanning && scanMode === 'checkout' && (
           <div className="manual-add-section">
-            {equipmentByCategory.length > 0 && (
-              <div className="equip-search-dropdown" ref={equipDropdownRef}>
-                <input
-                  type="text"
-                  className="equip-search-input"
-                  placeholder="Search equipment to add..."
-                  value={equipSearch}
-                  onChange={e => { setEquipSearch(e.target.value); setEquipDropdownOpen(true); }}
-                  onFocus={() => setEquipDropdownOpen(true)}
-                />
-                {equipDropdownOpen && (
-                  <div className="equip-search-list">
-                    {filteredEquipment.length === 0 ? (
-                      <div className="equip-search-empty">No matches found</div>
-                    ) : (
-                      filteredEquipment.map(group => (
-                        <div key={group.category}>
-                          <div className="equip-search-category">{group.category.charAt(0) + group.category.slice(1).toLowerCase()}</div>
-                          {group.items.map(name => (
-                            <button
-                              key={name}
-                              className="equip-search-item"
-                              onClick={() => handleDropdownSelect(name)}
-                            >
-                              {name}
-                            </button>
-                          ))}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
+            {allEquipment.length > 0 && (
+              <button
+                className="equip-picker-open-btn"
+                onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); }}
+              >
+                <Search size={16} />
+                Browse Equipment to Add...
+              </button>
             )}
             <div className="manual-add-row">
               <input
@@ -525,6 +494,77 @@ export default function ProjectDetail() {
               <div className="note-popup-body">
                 <p className="note-popup-label">Damage Report:</p>
                 <p className="note-popup-text">{expandedNote.notes}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Equipment Picker Modal */}
+        {equipPickerOpen && (
+          <div className="equip-picker-overlay" onClick={() => setEquipPickerOpen(false)}>
+            <div className="equip-picker-modal" onClick={e => e.stopPropagation()}>
+              <div className="equip-picker-header">
+                <h3>Add Equipment</h3>
+                <button className="equip-picker-close" onClick={() => setEquipPickerOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="equip-picker-search">
+                <Search size={16} />
+                <input
+                  ref={equipSearchRef}
+                  type="text"
+                  placeholder="Search equipment..."
+                  value={equipSearch}
+                  onChange={e => setEquipSearch(e.target.value)}
+                />
+                {equipSearch && (
+                  <button className="equip-picker-clear" onClick={() => setEquipSearch('')}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="equip-picker-categories">
+                <button
+                  className={`equip-picker-cat-btn ${equipCategory === 'ALL' ? 'active' : ''}`}
+                  onClick={() => setEquipCategory('ALL')}
+                >
+                  All
+                </button>
+                {availableCategories.map(cat => (
+                  <button
+                    key={cat}
+                    className={`equip-picker-cat-btn ${equipCategory === cat ? 'active' : ''}`}
+                    onClick={() => setEquipCategory(cat)}
+                  >
+                    {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
+              <div className="equip-picker-grid">
+                {filteredPickerEquipment.length === 0 ? (
+                  <div className="equip-picker-empty">No equipment found</div>
+                ) : (
+                  filteredPickerEquipment.map(eq => (
+                    <button
+                      key={eq.id}
+                      className="equip-picker-card"
+                      onClick={() => handlePickerSelect(eq.name)}
+                    >
+                      <div className="equip-picker-img">
+                        {eq.image ? (
+                          <img src={eq.image} alt={eq.name} loading="lazy" />
+                        ) : (
+                          <div className="equip-picker-placeholder">{eq.name}</div>
+                        )}
+                        <span className="equip-picker-cat-tag">{eq.category}</span>
+                      </div>
+                      <div className="equip-picker-info">
+                        <span className="equip-picker-name">{eq.name}</span>
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
           </div>
