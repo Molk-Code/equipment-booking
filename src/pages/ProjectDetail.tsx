@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Archive,
@@ -29,7 +29,9 @@ export default function ProjectDetail() {
   } = useInventory();
 
   const [manualItemName, setManualItemName] = useState('');
-  const [selectedEquipment, setSelectedEquipment] = useState('');
+  const [equipSearch, setEquipSearch] = useState('');
+  const [equipDropdownOpen, setEquipDropdownOpen] = useState(false);
+  const equipDropdownRef = useRef<HTMLDivElement>(null);
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -121,15 +123,41 @@ export default function ProjectDetail() {
       .map(cat => ({ category: cat, items: groups.get(cat)!.sort((a, b) => a.localeCompare(b)) }));
   })();
 
-  // Handle dropdown selection
+  // Handle dropdown item selection
   const handleDropdownSelect = useCallback((value: string) => {
     if (!projectId || !value) return;
     const now = new Date();
     const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
     const timestamp = `manual_${dateStr}`;
     addItemFromScan(projectId, { timestamp, equipmentName: value });
-    setSelectedEquipment('');
+    setEquipSearch('');
+    setEquipDropdownOpen(false);
   }, [projectId, addItemFromScan]);
+
+  // Filter equipment by search query
+  const filteredEquipment = (() => {
+    if (!equipSearch.trim()) return equipmentByCategory;
+    const q = equipSearch.toLowerCase();
+    return equipmentByCategory
+      .map(group => ({
+        category: group.category,
+        items: group.items.filter(name => name.toLowerCase().includes(q)),
+      }))
+      .filter(group => group.items.length > 0);
+  })();
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (equipDropdownRef.current && !equipDropdownRef.current.contains(e.target as Node)) {
+        setEquipDropdownOpen(false);
+      }
+    }
+    if (equipDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [equipDropdownOpen]);
 
   // Manual item add during checkout (free text)
   const handleAddManualItem = useCallback(() => {
@@ -281,21 +309,37 @@ export default function ProjectDetail() {
         {isScanning && scanMode === 'checkout' && (
           <div className="manual-add-section">
             {equipmentByCategory.length > 0 && (
-              <div className="manual-add-row">
-                <select
-                  className="manual-add-select"
-                  value={selectedEquipment}
-                  onChange={e => handleDropdownSelect(e.target.value)}
-                >
-                  <option value="">Select equipment to add...</option>
-                  {equipmentByCategory.map(group => (
-                    <optgroup key={group.category} label={group.category.charAt(0) + group.category.slice(1).toLowerCase()}>
-                      {group.items.map(name => (
-                        <option key={name} value={name}>{name}</option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+              <div className="equip-search-dropdown" ref={equipDropdownRef}>
+                <input
+                  type="text"
+                  className="equip-search-input"
+                  placeholder="Search equipment to add..."
+                  value={equipSearch}
+                  onChange={e => { setEquipSearch(e.target.value); setEquipDropdownOpen(true); }}
+                  onFocus={() => setEquipDropdownOpen(true)}
+                />
+                {equipDropdownOpen && (
+                  <div className="equip-search-list">
+                    {filteredEquipment.length === 0 ? (
+                      <div className="equip-search-empty">No matches found</div>
+                    ) : (
+                      filteredEquipment.map(group => (
+                        <div key={group.category}>
+                          <div className="equip-search-category">{group.category.charAt(0) + group.category.slice(1).toLowerCase()}</div>
+                          {group.items.map(name => (
+                            <button
+                              key={name}
+                              className="equip-search-item"
+                              onClick={() => handleDropdownSelect(name)}
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             )}
             <div className="manual-add-row">
