@@ -1578,31 +1578,23 @@
 .equip-picker-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem 1rem;
 }
 
 .equip-picker-modal {
   background: var(--bg-secondary, #12121a);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   width: 100%;
-  max-width: 800px;
-  height: calc(100vh - 3rem);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-lg);
 }
 
 .equip-picker-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 0.75rem 0.75rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -1634,8 +1626,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.75rem 1.25rem 0;
-  padding: 0.55rem 0.85rem;
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.5rem 0.75rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1681,8 +1673,8 @@
 /* Category tabs */
 .equip-picker-categories {
   display: flex;
-  gap: 0.35rem;
-  padding: 0.75rem 1.25rem 0;
+  gap: 0.3rem;
+  padding: 0.5rem 0.75rem;
   flex-shrink: 0;
   overflow-x: auto;
 }
@@ -1715,12 +1707,27 @@
 /* Card grid */
 .equip-picker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem;
-  padding: 1rem 1.25rem 1.25rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  padding: 0.75rem;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 600px) {
+  .equip-picker-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .equip-picker-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .equip-picker-empty {
@@ -1759,7 +1766,7 @@
 
 .equip-picker-img {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: #fff;
 }
@@ -1768,7 +1775,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 0.4rem;
+  padding: 0.25rem;
 }
 
 .equip-picker-placeholder {
@@ -1815,22 +1822,6 @@
   -webkit-box-orient: vertical;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .equip-picker-overlay {
-    padding: 0;
-  }
-  .equip-picker-modal {
-    border-radius: 0;
-    max-height: 100vh;
-    height: 100vh;
-  }
-  .equip-picker-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    padding: 0.75rem;
-  }
-}
 
 .manual-add-row {
   display: flex;
