@@ -1578,16 +1578,17 @@
 .equip-picker-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: var(--bg-primary, #0a0a0f);
   z-index: 1000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .equip-picker-modal {
-  background: var(--bg-secondary, #12121a);
   width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
 .equip-picker-header {
@@ -1596,7 +1597,10 @@
   justify-content: space-between;
   padding: 0.75rem 0.75rem;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary, #0a0a0f);
+  z-index: 10;
 }
 
 .equip-picker-header h3 {
@@ -1626,13 +1630,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.5rem 0.75rem 0;
+  margin: 0 0.75rem;
   padding: 0.5rem 0.75rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  flex-shrink: 0;
   transition: border-color var(--transition);
+  position: sticky;
+  top: 49px;
+  z-index: 9;
 }
 
 .equip-picker-search:focus-within {
@@ -1675,8 +1681,11 @@
   display: flex;
   gap: 0.3rem;
   padding: 0.5rem 0.75rem;
-  flex-shrink: 0;
   overflow-x: auto;
+  position: sticky;
+  top: 87px;
+  z-index: 9;
+  background: var(--bg-primary, #0a0a0f);
 }
 
 .equip-picker-cat-btn {
@@ -1709,18 +1718,14 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
-  padding: 0.75rem;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem 0.75rem;
 }
 
 @media (min-width: 600px) {
   .equip-picker-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 0.5rem 1rem;
   }
 }
 
