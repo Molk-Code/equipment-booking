@@ -33,7 +33,6 @@ export default function ProjectDetail() {
   const [equipSearch, setEquipSearch] = useState('');
   const [equipCategory, setEquipCategory] = useState('ALL');
   const equipSearchRef = useRef<HTMLInputElement>(null);
-  const [pickerAdded, setPickerAdded] = useState<Record<string, number>>({});
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -137,7 +136,7 @@ export default function ProjectDetail() {
     const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const timestamp = `manual_${dateStr}`;
     addItemFromScan(projectId, { timestamp, equipmentName: eqName });
-    setPickerAdded(prev => ({ ...prev, [eqName]: (prev[eqName] || 0) + 1 }));
+    setEquipPickerOpen(false);
   }, [projectId, addItemFromScan]);
 
   // Focus search when picker opens
@@ -307,7 +306,7 @@ export default function ProjectDetail() {
             {allEquipment.length > 0 && (
               <button
                 className="equip-picker-open-btn"
-                onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); setPickerAdded({}); }}
+                onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); }}
               >
                 <Search size={16} />
                 Browse Equipment to Add...
@@ -547,51 +546,25 @@ export default function ProjectDetail() {
                 {filteredPickerEquipment.length === 0 ? (
                   <div className="equip-picker-empty">No equipment found</div>
                 ) : (
-                  filteredPickerEquipment.map(eq => {
-                    const count = pickerAdded[eq.name] || 0;
-                    return (
-                      <button
-                        key={eq.id}
-                        className="equip-picker-card"
-                        style={count > 0 ? {
-                          border: '3px solid #4cd964',
-                          boxShadow: '0 0 16px rgba(76, 217, 100, 0.4)',
-                        } : undefined}
-                        onClick={() => handlePickerSelect(eq.name)}
-                      >
-                        {count > 0 && (
-                          <span style={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            minWidth: '28px',
-                            height: '28px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: '#4cd964',
-                            color: '#000',
-                            fontSize: '0.82rem',
-                            fontWeight: 900,
-                            borderRadius: '0 4px 0 8px',
-                            zIndex: 5,
-                            padding: '0 6px',
-                          }}>✓{count}</span>
+                  filteredPickerEquipment.map(eq => (
+                    <button
+                      key={eq.id}
+                      className="equip-picker-card"
+                      onClick={() => handlePickerSelect(eq.name)}
+                    >
+                      <div className="equip-picker-img">
+                        {eq.image ? (
+                          <img src={eq.image} alt={eq.name} loading="lazy" />
+                        ) : (
+                          <div className="equip-picker-placeholder">{eq.name}</div>
                         )}
-                        <div className="equip-picker-img">
-                          {eq.image ? (
-                            <img src={eq.image} alt={eq.name} loading="lazy" />
-                          ) : (
-                            <div className="equip-picker-placeholder">{eq.name}</div>
-                          )}
-                          <span className="equip-picker-cat-tag">{eq.category}</span>
-                        </div>
-                        <div className="equip-picker-info">
-                          <span className="equip-picker-name" style={count > 0 ? { color: '#4cd964' } : undefined}>{eq.name}</span>
-                        </div>
-                      </button>
-                    );
-                  }))
+                        <span className="equip-picker-cat-tag">{eq.category}</span>
+                      </div>
+                      <div className="equip-picker-info">
+                        <span className="equip-picker-name">{eq.name}</span>
+                      </div>
+                    </button>
+                  )))
                 )}
               </div>
             </div>
