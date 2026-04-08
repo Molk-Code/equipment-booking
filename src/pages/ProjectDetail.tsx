@@ -130,15 +130,6 @@ export default function ProjectDetail() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   })();
 
-  // Count how many of each equipment name are already in the project
-  const itemCounts = (() => {
-    const counts = new Map<string, number>();
-    items.forEach(i => {
-      counts.set(i.equipmentName, (counts.get(i.equipmentName) || 0) + 1);
-    });
-    return counts;
-  })();
-
   // Handle picker item selection
   const handlePickerSelect = useCallback((eqName: string) => {
     if (!projectId || !eqName) return;
@@ -557,17 +548,35 @@ export default function ProjectDetail() {
                   <div className="equip-picker-empty">No equipment found</div>
                 ) : (
                   filteredPickerEquipment.map(eq => {
-                    const existingCount = itemCounts.get(eq.name) || 0;
-                    const addedCount = pickerAdded[eq.name] || 0;
-                    const count = existingCount + addedCount;
+                    const count = pickerAdded[eq.name] || 0;
                     return (
                       <button
                         key={eq.id}
-                        className={`equip-picker-card${count > 0 ? ' equip-picker-selected' : ''}`}
+                        className="equip-picker-card"
+                        style={count > 0 ? {
+                          border: '3px solid #4cd964',
+                          boxShadow: '0 0 16px rgba(76, 217, 100, 0.4)',
+                        } : undefined}
                         onClick={() => handlePickerSelect(eq.name)}
                       >
                         {count > 0 && (
-                          <span className="equip-picker-count">✓ {count}</span>
+                          <span style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            minWidth: '28px',
+                            height: '28px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#4cd964',
+                            color: '#000',
+                            fontSize: '0.82rem',
+                            fontWeight: 900,
+                            borderRadius: '0 4px 0 8px',
+                            zIndex: 5,
+                            padding: '0 6px',
+                          }}>✓{count}</span>
                         )}
                         <div className="equip-picker-img">
                           {eq.image ? (
@@ -578,7 +587,7 @@ export default function ProjectDetail() {
                           <span className="equip-picker-cat-tag">{eq.category}</span>
                         </div>
                         <div className="equip-picker-info">
-                          <span className="equip-picker-name">{eq.name}</span>
+                          <span className="equip-picker-name" style={count > 0 ? { color: '#4cd964' } : undefined}>{eq.name}</span>
                         </div>
                       </button>
                     );
