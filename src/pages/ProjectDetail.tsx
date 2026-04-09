@@ -308,8 +308,8 @@ export default function ProjectDetail() {
                 className="equip-picker-open-btn"
                 onClick={() => { setEquipPickerOpen(true); setEquipSearch(''); setEquipCategory('ALL'); }}
               >
-                <Search size={16} />
-                Browse Equipment to Add...
+                <Package size={16} />
+                Open Inventory
               </button>
             )}
             <div className="manual-add-row">

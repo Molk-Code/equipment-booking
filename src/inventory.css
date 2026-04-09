@@ -1556,22 +1556,27 @@
 .equip-picker-open-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.65rem 0.85rem;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  background: var(--accent);
+  border: none;
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  color: #000;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: border-color var(--transition), color var(--transition);
+  transition: background var(--transition), transform 0.1s ease;
 }
 
 .equip-picker-open-btn:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
+  background: var(--accent-hover);
+}
+
+.equip-picker-open-btn:active {
+  transform: scale(0.98);
 }
 
 /* Equipment Picker Modal */
