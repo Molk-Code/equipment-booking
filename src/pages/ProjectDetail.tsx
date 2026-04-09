@@ -564,7 +564,7 @@ export default function ProjectDetail() {
                         <span className="equip-picker-name">{eq.name}</span>
                       </div>
                     </button>
-                  )))
+                  ))
                 )}
               </div>
             </div>
