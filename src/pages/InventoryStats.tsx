@@ -10,10 +10,11 @@ type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'borrowers';
 export default function InventoryStats() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, updateItemStatus, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, projectItems, updateItemStatus, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
+  const [borrowerPopup, setBorrowerPopup] = useState<{ name: string; type: 'projects' | 'damaged' | 'missing'; projectIds: string[] } | null>(null);
 
   // Sync tab with URL param when it changes
   useEffect(() => {
@@ -30,6 +31,47 @@ export default function InventoryStats() {
   const borrowerStats = getBorrowerStats();
 
   const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
+
+  const getBorrowerProjects = (borrowerName: string): string[] => {
+    const nameLower = borrowerName.toLowerCase();
+    return projects
+      .filter(p => p.borrowers.some(b => b.toLowerCase() === nameLower))
+      .map(p => p.id);
+  };
+
+  const getBorrowerDamagedProjects = (borrowerName: string): string[] => {
+    const nameLower = borrowerName.toLowerCase();
+    const involvedProjectIds = projects
+      .filter(p => p.borrowers.some(b => b.toLowerCase() === nameLower))
+      .map(p => p.id);
+    const idsWithDamage = new Set(
+      projectItems
+        .filter(i => involvedProjectIds.includes(i.projectId) && i.status === 'damaged')
+        .map(i => i.projectId)
+    );
+    return [...idsWithDamage];
+  };
+
+  const getBorrowerMissingProjects = (borrowerName: string): string[] => {
+    const nameLower = borrowerName.toLowerCase();
+    const involvedProjectIds = projects
+      .filter(p => p.borrowers.some(b => b.toLowerCase() === nameLower))
+      .map(p => p.id);
+    const idsWithMissing = new Set(
+      projectItems
+        .filter(i => involvedProjectIds.includes(i.projectId) && i.status === 'missing')
+        .map(i => i.projectId)
+    );
+    return [...idsWithMissing];
+  };
+
+  const statusLabel = (status: string) => {
+    switch (status) {
+      case 'active': case 'checked-out': return 'Active';
+      case 'returned': case 'archived': return 'Archived';
+      default: return status;
+    }
+  };
 
   return (
     <div className="app">
@@ -284,21 +326,36 @@ export default function InventoryStats() {
                     </span>
                     <span className="bs-col-projects">
                       {stat.projectCount > 0 ? (
-                        <strong>{stat.projectCount}</strong>
+                        <button
+                          className="bs-clickable"
+                          onClick={() => setBorrowerPopup({ name: stat.name, type: 'projects', projectIds: getBorrowerProjects(stat.name) })}
+                        >
+                          {stat.projectCount}
+                        </button>
                       ) : (
                         <span className="bs-zero">0</span>
                       )}
                     </span>
                     <span className="bs-col-damaged">
                       {stat.damagedCount > 0 ? (
-                        <span className="bs-warning">{stat.damagedCount}</span>
+                        <button
+                          className="bs-clickable bs-clickable-warning"
+                          onClick={() => setBorrowerPopup({ name: stat.name, type: 'damaged', projectIds: getBorrowerDamagedProjects(stat.name) })}
+                        >
+                          {stat.damagedCount}
+                        </button>
                       ) : (
                         <span className="bs-zero">0</span>
                       )}
                     </span>
                     <span className="bs-col-missing">
                       {stat.missingCount > 0 ? (
-                        <span className="bs-danger">{stat.missingCount}</span>
+                        <button
+                          className="bs-clickable bs-clickable-danger"
+                          onClick={() => setBorrowerPopup({ name: stat.name, type: 'missing', projectIds: getBorrowerMissingProjects(stat.name) })}
+                        >
+                          {stat.missingCount}
+                        </button>
                       ) : (
                         <span className="bs-zero">0</span>
                       )}
@@ -308,6 +365,48 @@ export default function InventoryStats() {
               </div>
             )}
           </section>
+        )}
+
+        {/* Borrower projects popup */}
+        {borrowerPopup && (
+          <div className="note-popup-overlay" onClick={() => setBorrowerPopup(null)}>
+            <div className="note-popup borrower-projects-popup" onClick={e => e.stopPropagation()}>
+              <div className="note-popup-header">
+                <h4>
+                  {borrowerPopup.name} — {borrowerPopup.type === 'projects' ? 'Projects' : borrowerPopup.type === 'damaged' ? 'Damaged in' : 'Missing in'}
+                </h4>
+                <button className="note-popup-close" onClick={() => setBorrowerPopup(null)}>
+                  <XCircle size={18} />
+                </button>
+              </div>
+              <div className="note-popup-body">
+                {borrowerPopup.projectIds.length === 0 ? (
+                  <p className="bs-popup-empty">No projects found.</p>
+                ) : (
+                  <div className="bs-popup-list">
+                    {borrowerPopup.projectIds.map(pid => {
+                      const proj = projects.find(p => p.id === pid);
+                      if (!proj) return null;
+                      const isActive = proj.status === 'active' || proj.status === 'checked-out';
+                      return (
+                        <Link
+                          key={pid}
+                          to={`/inventory/project/${pid}`}
+                          className="bs-popup-project"
+                          onClick={() => setBorrowerPopup(null)}
+                        >
+                          <span className="bs-popup-project-name">{proj.name}</span>
+                          <span className={`bs-popup-status ${isActive ? 'active' : 'archived'}`}>
+                            {statusLabel(proj.status)}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Note popup overlay */}
