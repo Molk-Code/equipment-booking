@@ -2206,6 +2206,20 @@
   font-weight: 700;
 }
 
+/* Missing input variant */
+.checkin-inline-missing {
+  border-left-color: #ff5555;
+}
+
+.checkin-missing-save-btn {
+  background: rgba(255, 85, 85, 0.15) !important;
+  color: #ff5555 !important;
+}
+
+.checkin-missing-save-btn:hover:not(:disabled) {
+  background: rgba(255, 85, 85, 0.25) !important;
+}
+
 /* Clickable stat numbers in borrower table */
 .bs-clickable {
   background: none;

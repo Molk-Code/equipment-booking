@@ -35,6 +35,8 @@ export default function ProjectDetail() {
   const equipSearchRef = useRef<HTMLInputElement>(null);
   const [showDamageInput, setShowDamageInput] = useState<Record<string, boolean>>({});
   const [damageNotes, setDamageNotes] = useState<Record<string, string>>({});
+  const [showMissingInput, setShowMissingInput] = useState<Record<string, boolean>>({});
+  const [missingNotes, setMissingNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
 
@@ -179,12 +181,14 @@ export default function ProjectDetail() {
     }
   }, [projectId, updateItemStatus]);
 
-  // Mark single item as missing
+  // Mark single item as missing with notes
   const handleMarkMissing = useCallback((equipmentName: string) => {
-    if (projectId) {
-      updateItemStatus(projectId, equipmentName, 'missing');
-    }
-  }, [projectId, updateItemStatus]);
+    if (!projectId) return;
+    const notes = missingNotes[equipmentName]?.trim();
+    updateItemStatus(projectId, equipmentName, 'missing', notes || undefined);
+    setShowMissingInput(prev => ({ ...prev, [equipmentName]: false }));
+    setMissingNotes(prev => ({ ...prev, [equipmentName]: '' }));
+  }, [projectId, missingNotes, updateItemStatus]);
 
   // Mark item as damaged with notes
   const handleMarkDamaged = useCallback((equipmentName: string) => {
@@ -400,7 +404,7 @@ export default function ProjectDetail() {
                           </button>
                           <button
                             className="item-missing-btn"
-                            onClick={() => handleMarkMissing(item.equipmentName)}
+                            onClick={() => setShowMissingInput(prev => ({ ...prev, [item.equipmentName]: !prev[item.equipmentName] }))}
                             title="Mark as missing"
                           >
                             <XCircle size={14} />
@@ -439,6 +443,28 @@ export default function ProjectDetail() {
                         >
                           <AlertTriangle size={14} />
                           Mark Damaged
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Inline missing input */}
+                    {showMissingInput[item.equipmentName] && item.status === 'checked-out' && (
+                      <div className="checkin-inline-damage checkin-inline-missing">
+                        <input
+                          type="text"
+                          className="checkin-damage-input"
+                          placeholder="Explain the situation (optional)..."
+                          value={missingNotes[item.equipmentName] || ''}
+                          onChange={e => setMissingNotes(prev => ({ ...prev, [item.equipmentName]: e.target.value }))}
+                          onKeyDown={e => { if (e.key === 'Enter') handleMarkMissing(item.equipmentName); }}
+                          autoFocus
+                        />
+                        <button
+                          className="checkin-damage-save-btn checkin-missing-save-btn"
+                          onClick={() => handleMarkMissing(item.equipmentName)}
+                        >
+                          <XCircle size={14} />
+                          Mark Missing
                         </button>
                       </div>
                     )}

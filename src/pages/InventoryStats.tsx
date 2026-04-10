@@ -13,7 +13,7 @@ export default function InventoryStats() {
   const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, projectItems, updateItemStatus, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-  const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
+  const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string; label?: string } | null>(null);
   const [borrowerPopup, setBorrowerPopup] = useState<{ name: string; type: 'projects' | 'damaged' | 'missing'; projectIds: string[] } | null>(null);
 
   // Sync tab with URL param when it changes
@@ -278,7 +278,16 @@ export default function InventoryStats() {
                     <Link to={`/inventory/project/${mi.project.id}`} className="missing-item-project clickable-project">
                       {mi.project.name}
                     </Link>
-                    <span className="missing-item-date">Since {mi.item.checkoutTimestamp.split(' ')[0]}</span>
+                    <span className="missing-item-date">Since {mi.item.checkoutTimestamp.replace(/^manual_/, '').split(' ')[0]}</span>
+                    {mi.item.damageNotes && (
+                      <span
+                        className="damaged-item-notes clickable-note"
+                        onClick={() => setExpandedNote({ name: mi.item.equipmentName, notes: mi.item.damageNotes, label: 'Missing Report:' })}
+                        title="Click to read details"
+                      >
+                        {mi.item.damageNotes}
+                      </span>
+                    )}
                     <button
                       className="missing-item-remove-btn"
                       onClick={() => {
@@ -420,7 +429,7 @@ export default function InventoryStats() {
                 </button>
               </div>
               <div className="note-popup-body">
-                <p className="note-popup-label">Damage Report:</p>
+                <p className="note-popup-label">{expandedNote.label || 'Damage Report:'}</p>
                 <p className="note-popup-text">{expandedNote.notes}</p>
               </div>
             </div>
