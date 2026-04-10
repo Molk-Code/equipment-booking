@@ -5,7 +5,7 @@ import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
 import { useInventory } from '../context/InventoryContext';
 
-type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'borrowers';
+type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'borrowers' | 'projects';
 
 export default function InventoryStats() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function InventoryStats() {
   // Sync tab with URL param when it changes
   useEffect(() => {
     const tab = searchParams.get('tab') as TabType;
-    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'borrowers'].includes(tab)) {
+    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'borrowers', 'projects'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -119,7 +119,7 @@ export default function InventoryStats() {
               </div>
             </div>
           )}
-          <div className="inv-stat-card clickable" onClick={() => setActiveTab('overview')}>
+          <div className="inv-stat-card clickable" onClick={() => setActiveTab('projects')}>
             <BarChart3 size={20} />
             <div>
               <span className="inv-stat-value">{projects.length}</span>
@@ -168,6 +168,12 @@ export default function InventoryStats() {
             onClick={() => setActiveTab('borrowers')}
           >
             Borrowers
+          </button>
+          <button
+            className={`inv-tab ${activeTab === 'projects' ? 'active' : ''}`}
+            onClick={() => setActiveTab('projects')}
+          >
+            Projects ({projects.length})
           </button>
         </div>
 
@@ -371,6 +377,67 @@ export default function InventoryStats() {
                     </span>
                   </div>
                 ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === 'projects' && (
+          <section className="inv-section">
+            <h3 className="inv-section-title">
+              <Package size={18} />
+              All Projects
+            </h3>
+            {projects.length === 0 ? (
+              <div className="inv-empty">No projects yet.</div>
+            ) : (
+              <div className="all-projects-list">
+                {(() => {
+                  const active = projects.filter(p => p.status === 'active' || p.status === 'checked-out');
+                  const archived = projects.filter(p => p.status === 'archived' || p.status === 'returned');
+                  return (
+                    <>
+                      {active.length > 0 && (
+                        <div className="all-projects-group">
+                          <h4 className="all-projects-group-title">Active ({active.length})</h4>
+                          {active.map(proj => (
+                            <Link
+                              key={proj.id}
+                              to={`/inventory/project/${proj.id}`}
+                              className="all-projects-row"
+                            >
+                              <span className="all-projects-name">{proj.name}</span>
+                              <span className="all-projects-meta">
+                                {proj.borrowers.join(', ')}
+                              </span>
+                              <span className="all-projects-date">{proj.checkoutDate}</span>
+                              <span className={`bs-popup-status active`}>Active</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                      {archived.length > 0 && (
+                        <div className="all-projects-group">
+                          <h4 className="all-projects-group-title">Archived ({archived.length})</h4>
+                          {archived.map(proj => (
+                            <Link
+                              key={proj.id}
+                              to={`/inventory/project/${proj.id}`}
+                              className="all-projects-row"
+                            >
+                              <span className="all-projects-name">{proj.name}</span>
+                              <span className="all-projects-meta">
+                                {proj.borrowers.join(', ')}
+                              </span>
+                              <span className="all-projects-date">{proj.checkoutDate}</span>
+                              <span className={`bs-popup-status archived`}>Archived</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             )}
           </section>
