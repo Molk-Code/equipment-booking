@@ -1,8 +1,17 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus } from '../types';
+import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus, Klasslista } from '../types';
 import { fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
 import { fetchEquipment } from '../utils/sheets';
+import { fetchKlasslista } from '../utils/klasslista-sheets';
 import * as api from '../utils/inventory-api';
+
+export interface BorrowerStat {
+  name: string;
+  group: 'Film 1' | 'Film 2';
+  projectCount: number;
+  damagedCount: number;
+  missingCount: number;
+}
 
 interface InventoryContextType {
   projects: InventoryProject[];
@@ -12,6 +21,8 @@ interface InventoryContextType {
   scanMode: 'checkout' | 'checkin' | null;
   recentScans: QRScanEntry[];
   loading: boolean;
+  klasslista: Klasslista | null;
+  klasslistaLoading: boolean;
 
   createProject: (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
   updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
@@ -29,6 +40,7 @@ interface InventoryContextType {
   getMissingItems: () => { item: ProjectItem; project: InventoryProject }[];
   getMostBorrowed: () => { name: string; count: number }[];
   getCheckedOutEquipment: () => { item: ProjectItem; project: InventoryProject }[];
+  getBorrowerStats: () => BorrowerStat[];
   loadEquipment: () => Promise<void>;
 }
 
@@ -64,6 +76,8 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [recentScans, setRecentScans] = useState<QRScanEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [stopPoll, setStopPoll] = useState<(() => void) | null>(null);
+  const [klasslista, setKlasslista] = useState<Klasslista | null>(null);
+  const [klasslistaLoading, setKlasslistaLoading] = useState(false);
 
   // Persist to localStorage whenever projects/items change
   useEffect(() => { saveLocalProjects(projects); }, [projects]);
@@ -81,6 +95,21 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   // Load equipment on mount
   useEffect(() => { loadEquipment(); }, [loadEquipment]);
+
+  // Load klasslista on mount
+  const loadKlasslista = useCallback(async () => {
+    setKlasslistaLoading(true);
+    try {
+      const data = await fetchKlasslista();
+      setKlasslista(data);
+    } catch {
+      console.warn('Failed to load klasslista');
+    } finally {
+      setKlasslistaLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadKlasslista(); }, [loadKlasslista]);
 
   const createProjectFn = useCallback(async (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => {
     const project = await api.createProject(data);
@@ -256,9 +285,50 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       .filter(x => x.project);
   }, [projects, projectItems]);
 
+  const getBorrowerStats = useCallback((): BorrowerStat[] => {
+    if (!klasslista) return [];
+
+    const stats: BorrowerStat[] = [];
+
+    const processGroup = (names: string[], group: 'Film 1' | 'Film 2') => {
+      for (const name of names) {
+        const nameLower = name.toLowerCase();
+        // Find projects where this person is a borrower
+        const involvedProjects = projects.filter(p =>
+          p.borrowers.some(b => b.toLowerCase() === nameLower)
+        );
+        const involvedProjectIds = new Set(involvedProjects.map(p => p.id));
+
+        // Count damaged and missing items in those projects
+        const damagedCount = projectItems.filter(
+          i => involvedProjectIds.has(i.projectId) && i.status === 'damaged'
+        ).length;
+        const missingCount = projectItems.filter(
+          i => involvedProjectIds.has(i.projectId) && i.status === 'missing'
+        ).length;
+
+        stats.push({
+          name,
+          group,
+          projectCount: involvedProjects.length,
+          damagedCount,
+          missingCount,
+        });
+      }
+    };
+
+    processGroup(klasslista.film1, 'Film 1');
+    processGroup(klasslista.film2, 'Film 2');
+
+    // Sort by project count descending
+    stats.sort((a, b) => b.projectCount - a.projectCount);
+    return stats;
+  }, [klasslista, projects, projectItems]);
+
   return (
     <InventoryContext.Provider value={{
       projects, projectItems, allEquipment, isScanning, scanMode, recentScans, loading,
+      klasslista, klasslistaLoading,
       loadEquipment,
       createProject: createProjectFn,
       updateProjectStatus: updateProjectStatusFn,
@@ -269,6 +339,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       updateItemStatus: updateItemStatusFn, markCheckinItem,
       getProjectItems, getActiveProjects, getArchivedProjects,
       getDamagedItems, getMissingItems, getMostBorrowed, getCheckedOutEquipment,
+      getBorrowerStats,
     }}>
       {children}
     </InventoryContext.Provider>

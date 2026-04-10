@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle, Users } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
 import { useInventory } from '../context/InventoryContext';
 
-type TabType = 'overview' | 'equipment' | 'damaged' | 'missing';
+type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'borrowers';
 
 export default function InventoryStats() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, updateItemStatus } = useInventory();
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, updateItemStatus, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
@@ -18,7 +18,7 @@ export default function InventoryStats() {
   // Sync tab with URL param when it changes
   useEffect(() => {
     const tab = searchParams.get('tab') as TabType;
-    if (tab && ['overview', 'equipment', 'damaged', 'missing'].includes(tab)) {
+    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'borrowers'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -27,6 +27,9 @@ export default function InventoryStats() {
   const damaged = getDamagedItems();
   const missingItems = getMissingItems();
   const checkedOut = getCheckedOutEquipment();
+  const borrowerStats = getBorrowerStats();
+
+  const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
 
   return (
     <div className="app">
@@ -81,6 +84,15 @@ export default function InventoryStats() {
               <span className="inv-stat-label">Total Projects</span>
             </div>
           </div>
+          {totalStudents > 0 && (
+            <div className="inv-stat-card clickable" onClick={() => setActiveTab('borrowers')}>
+              <Users size={20} />
+              <div>
+                <span className="inv-stat-value">{totalStudents}</span>
+                <span className="inv-stat-label">Students</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tab navigation */}
@@ -108,6 +120,12 @@ export default function InventoryStats() {
             onClick={() => setActiveTab('missing')}
           >
             Missing Items ({missingItems.length})
+          </button>
+          <button
+            className={`inv-tab ${activeTab === 'borrowers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('borrowers')}
+          >
+            Borrowers
           </button>
         </div>
 
@@ -236,6 +254,62 @@ export default function InventoryStats() {
             )}
           </section>
         )}
+
+        {activeTab === 'borrowers' && (
+          <section className="inv-section">
+            <h3 className="inv-section-title">
+              <Users size={18} />
+              Borrower Statistics
+            </h3>
+            {klasslistaLoading ? (
+              <div className="inv-empty">Loading student list...</div>
+            ) : borrowerStats.length === 0 ? (
+              <div className="inv-empty">No student data available. Add students to the Klasslista tab in the spreadsheet.</div>
+            ) : (
+              <div className="borrower-stats-table">
+                <div className="borrower-stats-header">
+                  <span className="bs-col-name">Name</span>
+                  <span className="bs-col-group">Class</span>
+                  <span className="bs-col-projects">Projects</span>
+                  <span className="bs-col-damaged">Damaged</span>
+                  <span className="bs-col-missing">Missing</span>
+                </div>
+                {borrowerStats.map(stat => (
+                  <div key={stat.name} className={`borrower-stats-row ${stat.damagedCount > 0 || stat.missingCount > 0 ? 'has-issues' : ''}`}>
+                    <span className="bs-col-name">{stat.name}</span>
+                    <span className="bs-col-group">
+                      <span className={`bs-group-tag ${stat.group === 'Film 1' ? 'film1' : 'film2'}`}>
+                        {stat.group}
+                      </span>
+                    </span>
+                    <span className="bs-col-projects">
+                      {stat.projectCount > 0 ? (
+                        <strong>{stat.projectCount}</strong>
+                      ) : (
+                        <span className="bs-zero">0</span>
+                      )}
+                    </span>
+                    <span className="bs-col-damaged">
+                      {stat.damagedCount > 0 ? (
+                        <span className="bs-warning">{stat.damagedCount}</span>
+                      ) : (
+                        <span className="bs-zero">0</span>
+                      )}
+                    </span>
+                    <span className="bs-col-missing">
+                      {stat.missingCount > 0 ? (
+                        <span className="bs-danger">{stat.missingCount}</span>
+                      ) : (
+                        <span className="bs-zero">0</span>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Note popup overlay */}
         {expandedNote && (
           <div className="note-popup-overlay" onClick={() => setExpandedNote(null)}>

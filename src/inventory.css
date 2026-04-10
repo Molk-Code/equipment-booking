@@ -2058,3 +2058,169 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ========== Borrower Chips (ProjectCreate) ========== */
+
+.borrower-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.borrower-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--accent, #00e68a);
+  color: #000;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.borrower-chip-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #000;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.borrower-chip-x:hover {
+  opacity: 1;
+}
+
+.borrower-dropdown {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.borrower-manual-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.borrower-manual-row input {
+  flex: 1;
+}
+
+.borrower-manual-row .borrower-add {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.borrower-loading {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+/* ========== Borrower Stats Table (InventoryStats) ========== */
+
+.borrower-stats-table {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.borrower-stats-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.borrower-stats-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  align-items: center;
+}
+
+.borrower-stats-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.borrower-stats-row.has-issues {
+  background: rgba(255, 100, 100, 0.05);
+}
+
+.bs-col-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bs-col-group,
+.bs-col-projects,
+.bs-col-damaged,
+.bs-col-missing {
+  text-align: center;
+}
+
+.bs-group-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.bs-group-tag.film1 {
+  background: rgba(0, 150, 255, 0.15);
+  color: #66b3ff;
+}
+
+.bs-group-tag.film2 {
+  background: rgba(180, 100, 255, 0.15);
+  color: #c088ff;
+}
+
+.bs-zero {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.bs-warning {
+  color: #ffaa00;
+  font-weight: 700;
+}
+
+.bs-danger {
+  color: #ff5555;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .borrower-stats-header,
+  .borrower-stats-row {
+    grid-template-columns: 1.5fr 0.8fr 0.7fr 0.7fr 0.7fr;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    font-size: 0.78rem;
+  }
+
+  .borrower-stats-header {
+    font-size: 0.65rem;
+  }
+
+  .bs-group-tag {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+  }
+}

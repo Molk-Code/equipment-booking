@@ -6,31 +6,43 @@ import { useInventory } from '../context/InventoryContext';
 
 export default function ProjectCreate() {
   const navigate = useNavigate();
-  const { createProject } = useInventory();
+  const { createProject, klasslista, klasslistaLoading } = useInventory();
 
   const [name, setName] = useState('');
-  const [borrowers, setBorrowers] = useState<string[]>(['']);
+  const [borrowers, setBorrowers] = useState<string[]>([]);
+  const [manualBorrower, setManualBorrower] = useState('');
   const [equipmentManager, setEquipmentManager] = useState('');
   const [checkoutDate, setCheckoutDate] = useState(new Date().toISOString().slice(0, 10));
   const [returnDate, setReturnDate] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const addBorrower = () => setBorrowers([...borrowers, '']);
-  const removeBorrower = (i: number) => setBorrowers(borrowers.filter((_, idx) => idx !== i));
-  const updateBorrower = (i: number, value: string) => {
-    const updated = [...borrowers];
-    updated[i] = value;
-    setBorrowers(updated);
+  const addBorrowerFromDropdown = (selectedName: string) => {
+    if (selectedName && !borrowers.includes(selectedName)) {
+      setBorrowers([...borrowers, selectedName]);
+    }
   };
+
+  const addManualBorrower = () => {
+    const trimmed = manualBorrower.trim();
+    if (trimmed && !borrowers.includes(trimmed)) {
+      setBorrowers([...borrowers, trimmed]);
+      setManualBorrower('');
+    }
+  };
+
+  const removeBorrower = (name: string) => {
+    setBorrowers(borrowers.filter(b => b !== name));
+  };
+
+  const hasKlasslista = klasslista && (klasslista.film1.length > 0 || klasslista.film2.length > 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    const validBorrowers = borrowers.filter(b => b.trim());
     if (!name.trim()) { setError('Project name is required'); return; }
-    if (validBorrowers.length === 0) { setError('At least one borrower is required'); return; }
+    if (borrowers.length === 0) { setError('At least one borrower is required'); return; }
     if (!equipmentManager) { setError('Equipment manager is required'); return; }
     if (!returnDate) { setError('Return date is required'); return; }
 
@@ -38,13 +50,13 @@ export default function ProjectCreate() {
     try {
       const project = await createProject({
         name: name.trim(),
-        borrowers: validBorrowers,
+        borrowers,
         equipmentManager,
         checkoutDate,
         returnDate,
       });
       navigate(`/inventory/project/${project.id}`);
-    } catch (err) {
+    } catch {
       setError('Failed to create project. Please try again.');
       setSaving(false);
     }
@@ -81,25 +93,72 @@ export default function ProjectCreate() {
 
             <div className="form-group">
               <label>Borrowers</label>
-              <div className="borrowers-list">
-                {borrowers.map((b, i) => (
-                  <div key={i} className="borrower-row">
-                    <input
-                      type="text"
-                      value={b}
-                      onChange={e => updateBorrower(i, e.target.value)}
-                      placeholder={`Borrower ${i + 1}`}
-                    />
-                    {borrowers.length > 1 && (
-                      <button type="button" className="borrower-remove" onClick={() => removeBorrower(i)}>
-                        <X size={16} />
+
+              {/* Selected borrowers as chips */}
+              {borrowers.length > 0 && (
+                <div className="borrower-chips">
+                  {borrowers.map(b => (
+                    <span key={b} className="borrower-chip">
+                      {b}
+                      <button type="button" onClick={() => removeBorrower(b)} className="borrower-chip-x">
+                        <X size={12} />
                       </button>
-                    )}
-                  </div>
-                ))}
-                <button type="button" className="borrower-add" onClick={addBorrower}>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Grouped dropdown from klasslista */}
+              {klasslistaLoading ? (
+                <div className="borrower-loading">Loading student list...</div>
+              ) : hasKlasslista ? (
+                <select
+                  className="form-select borrower-dropdown"
+                  value=""
+                  onChange={e => {
+                    addBorrowerFromDropdown(e.target.value);
+                    e.target.value = '';
+                  }}
+                >
+                  <option value="">Select borrower...</option>
+                  {klasslista!.film1.length > 0 && (
+                    <optgroup label="Film 1">
+                      {klasslista!.film1.map(n => (
+                        <option key={`f1-${n}`} value={n} disabled={borrowers.includes(n)}>
+                          {n}{borrowers.includes(n) ? ' (added)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {klasslista!.film2.length > 0 && (
+                    <optgroup label="Film 2">
+                      {klasslista!.film2.map(n => (
+                        <option key={`f2-${n}`} value={n} disabled={borrowers.includes(n)}>
+                          {n}{borrowers.includes(n) ? ' (added)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              ) : null}
+
+              {/* Manual fallback input */}
+              <div className="borrower-manual-row">
+                <input
+                  type="text"
+                  value={manualBorrower}
+                  onChange={e => setManualBorrower(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addManualBorrower();
+                    }
+                  }}
+                  placeholder={hasKlasslista ? 'Or type name manually...' : 'Type borrower name...'}
+                />
+                <button type="button" className="borrower-add" onClick={addManualBorrower}>
                   <UserPlus size={14} />
-                  Add Borrower
+                  Add
                 </button>
               </div>
             </div>

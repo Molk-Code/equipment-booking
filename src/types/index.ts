@@ -56,3 +56,8 @@ export interface QRScanEntry {
   timestamp: string;
   equipmentName: string;
 }
+
+export interface Klasslista {
+  film1: string[];
+  film2: string[];
+}
