@@ -167,7 +167,7 @@ export default function InventoryStats() {
             className={`inv-tab ${activeTab === 'checked-out' ? 'active' : ''}`}
             onClick={() => setActiveTab('checked-out')}
           >
-            Checked Out ({checkedOut.length})
+            Manual Checkouts
           </button>
           <button
             className={`inv-tab ${activeTab === 'borrowers' ? 'active' : ''}`}
@@ -318,43 +318,91 @@ export default function InventoryStats() {
           </section>
         )}
 
-        {activeTab === 'checked-out' && (
-          <section className="inv-section">
-            <h3 className="inv-section-title">
-              <Package size={18} />
-              Checked Out Items
-            </h3>
-            {checkedOut.length === 0 ? (
-              <div className="inv-empty">No equipment currently checked out.</div>
-            ) : (
-              <div className="checked-out-stats-list">
-                <p className="missing-items-info">
-                  All items currently checked out across all projects. Remove an item if it was added by mistake.
-                </p>
-                {checkedOut.map((co, i) => (
-                  <div key={i} className="checked-out-stat-row">
-                    <span className="co-stat-name">{co.item.equipmentName}</span>
-                    <Link to={`/inventory/project/${co.project.id}`} className="co-stat-project clickable-project">
-                      {co.project.name}
-                    </Link>
-                    <span className="co-stat-date">Since {co.item.checkoutTimestamp.replace(/^manual_/, '').split(' ')[0]}</span>
-                    <button
-                      className="missing-item-remove-btn"
-                      onClick={() => {
-                        if (confirm(`Remove "${co.item.equipmentName}" from project "${co.project.name}"?`)) {
-                          removeProjectItem(co.project.id, co.item.equipmentName, co.item.checkoutTimestamp);
-                        }
-                      }}
-                      title="Remove item from project"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        {activeTab === 'checked-out' && (() => {
+          // Find all items across all projects that don't match any equipment in the inventory
+          const equipNameSet = new Set(
+            allEquipment.map(eq => eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim())
+          );
+          const isInInventory = (name: string) => {
+            const norm = name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+            return equipNameSet.has(norm);
+          };
+
+          // Collect all manual items (not in inventory) from all project items
+          const manualItems = projectItems.filter(item => !isInInventory(item.equipmentName));
+
+          // Aggregate by name: count occurrences and collect project references
+          const aggregated = new Map<string, { count: number; entries: { item: typeof manualItems[0]; project: typeof projects[0] | undefined }[] }>();
+          manualItems.forEach(item => {
+            const key = item.equipmentName.toLowerCase().trim();
+            const existing = aggregated.get(key);
+            const project = projects.find(p => p.id === item.projectId);
+            const entry = { item, project };
+            if (existing) {
+              existing.count++;
+              existing.entries.push(entry);
+            } else {
+              aggregated.set(key, { count: 1, entries: [entry] });
+            }
+          });
+
+          // Sort by count descending
+          const sorted = [...aggregated.entries()].sort((a, b) => b[1].count - a[1].count);
+
+          return (
+            <section className="inv-section">
+              <h3 className="inv-section-title">
+                <Package size={18} />
+                Manual Checkouts
+              </h3>
+              {sorted.length === 0 ? (
+                <div className="inv-empty">No manually typed items found. All checked-out items match the inventory.</div>
+              ) : (
+                <div className="checked-out-stats-list">
+                  <p className="missing-items-info">
+                    Items typed in manually during checkout that don't match any equipment in the inventory. These may need to be added to the spreadsheet.
+                  </p>
+                  {sorted.map(([, data]) => {
+                    const displayName = data.entries[0].item.equipmentName;
+                    return (
+                      <div key={displayName} className="manual-checkout-group">
+                        <div className="manual-checkout-header">
+                          <span className="co-stat-name">{displayName}</span>
+                          <span className="manual-checkout-count">{data.count}x</span>
+                        </div>
+                        <div className="manual-checkout-entries">
+                          {data.entries.map((entry, j) => (
+                            <div key={j} className="manual-checkout-entry">
+                              {entry.project ? (
+                                <Link to={`/inventory/project/${entry.project.id}`} className="co-stat-project clickable-project">
+                                  {entry.project.name}
+                                </Link>
+                              ) : (
+                                <span className="co-stat-project">Unknown project</span>
+                              )}
+                              <span className="co-stat-date">{entry.item.checkoutTimestamp.replace(/^manual_/, '').split(' ')[0]}</span>
+                              <button
+                                className="missing-item-remove-btn"
+                                onClick={() => {
+                                  if (confirm(`Remove "${entry.item.equipmentName}" from project "${entry.project?.name || 'unknown'}"?`)) {
+                                    removeProjectItem(entry.item.projectId, entry.item.equipmentName, entry.item.checkoutTimestamp);
+                                  }
+                                }}
+                                title="Remove this entry"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {activeTab === 'borrowers' && (
           <section className="inv-section">

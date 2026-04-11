@@ -1661,22 +1661,50 @@
   color: var(--accent);
 }
 
-/* ===== Checked Out Stats List ===== */
+/* ===== Manual Checkouts Stats List ===== */
 .checked-out-stats-list {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
-.checked-out-stat-row {
+.manual-checkout-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid rgba(255, 165, 0, 0.6);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.manual-checkout-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.6rem 0.75rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 3px solid rgba(0, 122, 255, 0.5);
-  border-radius: var(--radius-sm);
+}
+
+.manual-checkout-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(255, 165, 0, 0.15);
+  padding: 0.1rem 0.5rem;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.manual-checkout-entries {
+  display: flex;
+  flex-direction: column;
+}
+
+.manual-checkout-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.75rem 0.35rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
 }
 
 .co-stat-name {
