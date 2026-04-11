@@ -397,9 +397,6 @@ export default function ProjectDetail() {
             <h3 className="inv-section-title">
               <Package size={18} />
               Equipment ({items.length})
-              {rentalDays > 0 && totalPrice > 0 && (
-                <span className="equipment-total-price">{totalPrice} kr <span className="equipment-total-days">({rentalDays} days)</span></span>
-              )}
             </h3>
             <div className="project-items-list">
               {mergedItems.map((group, i) => {
@@ -522,9 +519,17 @@ export default function ProjectDetail() {
           </section>
         )}
 
+        {/* Price total bar */}
+        {rentalDays > 0 && items.length > 0 && (
+          <div className="checkout-price-total">
+            <span className="checkout-price-label">{items.length} items &middot; {rentalDays} days</span>
+            <span className="checkout-price-amount">{totalPrice > 0 ? `${totalPrice} kr` : 'Free'}</span>
+          </div>
+        )}
+
         {/* Complete Return & Archive Button */}
         {isCheckedOut && !isScanning && items.length > 0 && (
-          <div className="project-actions" style={{ marginTop: '1rem' }}>
+          <div className="project-actions" style={{ marginTop: '0.5rem' }}>
             <button className="primary-btn danger-btn" onClick={handleCompleteReturn}>
               <Archive size={16} />
               Complete Return & Archive Project
@@ -534,7 +539,7 @@ export default function ProjectDetail() {
 
         {/* Done button at the bottom of checkout process */}
         {isScanning && (
-          <div className="project-actions" style={{ marginTop: '1rem' }}>
+          <div className="project-actions" style={{ marginTop: '0.5rem' }}>
             <button className="scan-done-btn" onClick={handleStopScanning}>
               <CheckCircle size={16} />
               Done

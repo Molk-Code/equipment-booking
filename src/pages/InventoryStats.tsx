@@ -5,12 +5,12 @@ import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
 import { useInventory } from '../context/InventoryContext';
 
-type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'borrowers' | 'projects';
+type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'checked-out' | 'borrowers' | 'projects';
 
 export default function InventoryStats() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, projectItems, updateItemStatus, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, projectItems, updateItemStatus, removeProjectItem, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string; label?: string } | null>(null);
@@ -19,7 +19,7 @@ export default function InventoryStats() {
   // Sync tab with URL param when it changes
   useEffect(() => {
     const tab = searchParams.get('tab') as TabType;
-    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'borrowers', 'projects'].includes(tab)) {
+    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'checked-out', 'borrowers', 'projects'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -164,6 +164,12 @@ export default function InventoryStats() {
             Missing Items ({missingItems.length})
           </button>
           <button
+            className={`inv-tab ${activeTab === 'checked-out' ? 'active' : ''}`}
+            onClick={() => setActiveTab('checked-out')}
+          >
+            Checked Out ({checkedOut.length})
+          </button>
+          <button
             className={`inv-tab ${activeTab === 'borrowers' ? 'active' : ''}`}
             onClick={() => setActiveTab('borrowers')}
           >
@@ -302,6 +308,44 @@ export default function InventoryStats() {
                         }
                       }}
                       title="Mark as found/returned"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === 'checked-out' && (
+          <section className="inv-section">
+            <h3 className="inv-section-title">
+              <Package size={18} />
+              Checked Out Items
+            </h3>
+            {checkedOut.length === 0 ? (
+              <div className="inv-empty">No equipment currently checked out.</div>
+            ) : (
+              <div className="checked-out-stats-list">
+                <p className="missing-items-info">
+                  All items currently checked out across all projects. Remove an item if it was added by mistake.
+                </p>
+                {checkedOut.map((co, i) => (
+                  <div key={i} className="checked-out-stat-row">
+                    <span className="co-stat-name">{co.item.equipmentName}</span>
+                    <Link to={`/inventory/project/${co.project.id}`} className="co-stat-project clickable-project">
+                      {co.project.name}
+                    </Link>
+                    <span className="co-stat-date">Since {co.item.checkoutTimestamp.replace(/^manual_/, '').split(' ')[0]}</span>
+                    <button
+                      className="missing-item-remove-btn"
+                      onClick={() => {
+                        if (confirm(`Remove "${co.item.equipmentName}" from project "${co.project.name}"?`)) {
+                          removeProjectItem(co.project.id, co.item.equipmentName, co.item.checkoutTimestamp);
+                        }
+                      }}
+                      title="Remove item from project"
                     >
                       <Trash2 size={14} />
                     </button>
