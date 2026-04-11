@@ -24,10 +24,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields: to, subject, pdfBase64, filename' });
     }
 
-    // Send email to equipment manager
+    // Send email to equipment managers
+    const recipients = [to];
+    const CC_EMAIL = 'karl.sparre@regionvarmland.se';
+    // Add CC if not already the primary recipient
+    const cc = to.toLowerCase() !== CC_EMAIL.toLowerCase() ? [CC_EMAIL] : [];
+
     const emailPayload = {
       from: 'Molkom Rental House <onboarding@resend.dev>',
-      to: [to],
+      to: recipients,
+      ...(cc.length > 0 && { cc }),
       subject: subject,
       html: html || '<p>See attached booking PDF.</p>',
       attachments: [
