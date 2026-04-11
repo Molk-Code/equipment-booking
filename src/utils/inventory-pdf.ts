@@ -367,7 +367,7 @@ export function generateUserGuidePDF(): Blob {
 
   doc.setFontSize(10);
   doc.setTextColor(120);
-  doc.text(`Version 1.0  |  ${new Date().toLocaleDateString('sv-SE')}`, pw / 2, 100, { align: 'center' });
+  doc.text(`Version 2.0  |  ${new Date().toLocaleDateString('sv-SE')}`, pw / 2, 100, { align: 'center' });
 
   // ====== TABLE OF CONTENTS ======
   doc.addPage();
@@ -384,9 +384,10 @@ export function generateUserGuidePDF(): Blob {
     '6. Managing a Checked-Out Project',
     '7. Returning Equipment (Check-In)',
     '8. Statistics & Equipment Status',
-    '9. Data Backup',
-    '10. Downloading PDF Contracts',
-    '11. Tips & Troubleshooting',
+    '9. Booking Page Password',
+    '10. Data Backup',
+    '11. Downloading PDF Contracts',
+    '12. Tips & Troubleshooting',
   ];
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
@@ -405,11 +406,13 @@ export function generateUserGuidePDF(): Blob {
   paragraph('The system lets you:');
   bulletList([
     'Create projects with borrower names and dates',
+    'Select borrowers from the student list (Klasslista) or type names manually',
     'Scan equipment in and out using a mobile QR scanner',
-    'Add equipment manually if QR codes are unavailable',
+    'Add equipment manually using a visual equipment picker with images',
     'Track which equipment is currently checked out, damaged, or missing',
     'Generate PDF contracts for borrowers to sign',
-    'View statistics on most-borrowed and damaged equipment',
+    'View statistics on most-borrowed and damaged equipment, plus borrower history',
+    'Control booking page access with a password managed from Google Sheets',
     'Backup and restore all data',
   ]);
 
@@ -420,6 +423,8 @@ export function generateUserGuidePDF(): Blob {
   paragraph('When you first visit the inventory system, you will see a password prompt. Enter the password to access the system. The password is the same for all users and is given to you by the equipment managers.');
   y += 2;
   paragraph('Once logged in, the session stays active until you close the browser tab. You do not need to log in again while the tab is open.');
+  y += 2;
+  paragraph('Note: The inventory system password is separate from the booking page password. The inventory password is hardcoded, while the booking page password can be changed from Google Sheets (see section 9).');
 
   divider();
 
@@ -428,20 +433,24 @@ export function generateUserGuidePDF(): Blob {
   paragraph('The Dashboard is the main overview page. At the top you see quick statistics:');
   bulletList([
     'Active Projects: number of projects currently being set up',
-    'Items Out: total number of equipment items currently checked out',
-    'Damaged: number of items reported as damaged',
-    'Missing: number of items marked as missing (only shown if > 0)',
+    'Items Out: total number of equipment items currently checked out (clickable)',
+    'Damaged: number of items reported as damaged (clickable)',
+    'Missing: number of items marked as missing (only shown if > 0, clickable)',
   ]);
+  y += 2;
+  paragraph('Clicking the Items Out, Damaged, or Missing stat cards takes you directly to the corresponding tab in the Statistics page.');
   y += 2;
   paragraph('Below the stats you find:');
   bulletList([
-    'Active Projects: cards for each project that is being set up or checked out. Click a card to open the project.',
+    'Active Projects: cards for each project. Click a card to open the project.',
     'Currently Checked Out Equipment: a quick list of all items that are currently out.',
     'Archived Projects: collapsed section with old/completed projects. Click to expand.',
-    'Data Backup: section for manual and automatic backup (see section 9).',
   ]);
   y += 2;
   paragraph('You can delete a project by clicking the red trash icon on the project card. This permanently removes the project and all its items.');
+  y += 2;
+  subheading('Settings area:');
+  paragraph('At the bottom of the Dashboard, a separate settings area contains Data Backup controls and the User Guide download button. These are visually separated from the project content above.');
 
   divider();
 
@@ -452,11 +461,17 @@ export function generateUserGuidePDF(): Blob {
   subheading('Required fields:');
   numberedList([
     'Project Name: give the project a descriptive name (e.g. "Documentary Short Film")',
-    'Borrowers: add one or more borrower names. Click "Add Borrower" for additional names.',
+    'Borrowers: select from the student list or type names manually (see below)',
     'Equipment Manager: select who is responsible for this checkout (Fredrik, Karl, or Mats)',
     'Checkout Date: today\'s date is pre-filled, change if needed',
     'Return Date: when the equipment should be returned',
   ]);
+
+  y += 2;
+  subheading('Selecting borrowers (Klasslista):');
+  paragraph('If a student list (Klasslista) is set up in the Google Sheet, a dropdown appears with students grouped by Film 1 and Film 2. Select a student from the dropdown to add them as a borrower. Already-added students appear greyed out.');
+  y += 2;
+  paragraph('You can also type a name manually in the text field below the dropdown and press Enter or click "Add". This is useful for borrowers not on the student list. Selected borrowers appear as removable chips above the input.');
   y += 2;
   paragraph('Click "Create Project" to save. You will be taken directly to the project page where scanning begins automatically.');
 
@@ -475,8 +490,10 @@ export function generateUserGuidePDF(): Blob {
   ]);
 
   y += 2;
-  subheading('Adding items manually:');
-  paragraph('If an item does not have a QR code, you can type the equipment name in the "Add item manually..." field and press Enter or click "Add". The date and time are recorded automatically.');
+  subheading('Adding items manually with the equipment picker:');
+  paragraph('Click the "Add Equipment" button to open the visual equipment picker. This opens a full-screen modal showing all equipment as cards with images, organized by category (Camera, Grip, Lights, Sound, Location, Books). Use the search bar to filter items. Click a card to select it, then confirm to add it to the project.');
+  y += 2;
+  paragraph('You can also type an equipment name directly in the "Add item manually..." text field and press Enter.');
 
   y += 2;
   subheading('Removing items during scanning:');
@@ -494,7 +511,7 @@ export function generateUserGuidePDF(): Blob {
   bulletList([
     'A summary bar showing how many items are returned, still out, and missing',
     'The full equipment list with action buttons for each item',
-    '"Add Items" button to scan more equipment into the project',
+    '"Add Items" button to scan or pick more equipment into the project',
     '"Download Contract PDF" button',
   ]);
 
@@ -503,11 +520,11 @@ export function generateUserGuidePDF(): Blob {
   bulletList([
     'Green checkmark: Mark the item as returned',
     'Wrench icon: Report damage (opens a text field for damage description)',
-    'Red X: Mark the item as missing',
+    'Red X: Mark the item as missing (with optional notes)',
   ]);
 
   y += 2;
-  paragraph('Damage notes can be viewed later by clicking on the note text next to damaged items.');
+  paragraph('Damage and missing notes can be viewed later by clicking on the note text next to the item.');
 
   divider();
 
@@ -531,27 +548,55 @@ export function generateUserGuidePDF(): Blob {
 
   // ====== 8. STATISTICS ======
   heading('8. Statistics & Equipment Status', 18);
-  paragraph('Click "Statistics" in the navigation to see an overview of all equipment and borrowing history.');
+  paragraph('Click "Statistics" in the navigation to see an overview of all equipment and borrowing history. The page shows stat cards at the top and has six tabs:');
   y += 2;
   subheading('Tabs:');
   bulletList([
-    'Most Borrowed: shows which equipment has been borrowed the most times, ranked by frequency',
+    'Most Borrowed: shows which equipment has been borrowed the most times, ranked by frequency.',
     'Equipment Status: a grid of all equipment from the master list. Checked-out items appear first. Shows which project each item is in.',
-    'Damaged Items: list of all damaged items with damage notes. Click the checkmark to mark as resolved.',
-    'Missing Items: list of all missing items. Click the icon to mark as found/returned.',
+    'Damaged Items: list of all damaged items with damage notes and project links. Click the checkmark to mark as resolved.',
+    'Missing Items: list of all missing items with project links. Click the icon to mark as found/returned.',
+    'Borrowers: a table of all students from the Klasslista, showing their class (Film 1 or Film 2), number of projects, damaged items, and missing items. Click the numbers to see which projects are involved.',
+    'Projects: a list of all projects (active and archived) with borrower names and dates. Click any project to open it.',
   ]);
   y += 2;
-  paragraph('You can also access specific tabs by clicking the stat cards on the Dashboard (e.g. clicking "Damaged" takes you to the Damaged Items tab).');
+  paragraph('You can also access specific tabs by clicking the stat cards on the Dashboard or on the Statistics page itself.');
 
   divider();
 
-  // ====== 9. DATA BACKUP ======
-  heading('9. Data Backup', 18);
-  paragraph('All data is stored in the browser\'s localStorage. This means data can be lost if the browser data is cleared. Use the backup features to protect your data.');
+  // ====== 9. BOOKING PAGE PASSWORD ======
+  heading('9. Booking Page Password', 18);
+  paragraph('The booking page (where students browse and book equipment) can be optionally password-protected. This password is managed from Google Sheets and is separate from the inventory system password.');
+
+  y += 2;
+  subheading('How it works:');
+  bulletList([
+    'The booking password is stored in the Google Sheet, in the "Losenord Booking" tab, cell A2.',
+    'If A2 contains a password, visitors must enter it to access the booking page.',
+    'If A2 is empty, the booking page is open to everyone without a password.',
+    'When the password is changed, all previously authenticated sessions are invalidated. Users must enter the new password.',
+  ]);
+
+  y += 2;
+  subheading('Viewing and changing the password:');
+  numberedList([
+    'In the inventory system, click "Password" in the top navigation bar.',
+    'A panel shows the current booking page password (or "no password set").',
+    'Click "Open Losenord Booking" to go directly to the correct tab in Google Sheets.',
+    'In Google Sheets, edit cell A2 to set a new password, or clear it to remove the password.',
+  ]);
+  y += 2;
+  paragraph('The password panel refreshes every time you open it, so you always see the current value.');
+
+  divider();
+
+  // ====== 10. DATA BACKUP ======
+  heading('10. Data Backup', 18);
+  paragraph('All data is stored in the browser\'s localStorage. This means data can be lost if the browser data is cleared. Use the backup features to protect your data. The backup controls are in the settings area at the bottom of the Dashboard.');
   y += 2;
   subheading('Auto-Backup (recommended):');
   numberedList([
-    'On the Dashboard, find the "Data Backup" section at the bottom',
+    'On the Dashboard, find the "Data Backup" section in the settings area at the bottom',
     'Click "Enable Auto-Backup"',
     'Choose a location on your computer to save the backup file',
     'The system will automatically save a backup every hour',
@@ -570,8 +615,8 @@ export function generateUserGuidePDF(): Blob {
 
   divider();
 
-  // ====== 10. PDF CONTRACTS ======
-  heading('10. Downloading PDF Contracts', 18);
+  // ====== 11. PDF CONTRACTS ======
+  heading('11. Downloading PDF Contracts', 18);
   paragraph('The system can generate two types of PDF documents:');
   y += 2;
   subheading('Equipment Contract (checkout):');
@@ -584,12 +629,12 @@ export function generateUserGuidePDF(): Blob {
 
   divider();
 
-  // ====== 11. TIPS ======
-  heading('11. Tips & Troubleshooting', 18);
+  // ====== 12. TIPS ======
+  heading('12. Tips & Troubleshooting', 18);
   y += 2;
   subheading('Navigation:');
   bulletList([
-    'Use the top navigation bar to switch between Dashboard, New Project, and Statistics',
+    'Use the top navigation bar to switch between Dashboard, New Project, Statistics, and Password',
     'Click the "Booking" link to go back to the main booking system',
     'Click the Molkom Rental House logo to return to the Dashboard',
   ]);
@@ -600,14 +645,17 @@ export function generateUserGuidePDF(): Blob {
     'Scanned items not appearing? Make sure the mobile scanner is writing to the correct Google Sheet tab and the web page is open.',
     'Lost data after clearing browser? If auto-backup was enabled, just visit the page again and data will be restored. Otherwise, use Manual Import with a backup file.',
     'Duplicate items? The system automatically merges items with the same name (e.g. 3x Sandbag).',
-    'Need to add items to a checked-out project? Open the project and click "Add Items" to start scanning again.',
+    'Need to add items to a checked-out project? Open the project and click "Add Items" to start scanning or use the equipment picker.',
     'Cannot see auto-backup option? This feature only works in Chrome and Edge. Use Manual Export/Import in other browsers.',
+    'Student list not showing? Make sure the Klasslista tab in Google Sheets has student names organized by Film 1 and Film 2.',
+    'Booking password not working? Make sure cell A2 in the "Losenord Booking" tab is filled in. Users may need to refresh the page.',
   ]);
 
   y += 4;
   subheading('Quick reference:');
   bulletList([
-    'Password: provided by equipment managers',
+    'Inventory password: provided by equipment managers (hardcoded)',
+    'Booking password: set in Google Sheets > Losenord Booking > A2',
     'URL: the /inventory path on the booking website',
     'Supported browsers: Chrome, Edge (full features), Safari, Firefox (no auto-backup)',
   ]);
@@ -617,7 +665,7 @@ export function generateUserGuidePDF(): Blob {
   doc.setFontSize(8);
   doc.setTextColor(150);
   doc.text(
-    `Molkom Rental House - Inventory System User Guide  |  Generated: ${new Date().toLocaleDateString('sv-SE')}`,
+    `Molkom Rental House - Inventory System User Guide v2.0  |  Generated: ${new Date().toLocaleDateString('sv-SE')}`,
     pw / 2, footerY, { align: 'center' }
   );
 
