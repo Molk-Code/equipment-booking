@@ -104,20 +104,20 @@ export default function InventoryHeader() {
                   </>
                 ) : (
                   <p className="inv-pw-panel-desc">
-                    No password set. The booking page is open to everyone. Add a password in the Settings tab to require it.
+                    No password set. The booking page is open to everyone. Add a password in the Lösenord Booking tab to require it.
                   </p>
                 )}
                 <p className="inv-pw-panel-hint">
-                  Change the password in the <strong>Settings</strong> tab in the spreadsheet.
+                  Change the password in the <strong>Lösenord Booking</strong> tab in the spreadsheet.
                 </p>
                 <a
-                  href={sheetUrl}
+                  href={`${sheetUrl}?sheet=${encodeURIComponent('Lösenord Booking')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inv-pw-panel-link"
                 >
                   <ExternalLink size={12} />
-                  Open Spreadsheet
+                  Open Lösenord Booking
                 </a>
               </div>
             )}
