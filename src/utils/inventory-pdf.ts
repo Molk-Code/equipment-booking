@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import type { InventoryProject, ProjectItem, Equipment } from '../types';
+import { calculatePrice } from '../context/CartContext';
 
 // Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
 function formatTimestamp(ts: string): string {
@@ -18,7 +19,8 @@ export function generateContractPDF(
   project: InventoryProject,
   items: ProjectItem[],
   mode: 'checkout' | 'checkin' = 'checkout',
-  equipmentList: Equipment[] = []
+  equipmentList: Equipment[] = [],
+  rentalDays: number = 0
 ): Blob {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -59,7 +61,7 @@ export function generateContractPDF(
   y += 6;
   doc.text(`Checkout Date: ${project.checkoutDate}`, 20, y);
   y += 6;
-  doc.text(`Return Date: ${project.returnDate}`, 20, y);
+  doc.text(`Return Date: ${project.returnDate}${rentalDays > 0 ? ` (${rentalDays} days)` : ''}`, 20, y);
   y += 12;
 
   // Legal terms
@@ -88,10 +90,14 @@ export function generateContractPDF(
   doc.setTextColor(255);
   doc.rect(20, y - 4, pageWidth - 40, 8, 'F');
 
+  const showPrices = rentalDays > 0;
   if (mode === 'checkout') {
     doc.text('#', 22, y);
     doc.text('Equipment', 30, y);
-    doc.text('Scanned At', 140, y);
+    if (showPrices) {
+      doc.text('Price', 130, y);
+    }
+    doc.text('Scanned At', showPrices ? 155 : 140, y);
   } else {
     doc.text('#', 22, y);
     doc.text('Equipment', 30, y);
@@ -137,6 +143,20 @@ export function generateContractPDF(
     return includedMap.get(norm);
   }
 
+  // Build price lookup map
+  const priceMap = new Map<string, number>();
+  equipmentList.forEach(eq => {
+    const normName = eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+    if (!priceMap.has(normName)) {
+      priceMap.set(normName, eq.priceExclVat);
+    }
+  });
+
+  function findDayRate(itemName: string): number {
+    const norm = itemName.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+    return priceMap.get(norm) ?? -1;
+  }
+
   // Table rows
   mergedItems.forEach((merged, index) => {
     const included = findIncluded(merged.name);
@@ -167,7 +187,13 @@ export function generateContractPDF(
       doc.setTextColor(0);
       doc.text(String(index + 1), 22, y);
       doc.text(truncatedName, 30, y);
-      doc.text(displayTimestamp || '', 140, y);
+      if (showPrices) {
+        const dayRate = findDayRate(merged.name);
+        const itemPrice = dayRate > 0 ? calculatePrice(dayRate, rentalDays) * merged.quantity : 0;
+        const priceText = dayRate === 0 ? 'Free' : dayRate > 0 ? `${itemPrice} kr` : '';
+        doc.text(priceText, 130, y);
+      }
+      doc.text(displayTimestamp || '', showPrices ? 155 : 140, y);
     } else {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
@@ -231,6 +257,19 @@ export function generateContractPDF(
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text(`Total items: ${totalItemCount}`, 20, y);
+
+  if (showPrices && mode === 'checkout') {
+    let grandTotal = 0;
+    mergedItems.forEach(merged => {
+      const dayRate = findDayRate(merged.name);
+      if (dayRate > 0) {
+        grandTotal += calculatePrice(dayRate, rentalDays) * merged.quantity;
+      }
+    });
+    if (grandTotal > 0) {
+      doc.text(`Total (excl. VAT): ${grandTotal} kr`, pageWidth - 20, y, { align: 'right' });
+    }
+  }
 
   if (mode === 'checkin') {
     const returned = items.filter(i => i.status === 'returned').length;

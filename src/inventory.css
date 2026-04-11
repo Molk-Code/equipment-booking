@@ -276,6 +276,19 @@
   color: var(--text-primary);
 }
 
+.equipment-total-price {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.equipment-total-days {
+  font-weight: 400;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .inv-section-toggle {
   display: flex;
   align-items: center;
@@ -820,6 +833,15 @@
   flex: 1;
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+.project-item-price {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
 }
 
 .project-item-time {

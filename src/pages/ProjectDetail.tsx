@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Archive,
@@ -9,6 +9,7 @@ import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
 import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
+import { calculatePrice } from '../context/CartContext';
 
 // Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
 function formatTimestamp(ts: string): string {
@@ -79,6 +80,42 @@ export default function ProjectDetail() {
   const missingCount = items.filter(i => i.status === 'missing').length;
   const returnedCount = items.filter(i => i.status === 'returned').length;
   const checkedOutCount = items.filter(i => i.status === 'checked-out').length;
+
+  // Price lookup: match item names to equipment list for day rates
+  const priceMap = useMemo(() => {
+    const map = new Map<string, number>();
+    allEquipment.forEach(eq => {
+      const norm = eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+      if (!map.has(norm)) map.set(norm, eq.priceExclVat);
+    });
+    return map;
+  }, [allEquipment]);
+
+  function getDayRate(itemName: string): number {
+    const norm = itemName.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+    return priceMap.get(norm) ?? -1; // -1 means not found
+  }
+
+  // Rental days from project dates
+  const rentalDays = useMemo(() => {
+    if (!project) return 0;
+    const from = new Date(project.checkoutDate);
+    const to = new Date(project.returnDate);
+    const diff = Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(diff, 1);
+  }, [project]);
+
+  // Total price for all items
+  const totalPrice = useMemo(() => {
+    let total = 0;
+    mergedItems.forEach(group => {
+      const rate = getDayRate(group.name);
+      if (rate > 0) {
+        total += calculatePrice(rate, rentalDays) * group.quantity;
+      }
+    });
+    return total;
+  }, [mergedItems, rentalDays, priceMap]);
 
   // Auto-add scanned items during checkout
   useEffect(() => {
@@ -218,14 +255,14 @@ export default function ProjectDetail() {
 
   const handleDownloadPDF = useCallback((mode: 'checkout' | 'checkin') => {
     if (!project) return;
-    const blob = generateContractPDF(project, items, mode, allEquipment);
+    const blob = generateContractPDF(project, items, mode, allEquipment, rentalDays);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `${project.name.replace(/\s+/g, '_')}_${mode}_contract.pdf`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [project, items, allEquipment]);
+  }, [project, items, allEquipment, rentalDays]);
 
   if (!project) {
     return (
@@ -360,15 +397,25 @@ export default function ProjectDetail() {
             <h3 className="inv-section-title">
               <Package size={18} />
               Equipment ({items.length})
+              {rentalDays > 0 && totalPrice > 0 && (
+                <span className="equipment-total-price">{totalPrice} kr <span className="equipment-total-days">({rentalDays} days)</span></span>
+              )}
             </h3>
             <div className="project-items-list">
               {mergedItems.map((group, i) => {
                 const item = group.representative;
                 const ts = item.checkoutTimestamp;
+                const dayRate = getDayRate(group.name);
+                const itemPrice = dayRate > 0 ? calculatePrice(dayRate, rentalDays) * group.quantity : 0;
                 return (
                   <div key={i}>
                     <div className={`project-item-row status-row-${item.status}`}>
                       <span className="project-item-name">{group.displayName}</span>
+                      {rentalDays > 0 && (
+                        <span className="project-item-price">
+                          {dayRate === 0 ? 'Free' : dayRate > 0 ? `${itemPrice} kr` : ''}
+                        </span>
+                      )}
                       <span className="project-item-time">{formatTimestamp(ts)}</span>
                       <span className={`project-item-status item-status-${item.status}`}>
                         {item.status}
