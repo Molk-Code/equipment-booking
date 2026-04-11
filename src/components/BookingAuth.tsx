@@ -2,12 +2,12 @@ import { useState, useEffect, type ReactNode } from 'react';
 import { Lock } from 'lucide-react';
 import { fetchBookingPassword } from '../utils/booking-password';
 
-const BOOKING_AUTH_KEY = 'booking_authenticated';
+const BOOKING_AUTH_KEY = 'booking_authenticated_pw';
 
 export default function BookingAuth({ children }: { children: ReactNode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem(BOOKING_AUTH_KEY) === 'true');
+  const [authed, setAuthed] = useState(false);
   const [requiredPw, setRequiredPw] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,6 +15,21 @@ export default function BookingAuth({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchBookingPassword().then(pw => {
       setRequiredPw(pw);
+
+      // Check if previously authenticated with the SAME password
+      const storedPw = sessionStorage.getItem(BOOKING_AUTH_KEY);
+      if (pw && storedPw === pw) {
+        setAuthed(true);
+      } else if (pw && storedPw && storedPw !== pw) {
+        // Password changed — invalidate old session
+        sessionStorage.removeItem(BOOKING_AUTH_KEY);
+        setAuthed(false);
+      } else if (!pw) {
+        // No password required — clear any stored auth
+        sessionStorage.removeItem(BOOKING_AUTH_KEY);
+        setAuthed(true);
+      }
+
       setLoading(false);
     });
   }, []);
@@ -29,7 +44,7 @@ export default function BookingAuth({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  // Already authenticated this session
+  // Already authenticated with current password
   if (authed) {
     return <>{children}</>;
   }
@@ -37,7 +52,7 @@ export default function BookingAuth({ children }: { children: ReactNode }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === requiredPw) {
-      sessionStorage.setItem(BOOKING_AUTH_KEY, 'true');
+      sessionStorage.setItem(BOOKING_AUTH_KEY, requiredPw);
       setAuthed(true);
       setError('');
     } else {
