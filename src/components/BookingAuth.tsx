@@ -1,16 +1,28 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Lock } from 'lucide-react';
+import { fetchBookingPassword } from '../utils/booking-password';
 
-const BOOKING_PW_KEY = 'booking_page_password';
 const BOOKING_AUTH_KEY = 'booking_authenticated';
 
 export default function BookingAuth({ children }: { children: ReactNode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [authed, setAuthed] = useState(() => sessionStorage.getItem(BOOKING_AUTH_KEY) === 'true');
+  const [requiredPw, setRequiredPw] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check if a booking password is set
-  const requiredPw = localStorage.getItem(BOOKING_PW_KEY);
+  // Fetch booking password from Google Sheet on mount
+  useEffect(() => {
+    fetchBookingPassword().then(pw => {
+      setRequiredPw(pw);
+      setLoading(false);
+    });
+  }, []);
+
+  // Still loading — show nothing to avoid flash
+  if (loading) {
+    return null;
+  }
 
   // No password set — booking page is open
   if (!requiredPw) {

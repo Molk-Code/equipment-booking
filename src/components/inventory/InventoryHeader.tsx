@@ -1,25 +1,36 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Clapperboard, LayoutDashboard, PlusCircle, BarChart3, ArrowLeft, KeyRound, Check, X } from 'lucide-react';
+import { Clapperboard, LayoutDashboard, PlusCircle, BarChart3, ArrowLeft, KeyRound, ExternalLink } from 'lucide-react';
+import { fetchBookingPassword } from '../../utils/booking-password';
 
-const BOOKING_PW_KEY = 'booking_page_password';
+const SHEET_ID = '1rKKqBm0jRJ_KixzhIXZrwJk7UbuqWFWtJzdBCk91sv4';
 
 export default function InventoryHeader() {
   const location = useLocation();
   const path = location.pathname;
   const [showPwPanel, setShowPwPanel] = useState(false);
-  const [bookingPw, setBookingPw] = useState(() => localStorage.getItem(BOOKING_PW_KEY) || '');
-  const [pwInput, setPwInput] = useState('');
-  const [pwSaved, setPwSaved] = useState(false);
+  const [bookingPw, setBookingPw] = useState('');
+  const [pwLoading, setPwLoading] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Init input with current password when panel opens
+  // Fetch current password from sheet on mount
+  useEffect(() => {
+    fetchBookingPassword().then(pw => {
+      setBookingPw(pw);
+      setPwLoading(false);
+    });
+  }, []);
+
+  // Refresh when panel opens
   useEffect(() => {
     if (showPwPanel) {
-      setPwInput(bookingPw);
-      setPwSaved(false);
+      setPwLoading(true);
+      fetchBookingPassword().then(pw => {
+        setBookingPw(pw);
+        setPwLoading(false);
+      });
     }
-  }, [showPwPanel, bookingPw]);
+  }, [showPwPanel]);
 
   // Close panel on outside click
   useEffect(() => {
@@ -33,27 +44,7 @@ export default function InventoryHeader() {
     return () => document.removeEventListener('mousedown', handle);
   }, [showPwPanel]);
 
-  const savePw = () => {
-    const trimmed = pwInput.trim();
-    if (trimmed) {
-      localStorage.setItem(BOOKING_PW_KEY, trimmed);
-    } else {
-      localStorage.removeItem(BOOKING_PW_KEY);
-    }
-    setBookingPw(trimmed);
-    setPwSaved(true);
-    setTimeout(() => setShowPwPanel(false), 800);
-  };
-
-  const removePw = () => {
-    localStorage.removeItem(BOOKING_PW_KEY);
-    setBookingPw('');
-    setPwInput('');
-    setPwSaved(false);
-    // Also clear any existing booking auth so visitors need to re-authenticate
-    sessionStorage.removeItem('booking_authenticated');
-    setTimeout(() => setShowPwPanel(false), 400);
-  };
+  const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 
   return (
     <header className="header">
@@ -88,12 +79,12 @@ export default function InventoryHeader() {
             <span>Statistics</span>
           </Link>
 
-          {/* Booking password toggle */}
+          {/* Booking password display */}
           <div className="inv-nav-pw-wrap" ref={panelRef}>
             <button
               className={`inv-nav-link inv-nav-pw-btn ${bookingPw ? 'pw-active' : ''}`}
               onClick={() => setShowPwPanel(v => !v)}
-              title={bookingPw ? 'Booking page password is set' : 'Set booking page password'}
+              title={bookingPw ? 'Booking page password is set' : 'No booking page password'}
             >
               <KeyRound size={16} />
               <span>Password</span>
@@ -102,36 +93,32 @@ export default function InventoryHeader() {
             {showPwPanel && (
               <div className="inv-pw-panel">
                 <div className="inv-pw-panel-title">Booking Page Password</div>
-                <p className="inv-pw-panel-desc">
-                  {bookingPw
-                    ? 'Visitors must enter this password to access the booking page.'
-                    : 'No password set. The booking page is open to everyone.'}
-                </p>
-                <div className="inv-pw-panel-row">
-                  <input
-                    type="text"
-                    className="inv-pw-panel-input"
-                    value={pwInput}
-                    onChange={e => setPwInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') savePw(); }}
-                    placeholder="Enter password..."
-                    autoFocus
-                  />
-                  <button
-                    className="inv-pw-panel-save"
-                    onClick={savePw}
-                    disabled={!pwInput.trim()}
-                    title="Save password"
-                  >
-                    {pwSaved ? <Check size={14} /> : 'Set'}
-                  </button>
-                </div>
-                {bookingPw && (
-                  <button className="inv-pw-panel-remove" onClick={removePw}>
-                    <X size={12} />
-                    Remove password (make booking open)
-                  </button>
+                {pwLoading ? (
+                  <p className="inv-pw-panel-desc">Loading...</p>
+                ) : bookingPw ? (
+                  <>
+                    <p className="inv-pw-panel-desc">
+                      Students must enter this password to access the booking page:
+                    </p>
+                    <div className="inv-pw-panel-current">{bookingPw}</div>
+                  </>
+                ) : (
+                  <p className="inv-pw-panel-desc">
+                    No password set. The booking page is open to everyone. Add a password in the Settings tab to require it.
+                  </p>
                 )}
+                <p className="inv-pw-panel-hint">
+                  Change the password in the <strong>Settings</strong> tab in the spreadsheet.
+                </p>
+                <a
+                  href={sheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inv-pw-panel-link"
+                >
+                  <ExternalLink size={12} />
+                  Open Spreadsheet
+                </a>
               </div>
             )}
           </div>
