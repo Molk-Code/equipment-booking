@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw, BookOpen, Lock, LockOpen } from 'lucide-react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
@@ -14,7 +14,6 @@ import {
   getLastExportTime,
 } from '../utils/auto-backup';
 import { generateUserGuidePDF } from '../utils/inventory-pdf';
-import { fetchBookingPassword } from '../utils/booking-password';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
@@ -24,13 +23,7 @@ export default function InventoryDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [autoBackupEnabled, setAutoBackupEnabled] = useState(false);
   const [lastAutoExport, setLastAutoExport] = useState<string | null>(null);
-  const [bookingPassword, setBookingPassword] = useState<string | null>(null);
   const fsSupported = isFileSystemAccessSupported();
-
-  // Fetch current booking password from Google Sheets
-  useEffect(() => {
-    fetchBookingPassword().then(pw => setBookingPassword(pw));
-  }, []);
 
   // Check auto-backup status and start timer on mount
   useEffect(() => {
@@ -195,24 +188,6 @@ export default function InventoryDashboard() {
             </div>
           )}
         </div>
-
-        {/* Booking Password Status */}
-        {bookingPassword !== null && (
-          <div className="booking-pw-status">
-            {bookingPassword ? (
-              <>
-                <Lock size={14} />
-                <span>Booking page password: <strong>{bookingPassword}</strong></span>
-              </>
-            ) : (
-              <>
-                <LockOpen size={14} />
-                <span>Booking page is <strong>open</strong> (no password)</span>
-              </>
-            )}
-            <span className="booking-pw-hint">Change in Google Sheets → Lösenord Booking → A2</span>
-          </div>
-        )}
 
         {/* Active Projects */}
         <section className="inv-section">

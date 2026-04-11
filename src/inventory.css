@@ -247,30 +247,6 @@
   border-color: var(--border-light);
 }
 
-.booking-pw-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
-  margin-bottom: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  flex-wrap: wrap;
-}
-
-.booking-pw-status strong {
-  color: var(--text);
-}
-
-.booking-pw-hint {
-  margin-left: auto;
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-
 .inv-stat-value {
   display: block;
   font-size: 1.5rem;
