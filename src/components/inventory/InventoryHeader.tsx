@@ -111,7 +111,7 @@ export default function InventoryHeader() {
                   Change the password in the <strong>Lösenord Booking</strong> tab in the spreadsheet.
                 </p>
                 <a
-                  href={`${sheetUrl}?sheet=${encodeURIComponent('Lösenord Booking')}`}
+                  href={`${sheetUrl}#gid=680730864`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inv-pw-panel-link"

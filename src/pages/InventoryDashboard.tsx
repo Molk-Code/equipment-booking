@@ -277,78 +277,81 @@ export default function InventoryDashboard() {
             )}
           </section>
         )}
-        {/* Backup / Restore */}
-        <section className="inv-section" style={{ marginTop: '2rem' }}>
-          <h2 className="inv-section-title" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Data Backup
-          </h2>
+        {/* Settings & Tools — visually separated */}
+        <div className="inv-settings-area">
+          {/* Backup / Restore */}
+          <section className="inv-section">
+            <h2 className="inv-section-title" style={{ fontSize: '0.85rem' }}>
+              Data Backup
+            </h2>
 
-          {/* Auto-backup controls */}
-          {fsSupported && (
-            <div className="auto-backup-section">
-              {autoBackupEnabled ? (
-                <div className="auto-backup-status">
-                  <span className="auto-backup-active">
-                    <RefreshCw size={14} />
-                    Auto-backup active
-                  </span>
-                  {lastAutoExport && (
-                    <span className="auto-backup-time">
-                      Last saved: {new Date(lastAutoExport).toLocaleString('sv-SE')}
+            {/* Auto-backup controls */}
+            {fsSupported && (
+              <div className="auto-backup-section">
+                {autoBackupEnabled ? (
+                  <div className="auto-backup-status">
+                    <span className="auto-backup-active">
+                      <RefreshCw size={14} />
+                      Auto-backup active
                     </span>
-                  )}
-                  <button className="secondary-btn small-btn" onClick={handleDisableAutoBackup}>
-                    Disable
-                  </button>
-                </div>
-              ) : (
-                <div className="auto-backup-setup">
-                  <button className="primary-btn" onClick={handleEnableAutoBackup}>
-                    <RefreshCw size={14} />
-                    Enable Auto-Backup
-                  </button>
-                  <span className="auto-backup-desc">
-                    Saves automatically every hour to a file on this computer. Restores on startup if browser data is cleared.
-                  </span>
-                </div>
-              )}
+                    {lastAutoExport && (
+                      <span className="auto-backup-time">
+                        Last saved: {new Date(lastAutoExport).toLocaleString('sv-SE')}
+                      </span>
+                    )}
+                    <button className="secondary-btn small-btn" onClick={handleDisableAutoBackup}>
+                      Disable
+                    </button>
+                  </div>
+                ) : (
+                  <div className="auto-backup-setup">
+                    <button className="primary-btn" onClick={handleEnableAutoBackup}>
+                      <RefreshCw size={14} />
+                      Enable Auto-Backup
+                    </button>
+                    <span className="auto-backup-desc">
+                      Saves automatically every hour to a file on this computer. Restores on startup if browser data is cleared.
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="backup-actions">
+              <button className="secondary-btn" onClick={handleExportBackup}>
+                <Download size={14} />
+                Manual Export
+              </button>
+              <button className="secondary-btn" onClick={() => fileInputRef.current?.click()}>
+                <Upload size={14} />
+                Manual Import
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                onChange={handleImportBackup}
+              />
             </div>
-          )}
+            {importMsg && <p className="backup-msg">{importMsg}</p>}
+            {!fsSupported && (
+              <p className="backup-hint">
+                Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
+              </p>
+            )}
+          </section>
 
-          <div className="backup-actions">
-            <button className="secondary-btn" onClick={handleExportBackup}>
-              <Download size={14} />
-              Manual Export
-            </button>
-            <button className="secondary-btn" onClick={() => fileInputRef.current?.click()}>
-              <Upload size={14} />
-              Manual Import
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              style={{ display: 'none' }}
-              onChange={handleImportBackup}
-            />
-          </div>
-          {importMsg && <p className="backup-msg">{importMsg}</p>}
-          {!fsSupported && (
-            <p className="backup-hint">
-              Data is stored in this browser's localStorage. Export a backup regularly to avoid data loss if browser data is cleared.
-            </p>
-          )}
-        </section>
-
-        {/* User Guide */}
-        <section className="inv-section" style={{ marginTop: '1rem' }}>
-          <div className="backup-actions">
-            <button className="secondary-btn" onClick={handleDownloadGuide}>
-              <BookOpen size={14} />
-              Download User Guide (PDF)
-            </button>
-          </div>
-        </section>
+          {/* User Guide */}
+          <section className="inv-section" style={{ marginTop: '0.5rem' }}>
+            <div className="backup-actions">
+              <button className="secondary-btn" onClick={handleDownloadGuide}>
+                <BookOpen size={14} />
+                Download User Guide (PDF)
+              </button>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   );

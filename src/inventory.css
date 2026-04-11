@@ -1412,6 +1412,24 @@
   color: var(--danger);
 }
 
+/* ===== Settings Area (visual separator) ===== */
+.inv-settings-area {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  opacity: 0.75;
+}
+
+.inv-settings-area .inv-section {
+  margin-bottom: 0;
+}
+
+.inv-settings-area .inv-section-title {
+  color: var(--text-muted);
+}
+
 /* ===== Backup Actions ===== */
 .backup-actions {
   display: flex;
