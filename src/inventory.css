@@ -137,6 +137,100 @@
   padding-left: 0.85rem;
 }
 
+/* ===== Password Panel in Header ===== */
+
+.inv-nav-pw-wrap {
+  position: relative;
+}
+
+.inv-nav-pw-btn.pw-active {
+  color: var(--accent);
+}
+
+.inv-pw-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 280px;
+  background: var(--bg-card, #1a1a25);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+  padding: 0.85rem;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.inv-pw-panel-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.3rem;
+}
+
+.inv-pw-panel-desc {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 0.6rem;
+  line-height: 1.4;
+}
+
+.inv-pw-panel-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.inv-pw-panel-input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.inv-pw-panel-input:focus {
+  border-color: var(--accent, #00e68a);
+}
+
+.inv-pw-panel-save {
+  padding: 0.4rem 0.7rem;
+  background: var(--accent, #00e68a);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.inv-pw-panel-save:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.inv-pw-panel-remove {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #ff5555;
+  font-size: 0.72rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.inv-pw-panel-remove:hover {
+  opacity: 1;
+}
+
 /* ===== Stats Row ===== */
 .inv-stats-row {
   display: grid;

@@ -5,6 +5,7 @@ import ProjectCreate from './pages/ProjectCreate';
 import ProjectDetail from './pages/ProjectDetail';
 import InventoryStats from './pages/InventoryStats';
 import InventoryAuth from './components/inventory/InventoryAuth';
+import BookingAuth from './components/BookingAuth';
 
 export default function AppRouter() {
   return (
@@ -15,8 +16,8 @@ export default function AppRouter() {
       <Route path="/inventory/project/:projectId" element={<InventoryAuth><ProjectDetail /></InventoryAuth>} />
       <Route path="/inventory/stats" element={<InventoryAuth><InventoryStats /></InventoryAuth>} />
 
-      {/* Existing booking app (catch-all) */}
-      <Route path="/*" element={<App />} />
+      {/* Existing booking app (catch-all) — optionally password protected */}
+      <Route path="/*" element={<BookingAuth><App /></BookingAuth>} />
     </Routes>
   );
 }
