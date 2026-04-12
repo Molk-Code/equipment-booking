@@ -531,8 +531,8 @@ export default function InventoryStats() {
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
-                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className="all-projects-date">{proj.checkoutDate}</span>
+                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className={`bs-popup-status active`}>Active</span>
                               </Link>
                             );
@@ -554,8 +554,8 @@ export default function InventoryStats() {
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
-                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className="all-projects-date">{proj.checkoutDate}</span>
+                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className={`bs-popup-status archived`}>Archived</span>
                               </Link>
                             );
