@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle, Users } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
 import { useInventory } from '../context/InventoryContext';
+import { calculatePrice } from '../context/CartContext';
 
 type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'checked-out' | 'borrowers' | 'projects';
 
@@ -31,6 +32,32 @@ export default function InventoryStats() {
   const borrowerStats = getBorrowerStats();
 
   const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
+
+  // Price lookup map for project cost calculations
+  const priceMap = useMemo(() => {
+    const map = new Map<string, number>();
+    allEquipment.forEach(eq => {
+      const norm = eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+      if (!map.has(norm)) map.set(norm, eq.priceExclVat);
+    });
+    return map;
+  }, [allEquipment]);
+
+  function getProjectCost(projectId: string): number {
+    const proj = projects.find(p => p.id === projectId);
+    if (!proj) return 0;
+    const from = new Date(proj.checkoutDate);
+    const to = new Date(proj.returnDate);
+    const days = Math.max(Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)), 1);
+    const items = projectItems.filter(i => i.projectId === projectId);
+    let total = 0;
+    items.forEach(item => {
+      const norm = item.equipmentName.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+      const dayRate = priceMap.get(norm) ?? 0;
+      if (dayRate > 0) total += calculatePrice(dayRate, days);
+    });
+    return total;
+  }
 
   const getBorrowerProjects = (borrowerName: string): string[] => {
     const nameLower = borrowerName.toLowerCase();
@@ -492,39 +519,47 @@ export default function InventoryStats() {
                       {active.length > 0 && (
                         <div className="all-projects-group">
                           <h4 className="all-projects-group-title">Active ({active.length})</h4>
-                          {active.map(proj => (
-                            <Link
-                              key={proj.id}
-                              to={`/inventory/project/${proj.id}`}
-                              className="all-projects-row"
-                            >
-                              <span className="all-projects-name">{proj.name}</span>
-                              <span className="all-projects-meta">
-                                {proj.borrowers.join(', ')}
-                              </span>
-                              <span className="all-projects-date">{proj.checkoutDate}</span>
-                              <span className={`bs-popup-status active`}>Active</span>
-                            </Link>
-                          ))}
+                          {active.map(proj => {
+                            const cost = getProjectCost(proj.id);
+                            return (
+                              <Link
+                                key={proj.id}
+                                to={`/inventory/project/${proj.id}`}
+                                className="all-projects-row"
+                              >
+                                <span className="all-projects-name">{proj.name}</span>
+                                <span className="all-projects-meta">
+                                  {proj.borrowers.join(', ')}
+                                </span>
+                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
+                                <span className="all-projects-date">{proj.checkoutDate}</span>
+                                <span className={`bs-popup-status active`}>Active</span>
+                              </Link>
+                            );
+                          })}
                         </div>
                       )}
                       {archived.length > 0 && (
                         <div className="all-projects-group">
                           <h4 className="all-projects-group-title">Archived ({archived.length})</h4>
-                          {archived.map(proj => (
-                            <Link
-                              key={proj.id}
-                              to={`/inventory/project/${proj.id}`}
-                              className="all-projects-row"
-                            >
-                              <span className="all-projects-name">{proj.name}</span>
-                              <span className="all-projects-meta">
-                                {proj.borrowers.join(', ')}
-                              </span>
-                              <span className="all-projects-date">{proj.checkoutDate}</span>
-                              <span className={`bs-popup-status archived`}>Archived</span>
-                            </Link>
-                          ))}
+                          {archived.map(proj => {
+                            const cost = getProjectCost(proj.id);
+                            return (
+                              <Link
+                                key={proj.id}
+                                to={`/inventory/project/${proj.id}`}
+                                className="all-projects-row"
+                              >
+                                <span className="all-projects-name">{proj.name}</span>
+                                <span className="all-projects-meta">
+                                  {proj.borrowers.join(', ')}
+                                </span>
+                                {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
+                                <span className="all-projects-date">{proj.checkoutDate}</span>
+                                <span className={`bs-popup-status archived`}>Archived</span>
+                              </Link>
+                            );
+                          })}
                         </div>
                       )}
                     </>

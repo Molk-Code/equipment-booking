@@ -26,7 +26,7 @@ export default function ProjectDetail() {
     projects, isScanning, scanMode, recentScans,
     getProjectItems, startScanning, stopScanning,
     addItemFromScan, updateProjectStatus, updateItemStatus,
-    removeProjectItem, allEquipment,
+    removeProjectItem, allEquipment, klasslista,
   } = useInventory();
 
   const [manualItemName, setManualItemName] = useState('');
@@ -281,6 +281,24 @@ export default function ProjectDetail() {
   const isArchived = project.status === 'archived' || project.status === 'returned';
   const isCheckedOut = project.status === 'checked-out';
 
+  // Determine film class from borrowers
+  const filmClass = useMemo(() => {
+    if (!klasslista || !project) return '';
+    const film1Set = new Set(klasslista.film1.map(n => n.toLowerCase()));
+    const film2Set = new Set(klasslista.film2.map(n => n.toLowerCase()));
+    let hasFilm1 = false;
+    let hasFilm2 = false;
+    for (const b of project.borrowers) {
+      const lower = b.toLowerCase();
+      if (film1Set.has(lower)) hasFilm1 = true;
+      if (film2Set.has(lower)) hasFilm2 = true;
+    }
+    if (hasFilm1 && hasFilm2) return 'Film 1 & 2';
+    if (hasFilm1) return 'Film 1';
+    if (hasFilm2) return 'Film 2';
+    return '';
+  }, [klasslista, project]);
+
   return (
     <div className="app">
       <InventoryHeader />
@@ -293,7 +311,14 @@ export default function ProjectDetail() {
         {/* Project Header */}
         <div className="project-detail-header">
           <div>
-            <h2 className="inv-page-title">{project.name}</h2>
+            <h2 className="inv-page-title">
+              {project.name}
+              {filmClass && (
+                <span className={`film-class-tag ${filmClass === 'Film 1' ? 'film1' : filmClass === 'Film 2' ? 'film2' : 'film1'}`} style={{ marginLeft: '0.75rem', fontSize: '0.7rem', verticalAlign: 'middle' }}>
+                  {filmClass}
+                </span>
+              )}
+            </h2>
             <div className="project-detail-meta">
               <span><Users size={14} /> {project.borrowers.join(', ')}</span>
               {project.equipmentManager && (

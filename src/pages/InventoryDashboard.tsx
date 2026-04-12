@@ -17,7 +17,25 @@ import { generateUserGuidePDF } from '../utils/inventory-pdf';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
-  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject } = useInventory();
+  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject, klasslista } = useInventory();
+
+  // Determine film class for a project based on borrower names
+  function getFilmClass(borrowers: string[]): string {
+    if (!klasslista) return '';
+    const film1Set = new Set(klasslista.film1.map(n => n.toLowerCase()));
+    const film2Set = new Set(klasslista.film2.map(n => n.toLowerCase()));
+    let hasFilm1 = false;
+    let hasFilm2 = false;
+    for (const b of borrowers) {
+      const lower = b.toLowerCase();
+      if (film1Set.has(lower)) hasFilm1 = true;
+      if (film2Set.has(lower)) hasFilm2 = true;
+    }
+    if (hasFilm1 && hasFilm2) return 'Film 1 & 2';
+    if (hasFilm1) return 'Film 1';
+    if (hasFilm2) return 'Film 2';
+    return '';
+  }
   const [showArchived, setShowArchived] = useState(false);
   const [importMsg, setImportMsg] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -206,6 +224,7 @@ export default function InventoryDashboard() {
                   <ProjectCard
                     project={p}
                     itemCount={getProjectItems(p.id).length}
+                    filmClass={getFilmClass(p.borrowers)}
                   />
                   <button
                     className="archived-delete-btn"
@@ -263,6 +282,7 @@ export default function InventoryDashboard() {
                       project={p}
                       itemCount={getProjectItems(p.id).length}
                       missingCount={getMissingCountForProject(p.id)}
+                      filmClass={getFilmClass(p.borrowers)}
                     />
                     <button
                       className="archived-delete-btn"

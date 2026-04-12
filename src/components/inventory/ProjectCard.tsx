@@ -6,6 +6,7 @@ interface Props {
   project: InventoryProject;
   itemCount: number;
   missingCount?: number;
+  filmClass?: string;
 }
 
 const statusLabels: Record<string, string> = {
@@ -22,11 +23,16 @@ const statusClasses: Record<string, string> = {
   archived: 'status-archived',
 };
 
-export default function ProjectCard({ project, itemCount, missingCount = 0 }: Props) {
+export default function ProjectCard({ project, itemCount, missingCount = 0, filmClass }: Props) {
   return (
     <Link to={`/inventory/project/${project.id}`} className="project-card">
       <div className="project-card-header">
         <Folder size={20} />
+        {filmClass && (
+          <span className={`film-class-tag ${filmClass === 'Film 1' ? 'film1' : 'film2'}`}>
+            {filmClass}
+          </span>
+        )}
         <div className="project-card-badges">
           {missingCount > 0 && (
             <span className="project-missing-badge">
