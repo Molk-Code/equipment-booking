@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Circle, ArrowUpRight } from 'lucide-react';
+import { Search, Circle, ArrowUpRight, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Equipment, ProjectItem, InventoryProject } from '../../types';
 
@@ -49,6 +49,17 @@ function getInstanceNumber(name: string): number {
 
 export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [] }: Props) {
   const [search, setSearch] = useState('');
+  const [detailItem, setDetailItem] = useState<Equipment | null>(null);
+
+  // Find the base equipment record for an expanded item (to get image/included)
+  function findBaseEquipment(eq: Equipment): Equipment {
+    // Already has image or included? Return as-is
+    if (eq.image || (eq.included && eq.included.length > 0)) return eq;
+    // Try to find the parent by stripping instance number
+    const baseName = stripInstanceNumber(eq.name).toLowerCase();
+    const parent = equipment.find(e => e.name.toLowerCase() === baseName);
+    return parent || eq;
+  }
 
   // Expand equipment with quantity > 1 into individual instances (#1, #2, etc.)
   const expandedEquipment = equipment.flatMap(eq => {
@@ -255,7 +266,17 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
 
           return (
             <div key={eq.id} className={`equip-grid-row ${isOut ? 'row-out' : ''} ${isOverdue ? 'row-overdue' : ''} ${isMissing ? 'row-missing' : ''}`}>
-              <span className="equip-grid-name">{eq.name}</span>
+              <span
+                className={`equip-grid-name ${(eq.image || (eq.included && eq.included.length > 0)) ? 'equip-grid-name-clickable' : ''}`}
+                onClick={() => {
+                  const base = findBaseEquipment(eq);
+                  if (base.image || (base.included && base.included.length > 0)) {
+                    setDetailItem(base);
+                  }
+                }}
+              >
+                {eq.name}
+              </span>
               <span className="equip-grid-cat">{eq.category}</span>
               <span className={`equip-grid-status ${isMissing ? 'status-missing' : isOut ? 'status-out' : 'status-available'}`}>
                 <Circle size={8} fill="currentColor" />
@@ -309,6 +330,38 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
           );
         })}
       </div>
+
+      {/* Equipment detail popup (image + included items) */}
+      {detailItem && (
+        <div className="image-modal-overlay" onClick={() => setDetailItem(null)}>
+          <div className="image-modal" onClick={e => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={() => setDetailItem(null)}>
+              <X size={24} />
+            </button>
+            {detailItem.image ? (
+              <img src={detailItem.image} alt={detailItem.name} />
+            ) : (
+              <div className="equip-detail-no-image">{detailItem.name}</div>
+            )}
+            <p className="image-modal-name">{detailItem.name}</p>
+            {detailItem.description && (
+              <p className="image-modal-name" style={{ fontSize: '0.78rem', opacity: 0.6, marginTop: '0.25rem' }}>
+                {detailItem.description}
+              </p>
+            )}
+            {detailItem.included && detailItem.included.length > 0 && (
+              <div className="image-modal-included">
+                <h4>Included</h4>
+                <ul>
+                  {detailItem.included.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
