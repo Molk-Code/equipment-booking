@@ -1,69 +1,8 @@
 // Serverless API endpoint for inventory data (projects & items)
-// Stores data in Google Sheets tabs: "InventoryProjects" and "InventoryItems"
-// Supports GET (fetch all data) and POST (save all data)
-
-import { readSheet, replaceSheetData } from './sheets-auth.js';
-
-const PROJECTS_TAB = 'InventoryProjects';
-const ITEMS_TAB = 'InventoryItems';
-
-// Project columns: id, name, borrowers (JSON), equipmentManager, checkoutDate, returnDate, status, createdAt, updatedAt
-const PROJECT_HEADERS = ['id', 'name', 'borrowers', 'equipmentManager', 'checkoutDate', 'returnDate', 'status', 'createdAt', 'updatedAt'];
-
-// Item columns: projectId, equipmentName, checkoutTimestamp, checkinTimestamp, status, damageNotes
-const ITEM_HEADERS = ['projectId', 'equipmentName', 'checkoutTimestamp', 'checkinTimestamp', 'status', 'damageNotes'];
-
-function projectToRow(p) {
-  return [
-    p.id || '',
-    p.name || '',
-    JSON.stringify(p.borrowers || []),
-    p.equipmentManager || '',
-    p.checkoutDate || '',
-    p.returnDate || '',
-    p.status || 'active',
-    p.createdAt || '',
-    p.updatedAt || '',
-  ];
-}
-
-function rowToProject(row) {
-  let borrowers = [];
-  try { borrowers = JSON.parse(row[2] || '[]'); } catch { borrowers = []; }
-  return {
-    id: row[0] || '',
-    name: row[1] || '',
-    borrowers,
-    equipmentManager: row[3] || '',
-    checkoutDate: row[4] || '',
-    returnDate: row[5] || '',
-    status: row[6] || 'active',
-    createdAt: row[7] || '',
-    updatedAt: row[8] || '',
-  };
-}
-
-function itemToRow(item) {
-  return [
-    item.projectId || '',
-    item.equipmentName || '',
-    item.checkoutTimestamp || '',
-    item.checkinTimestamp || '',
-    item.status || 'checked-out',
-    item.damageNotes || '',
-  ];
-}
-
-function rowToItem(row) {
-  return {
-    projectId: row[0] || '',
-    equipmentName: row[1] || '',
-    checkoutTimestamp: row[2] || '',
-    checkinTimestamp: row[3] || '',
-    status: row[4] || 'checked-out',
-    damageNotes: row[5] || '',
-  };
-}
+// Proxies to a Google Apps Script web app that reads/writes the spreadsheet.
+// No service account needed — the Apps Script runs under your Google account.
+//
+// Set APPS_SCRIPT_URL env var in Vercel to your deployed Apps Script web app URL.
 
 export default async function handler(req, res) {
   // CORS headers
@@ -75,21 +14,28 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
+  if (!APPS_SCRIPT_URL) {
+    return res.status(500).json({ error: 'APPS_SCRIPT_URL not configured in Vercel env vars' });
+  }
+
   try {
     if (req.method === 'GET') {
-      // Fetch all projects and items from Sheets
-      const [projectRows, itemRows] = await Promise.all([
-        readSheet(`${PROJECTS_TAB}!A:I`).catch(() => []),
-        readSheet(`${ITEMS_TAB}!A:F`).catch(() => []),
-      ]);
+      // Fetch all data from Apps Script
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      });
 
-      // Skip header row (first row)
-      const projects = projectRows.slice(1).filter(r => r[0]).map(rowToProject);
-      const items = itemRows.slice(1).filter(r => r[0]).map(rowToItem);
+      // Apps Script redirects (302) when deployed — fetch follows automatically
+      if (!response.ok) {
+        throw new Error(`Apps Script GET failed: ${response.status}`);
+      }
 
+      const data = await response.json();
       return res.status(200).json({
-        projects,
-        items,
+        projects: data.projects || [],
+        items: data.items || [],
         timestamp: Date.now(),
       });
     }
@@ -101,20 +47,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid data: projects and items must be arrays' });
       }
 
-      // Write both tabs in parallel
-      await Promise.all([
-        replaceSheetData(
-          `${PROJECTS_TAB}!A:I`,
-          PROJECT_HEADERS,
-          projects.map(projectToRow)
-        ),
-        replaceSheetData(
-          `${ITEMS_TAB}!A:F`,
-          ITEM_HEADERS,
-          items.map(itemToRow)
-        ),
-      ]);
+      // Post data to Apps Script
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects, items }),
+      });
 
+      if (!response.ok) {
+        throw new Error(`Apps Script POST failed: ${response.status}`);
+      }
+
+      const data = await response.json();
       return res.status(200).json({
         success: true,
         projectCount: projects.length,
