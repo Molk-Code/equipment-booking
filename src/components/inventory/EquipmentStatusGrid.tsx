@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, Circle, ArrowUpRight, X } from 'lucide-react';
+import { Search, Circle, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Equipment, ProjectItem, InventoryProject } from '../../types';
+import EquipmentDetailModal from './EquipmentDetailModal';
 
 interface Props {
   equipment: Equipment[];
@@ -333,34 +334,7 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
 
       {/* Equipment detail popup (image + included items) */}
       {detailItem && (
-        <div className="image-modal-overlay" onClick={() => setDetailItem(null)}>
-          <div className="image-modal" onClick={e => e.stopPropagation()}>
-            <button className="image-modal-close" onClick={() => setDetailItem(null)}>
-              <X size={24} />
-            </button>
-            {detailItem.image ? (
-              <img src={detailItem.image} alt={detailItem.name} />
-            ) : (
-              <div className="equip-detail-no-image">{detailItem.name}</div>
-            )}
-            <p className="image-modal-name">{detailItem.name}</p>
-            {detailItem.description && (
-              <p className="image-modal-name" style={{ fontSize: '0.78rem', opacity: 0.6, marginTop: '0.25rem' }}>
-                {detailItem.description}
-              </p>
-            )}
-            {detailItem.included && detailItem.included.length > 0 && (
-              <div className="image-modal-included">
-                <h4>Included</h4>
-                <ul>
-                  {detailItem.included.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+        <EquipmentDetailModal equipment={detailItem} onClose={() => setDetailItem(null)} />
       )}
     </div>
   );

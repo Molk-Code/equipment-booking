@@ -3,7 +3,9 @@ import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Tr
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
+import EquipmentDetailModal, { findEquipmentByName } from '../components/inventory/EquipmentDetailModal';
 import { useInventory } from '../context/InventoryContext';
+import type { Equipment } from '../types';
 import {
   isFileSystemAccessSupported,
   setupAutoBackup,
@@ -17,7 +19,8 @@ import { generateUserGuidePDF } from '../utils/inventory-pdf';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
-  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject, klasslista } = useInventory();
+  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject, klasslista, allEquipment } = useInventory();
+  const [detailItem, setDetailItem] = useState<Equipment | null>(null);
 
   // Determine film class for a project based on borrower names
   function getFilmClass(borrowers: string[]): string {
@@ -247,13 +250,22 @@ export default function InventoryDashboard() {
               Currently Checked Out Equipment
             </h2>
             <div className="checked-out-list">
-              {checkedOut.slice(0, 20).map((co, i) => (
-                <div key={i} className="checked-out-item">
-                  <span className="co-name">{co.item.equipmentName}</span>
-                  <span className="co-project">{co.project.name}</span>
-                  <span className="co-date">Since {co.item.checkoutTimestamp.split(' ')[0]}</span>
-                </div>
-              ))}
+              {checkedOut.slice(0, 20).map((co, i) => {
+                const matchedEquip = findEquipmentByName(co.item.equipmentName, allEquipment);
+                const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
+                return (
+                  <div key={i} className="checked-out-item">
+                    <span
+                      className={`co-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                      onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                    >
+                      {co.item.equipmentName}
+                    </span>
+                    <span className="co-project">{co.project.name}</span>
+                    <span className="co-date">Since {co.item.checkoutTimestamp.split(' ')[0]}</span>
+                  </div>
+                );
+              })}
               {checkedOut.length > 20 && (
                 <div className="checked-out-more">
                   ...and {checkedOut.length - 20} more items
@@ -372,6 +384,11 @@ export default function InventoryDashboard() {
             </div>
           </section>
         </div>
+
+        {/* Equipment detail popup */}
+        {detailItem && (
+          <EquipmentDetailModal equipment={detailItem} onClose={() => setDetailItem(null)} />
+        )}
       </main>
     </div>
   );

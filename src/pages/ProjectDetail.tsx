@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
+import EquipmentDetailModal, { findEquipmentByName } from '../components/inventory/EquipmentDetailModal';
 import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
 import { calculatePrice } from '../context/CartContext';
@@ -40,6 +41,7 @@ export default function ProjectDetail() {
   const [missingNotes, setMissingNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
+  const [detailItem, setDetailItem] = useState<import('../types').Equipment | null>(null);
 
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
@@ -429,10 +431,17 @@ export default function ProjectDetail() {
                 const ts = item.checkoutTimestamp;
                 const dayRate = getDayRate(group.name);
                 const itemPrice = dayRate > 0 ? calculatePrice(dayRate, rentalDays) * group.quantity : 0;
+                const matchedEquip = findEquipmentByName(group.name, allEquipment);
+                const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
                 return (
                   <div key={i}>
                     <div className={`project-item-row status-row-${item.status}`}>
-                      <span className="project-item-name">{group.displayName}</span>
+                      <span
+                        className={`project-item-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                        onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                      >
+                        {group.displayName}
+                      </span>
                       {rentalDays > 0 && (
                         <span className="project-item-price">
                           {dayRate === 0 ? 'Free' : dayRate > 0 ? `${itemPrice} kr` : ''}
@@ -603,6 +612,11 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {/* Equipment detail popup */}
+        {detailItem && (
+          <EquipmentDetailModal equipment={detailItem} onClose={() => setDetailItem(null)} />
+        )}
+
         {/* Equipment Picker Modal */}
         {equipPickerOpen && (
           <div className="equip-picker-overlay" onClick={() => setEquipPickerOpen(false)}>
@@ -649,7 +663,10 @@ export default function ProjectDetail() {
                 {filteredPickerEquipment.length === 0 ? (
                   <div className="equip-picker-empty">No equipment found</div>
                 ) : (
-                  filteredPickerEquipment.map(eq => (
+                  filteredPickerEquipment.map(eq => {
+                    const eqDayRate = getDayRate(eq.name);
+                    const eqPrice = eqDayRate > 0 && rentalDays > 0 ? calculatePrice(eqDayRate, rentalDays) : 0;
+                    return (
                     <button
                       key={eq.id}
                       className="equip-picker-card"
@@ -662,12 +679,19 @@ export default function ProjectDetail() {
                           <div className="equip-picker-placeholder">{eq.name}</div>
                         )}
                         <span className="equip-picker-cat-tag">{eq.category}</span>
+                        {eqPrice > 0 && (
+                          <span className="equip-picker-price-tag">{eqPrice} kr</span>
+                        )}
+                        {eqDayRate === 0 && (
+                          <span className="equip-picker-price-tag equip-picker-price-free">Free</span>
+                        )}
                       </div>
                       <div className="equip-picker-info">
                         <span className="equip-picker-name">{eq.name}</span>
                       </div>
                     </button>
-                  ))
+                    );
+                  }))
                 )}
               </div>
             </div>

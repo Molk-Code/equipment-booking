@@ -3,8 +3,10 @@ import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Tras
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
+import EquipmentDetailModal, { findEquipmentByName } from '../components/inventory/EquipmentDetailModal';
 import { useInventory } from '../context/InventoryContext';
 import { calculatePrice } from '../context/CartContext';
+import type { Equipment } from '../types';
 
 type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'checked-out' | 'borrowers' | 'projects';
 
@@ -16,6 +18,7 @@ export default function InventoryStats() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string; label?: string } | null>(null);
   const [borrowerPopup, setBorrowerPopup] = useState<{ name: string; type: 'projects' | 'damaged' | 'missing'; projectIds: string[] } | null>(null);
+  const [detailItem, setDetailItem] = useState<Equipment | null>(null);
 
   // Sync tab with URL param when it changes
   useEffect(() => {
@@ -99,6 +102,23 @@ export default function InventoryStats() {
       default: return status;
     }
   };
+
+  // Determine film class from borrower names
+  function getFilmClass(borrowers: string[]): string {
+    if (!klasslista) return '';
+    const film1Set = new Set(klasslista.film1.map(n => n.toLowerCase()));
+    const film2Set = new Set(klasslista.film2.map(n => n.toLowerCase()));
+    let hasFilm1 = false, hasFilm2 = false;
+    for (const b of borrowers) {
+      const lower = b.toLowerCase();
+      if (film1Set.has(lower)) hasFilm1 = true;
+      if (film2Set.has(lower)) hasFilm2 = true;
+    }
+    if (hasFilm1 && hasFilm2) return 'Film 1 & 2';
+    if (hasFilm1) return 'Film 1';
+    if (hasFilm2) return 'Film 2';
+    return '';
+  }
 
   return (
     <div className="app">
@@ -221,10 +241,18 @@ export default function InventoryStats() {
               <div className="inv-empty">No borrowing data yet.</div>
             ) : (
               <div className="most-borrowed-list">
-                {mostBorrowed.slice(0, 20).map((item, i) => (
+                {mostBorrowed.slice(0, 20).map((item, i) => {
+                  const matchedEquip = findEquipmentByName(item.name, allEquipment);
+                  const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
+                  return (
                   <div key={item.name} className="most-borrowed-row">
                     <span className="most-borrowed-rank">#{i + 1}</span>
-                    <span className="most-borrowed-name">{item.name}</span>
+                    <span
+                      className={`most-borrowed-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                      onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                    >
+                      {item.name}
+                    </span>
                     <div className="most-borrowed-bar-wrap">
                       <div
                         className="most-borrowed-bar"
@@ -233,7 +261,8 @@ export default function InventoryStats() {
                     </div>
                     <span className="most-borrowed-count">{item.count}x</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
@@ -261,9 +290,16 @@ export default function InventoryStats() {
               <div className="damaged-items-list">
                 {damaged.map((item, i) => {
                   const project = projects.find(p => p.id === item.projectId);
+                  const matchedEquip = findEquipmentByName(item.equipmentName, allEquipment);
+                  const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
                   return (
                     <div key={i} className="damaged-item-row">
-                      <span className="damaged-item-name">{item.equipmentName}</span>
+                      <span
+                        className={`damaged-item-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                        onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                      >
+                        {item.equipmentName}
+                      </span>
                       {project ? (
                         <Link to={`/inventory/project/${project.id}`} className="damaged-item-project clickable-project">
                           {project.name}
@@ -310,10 +346,18 @@ export default function InventoryStats() {
                 <p className="missing-items-info">
                   Items marked as missing after check-in. If an item is checked out again in a new project, it is automatically removed from this list.
                 </p>
-                {missingItems.map((mi, i) => (
+                {missingItems.map((mi, i) => {
+                  const matchedEquip = findEquipmentByName(mi.item.equipmentName, allEquipment);
+                  const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
+                  return (
                   <div key={i} className="missing-item-row">
                     <XCircle size={16} className="missing-item-icon" />
-                    <span className="missing-item-name">{mi.item.equipmentName}</span>
+                    <span
+                      className={`missing-item-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                      onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                    >
+                      {mi.item.equipmentName}
+                    </span>
                     <Link to={`/inventory/project/${mi.project.id}`} className="missing-item-project clickable-project">
                       {mi.project.name}
                     </Link>
@@ -339,7 +383,8 @@ export default function InventoryStats() {
                       <Trash2 size={14} />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
@@ -521,13 +566,21 @@ export default function InventoryStats() {
                           <h4 className="all-projects-group-title">Active ({active.length})</h4>
                           {active.map(proj => {
                             const cost = getProjectCost(proj.id);
+                            const filmClass = getFilmClass(proj.borrowers);
                             return (
                               <Link
                                 key={proj.id}
                                 to={`/inventory/project/${proj.id}`}
                                 className="all-projects-row"
                               >
-                                <span className="all-projects-name">{proj.name}</span>
+                                <span className="all-projects-name">
+                                  {proj.name}
+                                  {filmClass && (
+                                    <span className={`film-class-tag ${filmClass === 'Film 1' ? 'film1' : filmClass === 'Film 2' ? 'film2' : 'film1'}`} style={{ marginLeft: '0.5rem', fontSize: '0.6rem' }}>
+                                      {filmClass}
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
@@ -544,13 +597,21 @@ export default function InventoryStats() {
                           <h4 className="all-projects-group-title">Archived ({archived.length})</h4>
                           {archived.map(proj => {
                             const cost = getProjectCost(proj.id);
+                            const filmClass = getFilmClass(proj.borrowers);
                             return (
                               <Link
                                 key={proj.id}
                                 to={`/inventory/project/${proj.id}`}
                                 className="all-projects-row"
                               >
-                                <span className="all-projects-name">{proj.name}</span>
+                                <span className="all-projects-name">
+                                  {proj.name}
+                                  {filmClass && (
+                                    <span className={`film-class-tag ${filmClass === 'Film 1' ? 'film1' : filmClass === 'Film 2' ? 'film2' : 'film1'}`} style={{ marginLeft: '0.5rem', fontSize: '0.6rem' }}>
+                                      {filmClass}
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
@@ -628,6 +689,11 @@ export default function InventoryStats() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Equipment detail popup */}
+        {detailItem && (
+          <EquipmentDetailModal equipment={detailItem} onClose={() => setDetailItem(null)} />
         )}
       </main>
     </div>

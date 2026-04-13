@@ -2052,6 +2052,24 @@
   color: var(--accent);
 }
 
+.equip-picker-price-tag {
+  position: absolute;
+  bottom: 0.3rem;
+  right: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #4cd964;
+  letter-spacing: 0.02em;
+}
+
+.equip-picker-price-free {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .equip-picker-info {
   padding: 0.5rem 0.6rem 0.55rem;
 }
