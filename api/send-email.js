@@ -24,16 +24,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields: to, subject, pdfBase64, filename' });
     }
 
-    // Send email to equipment managers
-    const recipients = [to];
-    const CC_EMAIL = 'karl.sparre@regionvarmland.se';
-    // Add CC if not already the primary recipient
-    const cc = to.toLowerCase() !== CC_EMAIL.toLowerCase() ? [CC_EMAIL] : [];
+    // Note: Resend free tier (onboarding@resend.dev) can only send to the
+    // account owner's email. CC to other addresses causes the entire send to
+    // fail. So we send the primary email first, then try CC as a separate
+    // email that silently fails if Resend rejects it.
 
     const emailPayload = {
       from: 'Molkom Rental House <onboarding@resend.dev>',
-      to: recipients,
-      ...(cc.length > 0 && { cc }),
+      to: [to],
       subject: subject,
       html: html || '<p>See attached booking PDF.</p>',
       attachments: [
@@ -61,10 +59,32 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: msg });
     }
 
-    // Note: Resend free tier (onboarding@resend.dev) can only send to the
-    // account owner's email. Confirmation emails to students are skipped here.
-    // To enable sending to students, verify a domain at resend.com/domains
-    // and update the "from" address above.
+    // Try to also send a copy to Karl (best-effort, won't block primary email)
+    const CC_EMAIL = 'karl.sparre@regionvarmland.se';
+    if (to.toLowerCase() !== CC_EMAIL.toLowerCase()) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Molkom Rental House <onboarding@resend.dev>',
+            to: [CC_EMAIL],
+            subject: `[CC] ${subject}`,
+            html: html || '<p>See attached booking PDF.</p>',
+            attachments: [{ filename, content: pdfBase64 }],
+          }),
+        });
+      } catch (ccErr) {
+        // CC failed silently — free tier may not allow sending to this address
+        console.warn('CC email to Karl failed (free tier restriction):', ccErr.message || ccErr);
+      }
+    }
+
+    // To enable sending to any recipient (including CC and student confirmations),
+    // verify a domain at resend.com/domains and update the "from" address above.
 
     return res.status(200).json({ success: true, id: data.id });
   } catch (err) {
