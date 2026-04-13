@@ -692,7 +692,7 @@ export default function ProjectDetail() {
                     </button>
                     );
                   }))
-                )}
+                }
               </div>
             </div>
           </div>
