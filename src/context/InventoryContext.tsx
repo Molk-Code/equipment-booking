@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus, Klasslista } from '../types';
 import { fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
 import { fetchEquipment } from '../utils/sheets';
 import { fetchKlasslista } from '../utils/klasslista-sheets';
 import * as api from '../utils/inventory-api';
+import { fetchFromServer } from '../utils/inventory-api';
 
 export interface BorrowerStat {
   name: string;
@@ -49,13 +50,10 @@ const InventoryContext = createContext<InventoryContextType | null>(null);
 const LS_PROJECTS = 'inventory_projects';
 const LS_ITEMS = 'inventory_items';
 
+// Quick localStorage reads for initial render (before server data arrives)
 function loadLocalProjects(): InventoryProject[] {
   try { return JSON.parse(localStorage.getItem(LS_PROJECTS) || '[]'); }
   catch { return []; }
-}
-
-function saveLocalProjects(projects: InventoryProject[]) {
-  localStorage.setItem(LS_PROJECTS, JSON.stringify(projects));
 }
 
 function loadLocalItems(): ProjectItem[] {
@@ -63,9 +61,7 @@ function loadLocalItems(): ProjectItem[] {
   catch { return []; }
 }
 
-function saveLocalItems(items: ProjectItem[]) {
-  localStorage.setItem(LS_ITEMS, JSON.stringify(items));
-}
+const SYNC_INTERVAL = 15000; // Poll every 15 seconds
 
 export function InventoryProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<InventoryProject[]>(loadLocalProjects);
@@ -78,10 +74,36 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [stopPoll, setStopPoll] = useState<(() => void) | null>(null);
   const [klasslista, setKlasslista] = useState<Klasslista | null>(null);
   const [klasslistaLoading, setKlasslistaLoading] = useState(false);
+  const syncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Persist to localStorage whenever projects/items change
-  useEffect(() => { saveLocalProjects(projects); }, [projects]);
-  useEffect(() => { saveLocalItems(projectItems); }, [projectItems]);
+  // Load data from server on mount (Google Sheets), fall back to localStorage
+  useEffect(() => {
+    let cancelled = false;
+    fetchFromServer().then(data => {
+      if (!cancelled) {
+        setProjects(data.projects);
+        setProjectItems(data.items);
+      }
+    }).catch(err => {
+      console.warn('Server fetch failed, using local cache:', err.message);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Poll server for updates every SYNC_INTERVAL ms
+  useEffect(() => {
+    syncTimerRef.current = setInterval(() => {
+      fetchFromServer().then(data => {
+        setProjects(data.projects);
+        setProjectItems(data.items);
+      }).catch(() => {
+        // Silently fail — local cache is still valid
+      });
+    }, SYNC_INTERVAL);
+    return () => {
+      if (syncTimerRef.current) clearInterval(syncTimerRef.current);
+    };
+  }, []);
 
   const loadEquipment = useCallback(async () => {
     setLoading(true);
