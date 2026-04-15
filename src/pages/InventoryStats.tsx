@@ -35,7 +35,6 @@ export default function InventoryStats() {
   const overdue = getOverdueEquipment();
   const borrowerStats = getBorrowerStats();
 
-  const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
 
   // Count manual checkout items (items not matching any equipment in inventory)
   const manualCheckoutCount = useMemo(() => {
