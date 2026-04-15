@@ -272,6 +272,7 @@ export default function InventoryDashboard() {
                       onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                     >
                       {co.item.equipmentName}
+                      {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                     </span>
                     <span className="co-project">{co.project.name}</span>
                     <span className="co-date">Since {co.item.checkoutTimestamp.split(' ')[0]}</span>

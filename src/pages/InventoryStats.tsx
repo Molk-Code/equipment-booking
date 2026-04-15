@@ -37,6 +37,17 @@ export default function InventoryStats() {
 
   const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
 
+  // Count manual checkout items (items not matching any equipment in inventory)
+  const manualCheckoutCount = useMemo(() => {
+    const equipNameSet = new Set(
+      allEquipment.map(eq => eq.name.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim())
+    );
+    return projectItems.filter(item => {
+      const norm = item.equipmentName.toLowerCase().replace(/\s*#\d+/g, '').replace(/\s*\(.*?\)/g, '').trim();
+      return !equipNameSet.has(norm);
+    }).length;
+  }, [allEquipment, projectItems]);
+
   // Price lookup map for project cost calculations
   const priceMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -96,6 +107,12 @@ export default function InventoryStats() {
     return [...idsWithMissing];
   };
 
+  // Strip ISO time portion: "2026-04-12T22:00:00.000Z" → "2026-04-12"
+  function formatDate(d: string): string {
+    if (!d) return '';
+    return d.includes('T') ? d.split('T')[0] : d;
+  }
+
   const statusLabel = (status: string) => {
     switch (status) {
       case 'active': case 'checked-out': return 'Active';
@@ -135,7 +152,7 @@ export default function InventoryStats() {
           Statistics & Inventory
         </h2>
 
-        {/* Stats Overview */}
+        {/* Stats Overview — always visible */}
         <div className="inv-stats-row">
           <div className="inv-stat-card clickable" onClick={() => setActiveTab('equipment')}>
             <Package size={20} />
@@ -151,31 +168,6 @@ export default function InventoryStats() {
               <span className="inv-stat-label">Currently Out</span>
             </div>
           </div>
-          {overdue.length > 0 && (
-            <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('overdue')}>
-              <Clock size={20} />
-              <div>
-                <span className="inv-stat-value">{overdue.length}</span>
-                <span className="inv-stat-label">Overdue</span>
-              </div>
-            </div>
-          )}
-          <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('damaged')}>
-            <AlertTriangle size={20} />
-            <div>
-              <span className="inv-stat-value">{damaged.length}</span>
-              <span className="inv-stat-label">Damaged Items</span>
-            </div>
-          </div>
-          {missingItems.length > 0 && (
-            <div className="inv-stat-card danger clickable" onClick={() => setActiveTab('missing')}>
-              <XCircle size={20} />
-              <div>
-                <span className="inv-stat-value">{missingItems.length}</span>
-                <span className="inv-stat-label">Missing Items</span>
-              </div>
-            </div>
-          )}
           <div className="inv-stat-card clickable" onClick={() => setActiveTab('projects')}>
             <BarChart3 size={20} />
             <div>
@@ -183,15 +175,20 @@ export default function InventoryStats() {
               <span className="inv-stat-label">Total Projects</span>
             </div>
           </div>
-          {totalStudents > 0 && (
-            <div className="inv-stat-card clickable" onClick={() => setActiveTab('borrowers')}>
-              <Users size={20} />
-              <div>
-                <span className="inv-stat-value">{totalStudents}</span>
-                <span className="inv-stat-label">Students</span>
-              </div>
+          <div className="inv-stat-card danger clickable" onClick={() => setActiveTab('missing')}>
+            <XCircle size={20} />
+            <div>
+              <span className="inv-stat-value">{missingItems.length}</span>
+              <span className="inv-stat-label">Missing Items</span>
             </div>
-          )}
+          </div>
+          <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('damaged')}>
+            <AlertTriangle size={20} />
+            <div>
+              <span className="inv-stat-value">{damaged.length}</span>
+              <span className="inv-stat-label">Damaged Items</span>
+            </div>
+          </div>
         </div>
 
         {/* Tab navigation */}
@@ -230,7 +227,7 @@ export default function InventoryStats() {
             className={`inv-tab ${activeTab === 'checked-out' ? 'active' : ''}`}
             onClick={() => setActiveTab('checked-out')}
           >
-            Manual Checkouts
+            Manual Checkouts ({manualCheckoutCount})
           </button>
           <button
             className={`inv-tab ${activeTab === 'borrowers' ? 'active' : ''}`}
@@ -268,6 +265,7 @@ export default function InventoryStats() {
                       onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                     >
                       {item.name}
+                      {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                     </span>
                     <div className="most-borrowed-bar-wrap">
                       <div
@@ -290,6 +288,7 @@ export default function InventoryStats() {
               equipment={allEquipment}
               checkedOut={checkedOut}
               missingItems={missingItems}
+              damagedItems={damaged}
             />
           </section>
         )}
@@ -317,6 +316,7 @@ export default function InventoryStats() {
                         onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                       >
                         {o.item.equipmentName}
+                        {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                       </span>
                       <Link to={`/inventory/project/${o.project.id}`} className="overdue-item-project">
                         {o.project.name}
@@ -352,6 +352,7 @@ export default function InventoryStats() {
                         onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                       >
                         {item.equipmentName}
+                        {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                       </span>
                       {project ? (
                         <Link to={`/inventory/project/${project.id}`} className="damaged-item-project clickable-project">
@@ -410,6 +411,7 @@ export default function InventoryStats() {
                       onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                     >
                       {mi.item.equipmentName}
+                      {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                     </span>
                     <Link to={`/inventory/project/${mi.project.id}`} className="missing-item-project clickable-project">
                       {mi.project.name}
@@ -637,7 +639,7 @@ export default function InventoryStats() {
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
-                                <span className="all-projects-date">{proj.checkoutDate}</span>
+                                <span className="all-projects-date">{formatDate(proj.checkoutDate)}</span>
                                 {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className={`bs-popup-status active`}>Active</span>
                               </Link>
@@ -668,7 +670,7 @@ export default function InventoryStats() {
                                 <span className="all-projects-meta">
                                   {proj.borrowers.join(', ')}
                                 </span>
-                                <span className="all-projects-date">{proj.checkoutDate}</span>
+                                <span className="all-projects-date">{formatDate(proj.checkoutDate)}</span>
                                 {cost > 0 && <span className="all-projects-cost">{cost} kr</span>}
                                 <span className={`bs-popup-status archived`}>Archived</span>
                               </Link>

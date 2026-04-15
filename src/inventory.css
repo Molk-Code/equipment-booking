@@ -2236,6 +2236,30 @@
   color: var(--danger);
 }
 
+/* ===== Equipment Status Grid — Damaged ===== */
+.equip-grid-row.row-damaged {
+  background: rgba(255, 165, 0, 0.06);
+}
+
+.equip-grid-status.status-damaged {
+  color: #ff9f43;
+}
+
+/* ===== Inventory Location Tag ===== */
+.equip-location-tag {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .inv-nav {

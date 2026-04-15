@@ -13,6 +13,12 @@ import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
 import { calculatePrice } from '../context/CartContext';
 
+// Strip ISO time portion: "2026-04-12T22:00:00.000Z" → "2026-04-12"
+function formatDate(d: string): string {
+  if (!d) return '';
+  return d.includes('T') ? d.split('T')[0] : d;
+}
+
 // Normalize timestamp for display: strip manual_ prefix, extract just HH:MM
 function formatTimestamp(ts: string): string {
   let clean = ts.startsWith('manual_') ? ts.replace('manual_', '') : ts;
@@ -480,7 +486,7 @@ export default function ProjectDetail() {
               {project.equipmentManager && (
                 <span><Wrench size={14} /> Manager: {project.equipmentManager}</span>
               )}
-              <span><Calendar size={14} /> {project.checkoutDate} — {project.returnDate}</span>
+              <span><Calendar size={14} /> {formatDate(project.checkoutDate)} — {formatDate(project.returnDate)}</span>
               <span><Package size={14} /> {items.length} items</span>
             </div>
           </div>
@@ -603,6 +609,7 @@ export default function ProjectDetail() {
                         onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
                       >
                         {group.displayName}
+                        {matchedEquip?.location && <span className="equip-location-tag">{matchedEquip.location}</span>}
                       </span>
                       {rentalDays > 0 && (
                         <span className="project-item-price">
@@ -849,7 +856,10 @@ export default function ProjectDetail() {
                         )}
                       </div>
                       <div className="equip-picker-info">
-                        <span className="equip-picker-name">{eq.name}</span>
+                        <span className="equip-picker-name">
+                          {eq.name}
+                          {eq.location && <span className="equip-location-tag">{eq.location}</span>}
+                        </span>
                       </div>
                     </button>
                     );

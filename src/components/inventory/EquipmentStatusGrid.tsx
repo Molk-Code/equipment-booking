@@ -8,6 +8,7 @@ interface Props {
   equipment: Equipment[];
   checkedOut: { item: ProjectItem; project: InventoryProject }[];
   missingItems?: { item: ProjectItem; project: InventoryProject }[];
+  damagedItems?: ProjectItem[];
 }
 
 // Normalize name for matching: lowercase, trim, collapse spaces
@@ -48,7 +49,7 @@ function getInstanceNumber(name: string): number {
   return match ? parseInt(match[1], 10) : 0;
 }
 
-export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [] }: Props) {
+export default function EquipmentStatusGrid({ equipment, checkedOut, missingItems = [], damagedItems = [] }: Props) {
   const [search, setSearch] = useState('');
   const [detailItem, setDetailItem] = useState<Equipment | null>(null);
 
@@ -221,11 +222,33 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
     }
   });
 
-  // Sort: checked out first, then missing, then available
+  // Build set of damaged equipment names for quick lookup
+  const damagedNames = new Set(
+    damagedItems.map(d => normalizeName(d.equipmentName))
+  );
+  const damagedCoreNames = new Set(
+    damagedItems.map(d => coreName(d.equipmentName))
+  );
+
+  function isDamaged(eqName: string): boolean {
+    if (damagedNames.has(normalizeName(eqName))) return true;
+    if (damagedCoreNames.has(coreName(eqName))) return true;
+    const fuzzy = fuzzyNormalize(eqName);
+    for (const d of damagedItems) {
+      if (fuzzyNormalize(d.equipmentName) === fuzzy) return true;
+    }
+    return false;
+  }
+
+  // Sort: Missing (4) > Damaged (3) > Checked Out (2) > Overdue (2) > Available (0)
   const sortedEquipment = [...expandedEquipment].sort((a, b) => {
-    const aOut = findCheckedOut(a.name) ? 2 : findMissing(a.name) ? 1 : 0;
-    const bOut = findCheckedOut(b.name) ? 2 : findMissing(b.name) ? 1 : 0;
-    return bOut - aOut;
+    function sortWeight(name: string): number {
+      if (findMissing(name)) return 4;
+      if (isDamaged(name)) return 3;
+      if (findCheckedOut(name)) return 2;
+      return 0;
+    }
+    return sortWeight(b.name) - sortWeight(a.name);
   });
 
   const filtered = sortedEquipment.filter(e =>
@@ -266,7 +289,7 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
           const isOverdue = isOut && co.project.returnDate < new Date().toISOString().slice(0, 10);
 
           return (
-            <div key={eq.id} className={`equip-grid-row ${isOut ? 'row-out' : ''} ${isOverdue ? 'row-overdue' : ''} ${isMissing ? 'row-missing' : ''}`}>
+            <div key={eq.id} className={`equip-grid-row ${isOut ? 'row-out' : ''} ${isOverdue ? 'row-overdue' : ''} ${isMissing ? 'row-missing' : ''} ${isDamaged(eq.name) ? 'row-damaged' : ''}`}>
               <span
                 className={`equip-grid-name ${(eq.image || (eq.included && eq.included.length > 0)) ? 'equip-grid-name-clickable' : ''}`}
                 onClick={() => {
@@ -277,11 +300,12 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
                 }}
               >
                 {eq.name}
+                {eq.location && <span className="equip-location-tag">{eq.location}</span>}
               </span>
               <span className="equip-grid-cat">{eq.category}</span>
-              <span className={`equip-grid-status ${isMissing ? 'status-missing' : isOut ? 'status-out' : 'status-available'}`}>
+              <span className={`equip-grid-status ${isMissing ? 'status-missing' : isDamaged(eq.name) ? 'status-damaged' : isOut ? 'status-out' : 'status-available'}`}>
                 <Circle size={8} fill="currentColor" />
-                {isMissing ? 'Missing' : isOverdue ? 'Overdue' : isOut ? 'Checked Out' : 'Available'}
+                {isMissing ? 'Missing' : isDamaged(eq.name) ? 'Damaged' : isOverdue ? 'Overdue' : isOut ? 'Checked Out' : 'Available'}
               </span>
               <span className="equip-grid-project">
                 {co ? (
@@ -314,6 +338,7 @@ export default function EquipmentStatusGrid({ equipment, checkedOut, missingItem
                 <Circle size={8} fill="currentColor" />
                 {isMissing ? 'Missing' : isOverdue ? 'Overdue' : isOut ? 'Checked Out' : 'Available'}
               </span>
+
               <span className="equip-grid-project">
                 {extra.co ? (
                   <Link to={`/inventory/project/${extra.co.project.id}`} className="clickable-project">

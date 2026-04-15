@@ -10,6 +10,7 @@ export interface Equipment {
   available?: number;
   included?: string[];
   notes?: string;
+  location?: string;
 }
 
 export interface CartItem {

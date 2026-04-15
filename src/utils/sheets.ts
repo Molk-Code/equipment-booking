@@ -210,6 +210,7 @@ async function fetchFromSheet(): Promise<Equipment[]> {
   const validCategories = new Set(['CAMERA', 'GRIP', 'LIGHTS', 'SOUND', 'LOCATION', 'BOOKS']);
 
   for (const row of rows) {
+    const colA = (row[0] || '').trim(); // Location/inventory place
     const colB = (row[1] || '').trim();
     const colC = (row[2] || '').trim();
     const colD = (row[3] || '').trim();
@@ -243,6 +244,7 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       ? colH.split(',').map(s => s.trim()).filter(Boolean)
       : undefined;
     const notes = colI || undefined;
+    const location = colA || undefined;
 
     rawItems.push({
       id: id++,
@@ -255,6 +257,7 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       filmYear2,
       included,
       notes,
+      location,
     });
   }
 
@@ -286,6 +289,9 @@ async function fetchFromSheet(): Promise<Equipment[]> {
       }
       if (!existing.notes && item.notes) {
         existing.notes = item.notes;
+      }
+      if (!existing.location && item.location) {
+        existing.location = item.location;
       }
     } else {
       deduped.set(key, { ...item, name: base || item.name });
@@ -332,7 +338,7 @@ function itemsChanged(a: Equipment[], b: Equipment[]): boolean {
   for (let i = 0; i < a.length; i++) {
     if (a[i].name !== b[i].name || a[i].image !== b[i].image ||
         a[i].category !== b[i].category || a[i].priceExclVat !== b[i].priceExclVat ||
-        a[i].description !== b[i].description) {
+        a[i].description !== b[i].description || a[i].location !== b[i].location) {
       return true;
     }
   }

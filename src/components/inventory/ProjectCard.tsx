@@ -9,6 +9,12 @@ interface Props {
   filmClass?: string;
 }
 
+// Strip ISO time portion: "2026-04-12T22:00:00.000Z" → "2026-04-12"
+function formatDate(d: string): string {
+  if (!d) return '';
+  return d.includes('T') ? d.split('T')[0] : d;
+}
+
 const statusLabels: Record<string, string> = {
   active: 'Active',
   'checked-out': 'Checked Out',
@@ -59,7 +65,7 @@ export default function ProjectCard({ project, itemCount, missingCount = 0, film
         )}
         <span className="project-card-meta-item">
           <Calendar size={14} />
-          {project.checkoutDate} — {project.returnDate}
+          {formatDate(project.checkoutDate)} — {formatDate(project.returnDate)}
         </span>
       </div>
       <div className="project-card-footer">

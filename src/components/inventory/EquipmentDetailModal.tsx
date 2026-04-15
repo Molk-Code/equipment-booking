@@ -22,7 +22,10 @@ export default function EquipmentDetailModal({ equipment, onClose }: Props) {
         ) : (
           <div className="equip-detail-no-image">{equipment.name}</div>
         )}
-        <p className="image-modal-name">{equipment.name}</p>
+        <p className="image-modal-name">
+          {equipment.name}
+          {equipment.location && <span className="equip-location-tag" style={{ marginLeft: '0.5rem' }}>{equipment.location}</span>}
+        </p>
         {equipment.description && (
           <p className="image-modal-name" style={{ fontSize: '0.78rem', opacity: 0.6, marginTop: '0.25rem' }}>
             {equipment.description}
