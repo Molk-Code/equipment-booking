@@ -250,6 +250,31 @@ export async function createProject(data: {
   return project;
 }
 
+export async function updateProject(
+  projectId: string,
+  updates: {
+    name?: string;
+    borrowers?: string[];
+    equipmentManager?: string;
+    checkoutDate?: string;
+    returnDate?: string;
+  }
+): Promise<void> {
+  markDirty();
+  const projects = readLocalProjects();
+  const idx = projects.findIndex(p => p.id === projectId);
+  if (idx >= 0) {
+    if (updates.name !== undefined) projects[idx].name = updates.name;
+    if (updates.borrowers !== undefined) projects[idx].borrowers = updates.borrowers;
+    if (updates.equipmentManager !== undefined) projects[idx].equipmentManager = updates.equipmentManager;
+    if (updates.checkoutDate !== undefined) projects[idx].checkoutDate = updates.checkoutDate;
+    if (updates.returnDate !== undefined) projects[idx].returnDate = updates.returnDate;
+    projects[idx].updatedAt = new Date().toISOString();
+    writeLocalProjects(projects);
+    debouncedSave();
+  }
+}
+
 export async function updateProjectStatus(
   projectId: string,
   status: ProjectStatus

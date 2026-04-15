@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, FileText, Archive,
   Calendar, Users, Package, Download, AlertTriangle,
-  CheckCircle, XCircle, Wrench, Plus, Trash2, Search, X
+  CheckCircle, XCircle, Wrench, Plus, Trash2, Search, X,
+  Pencil, Save, UserPlus
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
@@ -12,11 +13,22 @@ import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
 import { calculatePrice } from '../context/CartContext';
 
-// Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
+// Normalize timestamp for display: strip manual_ prefix, extract just HH:MM
 function formatTimestamp(ts: string): string {
   let clean = ts.startsWith('manual_') ? ts.replace('manual_', '') : ts;
+  // Convert dot-separated time (22.34.09) to colon format
   clean = clean.replace(/(\d{1,2})\.(\d{2})\.(\d{2})/, '$1:$2');
+  // Drop seconds if present
   clean = clean.replace(/(\d{1,2}:\d{2}):\d{2}/, '$1');
+  // Extract just the time part (HH:MM) — drop the date prefix
+  const timeMatch = clean.match(/(\d{1,2}:\d{2})(?:\s*$)/);
+  if (timeMatch) return timeMatch[1];
+  // If the string has a space (date + time), take the time part
+  const parts = clean.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    const last = parts[parts.length - 1];
+    if (/\d{1,2}:\d{2}/.test(last)) return last;
+  }
   return clean.trim();
 }
 
@@ -26,7 +38,7 @@ export default function ProjectDetail() {
   const {
     projects, isScanning, scanMode, recentScans,
     getProjectItems, startScanning, stopScanning,
-    addItemFromScan, updateProjectStatus, updateItemStatus,
+    addItemFromScan, updateProject, updateProjectStatus, updateItemStatus,
     removeProjectItem, allEquipment, klasslista,
   } = useInventory();
 
@@ -42,6 +54,15 @@ export default function ProjectDetail() {
   const [isAddingItems, setIsAddingItems] = useState(false);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
   const [detailItem, setDetailItem] = useState<import('../types').Equipment | null>(null);
+
+  // Edit mode state
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editBorrowers, setEditBorrowers] = useState<string[]>([]);
+  const [editManualBorrower, setEditManualBorrower] = useState('');
+  const [editManager, setEditManager] = useState('');
+  const [editCheckoutDate, setEditCheckoutDate] = useState('');
+  const [editReturnDate, setEditReturnDate] = useState('');
 
   const project = projects.find(p => p.id === projectId);
   const items = getProjectItems(projectId || '');
@@ -301,6 +322,41 @@ export default function ProjectDetail() {
     return '';
   }, [klasslista, project]);
 
+  const hasKlasslista = klasslista && (klasslista.film1.length > 0 || klasslista.film2.length > 0);
+
+  const startEditing = useCallback(() => {
+    if (!project) return;
+    setEditName(project.name);
+    setEditBorrowers([...project.borrowers]);
+    setEditManager(project.equipmentManager);
+    setEditCheckoutDate(project.checkoutDate);
+    setEditReturnDate(project.returnDate);
+    setEditManualBorrower('');
+    setEditing(true);
+  }, [project]);
+
+  const saveEdits = useCallback(async () => {
+    if (!projectId || !editName.trim()) return;
+    await updateProject(projectId, {
+      name: editName.trim(),
+      borrowers: editBorrowers,
+      equipmentManager: editManager,
+      checkoutDate: editCheckoutDate,
+      returnDate: editReturnDate,
+    });
+    setEditing(false);
+  }, [projectId, editName, editBorrowers, editManager, editCheckoutDate, editReturnDate, updateProject]);
+
+  const addEditBorrower = (name: string) => {
+    if (name && !editBorrowers.includes(name)) {
+      setEditBorrowers(prev => [...prev, name]);
+    }
+  };
+
+  const removeEditBorrower = (name: string) => {
+    setEditBorrowers(prev => prev.filter(b => b !== name));
+  };
+
   return (
     <div className="app">
       <InventoryHeader />
@@ -311,6 +367,104 @@ export default function ProjectDetail() {
         </button>
 
         {/* Project Header */}
+        {editing ? (
+          <div className="project-edit-form">
+            <div className="form-group">
+              <label>Project Name</label>
+              <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Borrowers</label>
+              {editBorrowers.length > 0 && (
+                <div className="borrower-chips">
+                  {editBorrowers.map(b => (
+                    <span key={b} className="borrower-chip">
+                      {b}
+                      <button type="button" onClick={() => removeEditBorrower(b)} className="borrower-chip-x">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {hasKlasslista && (
+                <select
+                  className="form-select borrower-dropdown"
+                  value=""
+                  onChange={e => { addEditBorrower(e.target.value); e.target.value = ''; }}
+                >
+                  <option value="">Select borrower...</option>
+                  {klasslista!.film1.length > 0 && (
+                    <optgroup label="Film 1">
+                      {klasslista!.film1.map(n => (
+                        <option key={`f1-${n}`} value={n} disabled={editBorrowers.includes(n)}>
+                          {n}{editBorrowers.includes(n) ? ' (added)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {klasslista!.film2.length > 0 && (
+                    <optgroup label="Film 2">
+                      {klasslista!.film2.map(n => (
+                        <option key={`f2-${n}`} value={n} disabled={editBorrowers.includes(n)}>
+                          {n}{editBorrowers.includes(n) ? ' (added)' : ''}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              )}
+              <div className="borrower-manual-row">
+                <input
+                  type="text"
+                  value={editManualBorrower}
+                  onChange={e => setEditManualBorrower(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const trimmed = editManualBorrower.trim();
+                      if (trimmed) { addEditBorrower(trimmed); setEditManualBorrower(''); }
+                    }
+                  }}
+                  placeholder="Type name manually..."
+                />
+                <button type="button" className="borrower-add" onClick={() => {
+                  const trimmed = editManualBorrower.trim();
+                  if (trimmed) { addEditBorrower(trimmed); setEditManualBorrower(''); }
+                }}>
+                  <UserPlus size={14} /> Add
+                </button>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Equipment Manager</label>
+              <select value={editManager} onChange={e => setEditManager(e.target.value)} className="form-select">
+                <option value="">Select manager...</option>
+                <option value="Fredrik">Fredrik</option>
+                <option value="Karl">Karl</option>
+                <option value="Mats">Mats</option>
+              </select>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Checkout Date</label>
+                <input type="date" value={editCheckoutDate} onChange={e => setEditCheckoutDate(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Return Date</label>
+                <input type="date" value={editReturnDate} onChange={e => setEditReturnDate(e.target.value)} min={editCheckoutDate} />
+              </div>
+            </div>
+            <div className="checkout-buttons">
+              <button className="primary-btn" onClick={saveEdits}>
+                <Save size={16} /> Save Changes
+              </button>
+              <button className="secondary-btn" onClick={() => setEditing(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
         <div className="project-detail-header">
           <div>
             <h2 className="inv-page-title">
@@ -330,10 +484,18 @@ export default function ProjectDetail() {
               <span><Package size={14} /> {items.length} items</span>
             </div>
           </div>
-          <span className={`project-status-badge status-${project.status === 'checked-out' ? 'checkout' : project.status}`}>
-            {project.status === 'checked-out' ? 'Checked Out' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-          </span>
+          <div className="project-header-actions">
+            {!isScanning && (
+              <button className="edit-project-btn" onClick={startEditing} title="Edit project">
+                <Pencil size={14} />
+              </button>
+            )}
+            <span className={`project-status-badge status-${project.status === 'checked-out' ? 'checkout' : project.status}`}>
+              {project.status === 'checked-out' ? 'Checked Out' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+            </span>
+          </div>
         </div>
+        )}
 
         {/* Missing items warning for archived projects */}
         {isArchived && missingCount > 0 && (

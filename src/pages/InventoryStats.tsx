@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle, Users } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Package, ArrowLeft, XCircle, Trash2, CheckCircle, Users, Clock } from 'lucide-react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import EquipmentStatusGrid from '../components/inventory/EquipmentStatusGrid';
@@ -8,12 +8,12 @@ import { useInventory } from '../context/InventoryContext';
 import { calculatePrice } from '../context/CartContext';
 import type { Equipment } from '../types';
 
-type TabType = 'overview' | 'equipment' | 'damaged' | 'missing' | 'checked-out' | 'borrowers' | 'projects';
+type TabType = 'overview' | 'equipment' | 'overdue' | 'damaged' | 'missing' | 'checked-out' | 'borrowers' | 'projects';
 
 export default function InventoryStats() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, projects, projectItems, updateItemStatus, removeProjectItem, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
+  const { allEquipment, getMostBorrowed, getDamagedItems, getMissingItems, getCheckedOutEquipment, getOverdueEquipment, projects, projectItems, updateItemStatus, removeProjectItem, getBorrowerStats, klasslista, klasslistaLoading } = useInventory();
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string; label?: string } | null>(null);
@@ -23,7 +23,7 @@ export default function InventoryStats() {
   // Sync tab with URL param when it changes
   useEffect(() => {
     const tab = searchParams.get('tab') as TabType;
-    if (tab && ['overview', 'equipment', 'damaged', 'missing', 'checked-out', 'borrowers', 'projects'].includes(tab)) {
+    if (tab && ['overview', 'equipment', 'overdue', 'damaged', 'missing', 'checked-out', 'borrowers', 'projects'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -32,6 +32,7 @@ export default function InventoryStats() {
   const damaged = getDamagedItems();
   const missingItems = getMissingItems();
   const checkedOut = getCheckedOutEquipment();
+  const overdue = getOverdueEquipment();
   const borrowerStats = getBorrowerStats();
 
   const totalStudents = klasslista ? klasslista.film1.length + klasslista.film2.length : 0;
@@ -150,6 +151,15 @@ export default function InventoryStats() {
               <span className="inv-stat-label">Currently Out</span>
             </div>
           </div>
+          {overdue.length > 0 && (
+            <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('overdue')}>
+              <Clock size={20} />
+              <div>
+                <span className="inv-stat-value">{overdue.length}</span>
+                <span className="inv-stat-label">Overdue</span>
+              </div>
+            </div>
+          )}
           <div className="inv-stat-card warning clickable" onClick={() => setActiveTab('damaged')}>
             <AlertTriangle size={20} />
             <div>
@@ -197,6 +207,12 @@ export default function InventoryStats() {
             onClick={() => setActiveTab('equipment')}
           >
             Equipment Status
+          </button>
+          <button
+            className={`inv-tab ${activeTab === 'overdue' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overdue')}
+          >
+            Overdue ({overdue.length})
           </button>
           <button
             className={`inv-tab ${activeTab === 'damaged' ? 'active' : ''}`}
@@ -275,6 +291,43 @@ export default function InventoryStats() {
               checkedOut={checkedOut}
               missingItems={missingItems}
             />
+          </section>
+        )}
+
+        {activeTab === 'overdue' && (
+          <section className="inv-section">
+            <h3 className="inv-section-title">
+              <Clock size={18} />
+              Overdue Equipment
+            </h3>
+            {overdue.length === 0 ? (
+              <div className="inv-empty">No overdue equipment. All items are within their return dates.</div>
+            ) : (
+              <div className="overdue-items-list">
+                <p className="missing-items-info">
+                  Equipment that has not been returned by the project's return date.
+                </p>
+                {overdue.map((o, i) => {
+                  const matchedEquip = findEquipmentByName(o.item.equipmentName, allEquipment);
+                  const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
+                  return (
+                    <div key={i} className="overdue-item-row">
+                      <span
+                        className={`overdue-item-name ${hasDetail ? 'equip-grid-name-clickable' : ''}`}
+                        onClick={() => { if (hasDetail && matchedEquip) setDetailItem(matchedEquip); }}
+                      >
+                        {o.item.equipmentName}
+                      </span>
+                      <Link to={`/inventory/project/${o.project.id}`} className="overdue-item-project">
+                        {o.project.name}
+                      </Link>
+                      <span className="overdue-item-date">Due: {o.project.returnDate}</span>
+                      <span className="overdue-item-days">{o.daysOverdue} day{o.daysOverdue !== 1 ? 's' : ''} overdue</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         )}
 

@@ -57,8 +57,11 @@ export function generateContractPDF(
   doc.setFont('helvetica', 'normal');
   doc.text(`Project: ${project.name}`, 20, y);
   y += 6;
-  doc.text(`Borrowers: ${project.borrowers.join(', ')}`, 20, y);
-  y += 6;
+  // Wrap borrower names if they're long
+  const borrowersText = `Borrowers: ${project.borrowers.join(', ')}`;
+  const borrowerLines = doc.splitTextToSize(borrowersText, pageWidth - 40);
+  doc.text(borrowerLines, 20, y);
+  y += borrowerLines.length * 5;
   doc.text(`Checkout Date: ${project.checkoutDate}`, 20, y);
   y += 6;
   doc.text(`Return Date: ${project.returnDate}${rentalDays > 0 ? ` (${rentalDays} days)` : ''}`, 20, y);
@@ -161,7 +164,12 @@ export function generateContractPDF(
   mergedItems.forEach((merged, index) => {
     const included = findIncluded(merged.name);
     const includedLineCount = included ? included.length : 0;
-    const rowHeight = 7 + includedLineCount * 4;
+    // Pre-calculate name wrap lines for row height
+    const preDisplayName = merged.quantity > 1 ? `${merged.quantity}x ${merged.name}` : merged.name;
+    const preNameMaxWidth = showPrices ? 95 : 105;
+    const preNameLines = doc.splitTextToSize(preDisplayName, preNameMaxWidth);
+    const preNameExtraLines = Math.max(0, preNameLines.length - 1);
+    const rowHeight = 7 + preNameExtraLines * 4 + includedLineCount * 4;
 
     if (y + rowHeight > 265) {
       doc.addPage();
@@ -176,9 +184,11 @@ export function generateContractPDF(
     const displayName = merged.quantity > 1
       ? `${merged.quantity}x ${merged.name}`
       : merged.name;
-    const truncatedName = displayName.length > 55
-      ? displayName.substring(0, 52) + '...'
-      : displayName;
+
+    // Measure how wide the name column is (up to the price/timestamp columns)
+    const nameMaxWidth = showPrices ? 95 : 105;
+    const nameLines = doc.splitTextToSize(displayName, nameMaxWidth);
+    const nameExtraLines = Math.max(0, nameLines.length - 1);
 
     if (mode === 'checkout') {
       const displayTimestamp = formatTimestamp(merged.representative.checkoutTimestamp);
@@ -186,7 +196,7 @@ export function generateContractPDF(
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
       doc.text(String(index + 1), 22, y);
-      doc.text(truncatedName, 30, y);
+      doc.text(nameLines, 30, y);
       if (showPrices) {
         const dayRate = findDayRate(merged.name);
         const itemPrice = dayRate > 0 ? calculatePrice(dayRate, rentalDays) * merged.quantity : 0;
@@ -199,7 +209,7 @@ export function generateContractPDF(
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
       doc.text(String(index + 1), 22, y);
-      doc.text(truncatedName, 30, y);
+      doc.text(nameLines, 30, y);
 
       const statusText = merged.representative.status === 'returned' ? 'OK'
         : merged.representative.status === 'damaged' ? 'DAMAGED'
@@ -221,7 +231,7 @@ export function generateContractPDF(
         doc.text(truncated, 155, y);
       }
     }
-    y += 7;
+    y += 7 + nameExtraLines * 4;
 
     // Show included items below the equipment name
     if (included && included.length > 0) {
@@ -281,7 +291,9 @@ export function generateContractPDF(
 
   // Signature lines
   y += 25;
-  if (y > 255) {
+  // Estimate space needed: signature lines + borrower names + date lines
+  const sigSpaceNeeded = 15 + (project.borrowers.length * 5) + 15;
+  if (y + sigSpaceNeeded > 265) {
     doc.addPage();
     y = 30;
   }
@@ -290,15 +302,39 @@ export function generateContractPDF(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
 
+  // Signature lines for each borrower
+  project.borrowers.forEach((borrower, idx) => {
+    if (y > 265) {
+      doc.addPage();
+      y = 30;
+    }
+    doc.line(20, y, 90, y);
+    doc.setTextColor(0);
+    doc.text(`${borrower}`, 20, y + 5);
+    if (idx === 0) {
+      // Equipment manager signature on the right, only once
+      doc.line(110, y, 180, y);
+      doc.text(`${project.equipmentManager || 'Equipment Manager'}`, 110, y + 5);
+    }
+    y += 12;
+  });
+
+  // If no borrowers (shouldn't happen), still show a generic line
+  if (project.borrowers.length === 0) {
+    doc.line(20, y, 90, y);
+    doc.text('Borrower Signature', 20, y + 5);
+    doc.line(110, y, 180, y);
+    doc.text('Equipment Manager Signature', 110, y + 5);
+    y += 12;
+  }
+
+  // Date line with today's date pre-filled
+  y += 5;
+  const todayStr = new Date().toLocaleDateString('sv-SE');
   doc.line(20, y, 90, y);
-  doc.text('Borrower Signature', 20, y + 5);
+  doc.text(`Date: ${todayStr}`, 20, y + 5);
   doc.line(110, y, 180, y);
-  doc.text('Equipment Manager Signature', 110, y + 5);
-  y += 15;
-  doc.line(20, y, 90, y);
-  doc.text('Date', 20, y + 5);
-  doc.line(110, y, 180, y);
-  doc.text('Date', 110, y + 5);
+  doc.text(`Date: ${todayStr}`, 110, y + 5);
 
   // Footer
   const footerY = doc.internal.pageSize.getHeight() - 10;

@@ -2661,3 +2661,99 @@
     padding: 0.15rem 0.3rem;
   }
 }
+
+/* ===== Edit Project Button & Form ===== */
+
+.project-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-project-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 8px;
+  color: var(--text-muted, #888);
+  padding: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.edit-project-btn:hover {
+  color: var(--accent, #6366f1);
+  border-color: var(--accent, #6366f1);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.project-edit-form {
+  background: var(--bg-card, #141414);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.project-edit-form .form-group label {
+  font-size: 0.78rem;
+  color: var(--text-muted, #888);
+  margin-bottom: 0.25rem;
+}
+
+.project-edit-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ===== Overdue Items ===== */
+
+.overdue-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.overdue-item-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 165, 0, 0.06);
+  border: 1px solid rgba(255, 165, 0, 0.15);
+}
+
+.overdue-item-name {
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  font-size: 0.85rem;
+}
+
+.overdue-item-project {
+  font-size: 0.8rem;
+  color: var(--accent, #6366f1);
+  text-decoration: none;
+}
+
+.overdue-item-project:hover {
+  text-decoration: underline;
+}
+
+.overdue-item-date {
+  font-size: 0.75rem;
+  color: #ff9500;
+  font-weight: 500;
+}
+
+.overdue-item-days {
+  font-size: 0.72rem;
+  color: var(--text-muted, #888);
+  white-space: nowrap;
+}

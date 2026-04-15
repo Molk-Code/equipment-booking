@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw, BookOpen } from 'lucide-react';
+import { FolderOpen, Archive, Package, AlertTriangle, ChevronDown, ChevronUp, Trash2, XCircle, Download, Upload, RefreshCw, BookOpen, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ProjectCard from '../components/inventory/ProjectCard';
@@ -19,7 +19,7 @@ import { generateUserGuidePDF } from '../utils/inventory-pdf';
 
 export default function InventoryDashboard() {
   const navigate = useNavigate();
-  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getDamagedItems, getMissingItems, deleteProject, klasslista, allEquipment } = useInventory();
+  const { getActiveProjects, getArchivedProjects, getProjectItems, getCheckedOutEquipment, getOverdueEquipment, getDamagedItems, getMissingItems, deleteProject, klasslista, allEquipment } = useInventory();
   const [detailItem, setDetailItem] = useState<Equipment | null>(null);
 
   // Determine film class for a project based on borrower names
@@ -76,6 +76,7 @@ export default function InventoryDashboard() {
   const active = getActiveProjects();
   const archived = getArchivedProjects();
   const checkedOut = getCheckedOutEquipment();
+  const overdue = getOverdueEquipment();
   const damaged = getDamagedItems();
   const missingItems = getMissingItems();
 
@@ -192,13 +193,24 @@ export default function InventoryDashboard() {
               <span className="inv-stat-label">Items Out</span>
             </div>
           </div>
-          <div className="inv-stat-card warning clickable" onClick={() => navigate('/inventory/stats?tab=damaged')}>
-            <AlertTriangle size={20} />
-            <div>
-              <span className="inv-stat-value">{damaged.length}</span>
-              <span className="inv-stat-label">Damaged</span>
+          {overdue.length > 0 && (
+            <div className="inv-stat-card warning clickable" onClick={() => navigate('/inventory/stats?tab=overdue')}>
+              <Clock size={20} />
+              <div>
+                <span className="inv-stat-value">{overdue.length}</span>
+                <span className="inv-stat-label">Overdue</span>
+              </div>
             </div>
-          </div>
+          )}
+          {damaged.length > 0 && (
+            <div className="inv-stat-card warning clickable" onClick={() => navigate('/inventory/stats?tab=damaged')}>
+              <AlertTriangle size={20} />
+              <div>
+                <span className="inv-stat-value">{damaged.length}</span>
+                <span className="inv-stat-label">Damaged</span>
+              </div>
+            </div>
+          )}
           {missingItems.length > 0 && (
             <div className="inv-stat-card danger clickable" onClick={() => navigate('/inventory/stats?tab=missing')}>
               <XCircle size={20} />

@@ -3,6 +3,7 @@ import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStat
 import { fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
 import { fetchEquipment } from '../utils/sheets';
 import { fetchKlasslista } from '../utils/klasslista-sheets';
+import { fetchProjektlista } from '../utils/projektlista-sheets';
 import * as api from '../utils/inventory-api';
 import { fetchFromServer } from '../utils/inventory-api';
 
@@ -24,8 +25,10 @@ interface InventoryContextType {
   loading: boolean;
   klasslista: Klasslista | null;
   klasslistaLoading: boolean;
+  projektlista: string[];
 
   createProject: (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => Promise<InventoryProject>;
+  updateProject: (id: string, updates: { name?: string; borrowers?: string[]; equipmentManager?: string; checkoutDate?: string; returnDate?: string }) => Promise<void>;
   updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
   deleteProject: (id: string) => void;
   startScanning: (projectId: string, mode: 'checkout' | 'checkin') => void;
@@ -41,6 +44,7 @@ interface InventoryContextType {
   getMissingItems: () => { item: ProjectItem; project: InventoryProject }[];
   getMostBorrowed: () => { name: string; count: number }[];
   getCheckedOutEquipment: () => { item: ProjectItem; project: InventoryProject }[];
+  getOverdueEquipment: () => { item: ProjectItem; project: InventoryProject; daysOverdue: number }[];
   getBorrowerStats: () => BorrowerStat[];
   loadEquipment: () => Promise<void>;
 }
@@ -74,6 +78,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   const [stopPoll, setStopPoll] = useState<(() => void) | null>(null);
   const [klasslista, setKlasslista] = useState<Klasslista | null>(null);
   const [klasslistaLoading, setKlasslistaLoading] = useState(false);
+  const [projektlista, setProjektlista] = useState<string[]>([]);
   const syncTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Load data from server on mount (Google Sheets), fall back to localStorage
@@ -138,10 +143,24 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { loadKlasslista(); }, [loadKlasslista]);
 
+  // Load projektlista on mount
+  useEffect(() => {
+    fetchProjektlista()
+      .then(names => setProjektlista(names))
+      .catch(() => console.warn('Failed to load projektlista'));
+  }, []);
+
   const createProjectFn = useCallback(async (data: { name: string; borrowers: string[]; equipmentManager: string; checkoutDate: string; returnDate: string }) => {
     const project = await api.createProject(data);
     setProjects(prev => [...prev, project]);
     return project;
+  }, []);
+
+  const updateProjectFn = useCallback(async (id: string, updates: { name?: string; borrowers?: string[]; equipmentManager?: string; checkoutDate?: string; returnDate?: string }) => {
+    setProjects(prev => prev.map(p =>
+      p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
+    ));
+    await api.updateProject(id, updates);
   }, []);
 
   const updateProjectStatusFn = useCallback(async (id: string, status: ProjectStatus) => {
@@ -312,6 +331,24 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       .filter(x => x.project);
   }, [projects, projectItems]);
 
+  const getOverdueEquipment = useCallback(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const activeProjects = projects.filter(p => p.status === 'active' || p.status === 'checked-out');
+    const overdueProjects = activeProjects.filter(p => p.returnDate < today);
+    const overdueProjectMap = new Map(overdueProjects.map(p => [p.id, p]));
+
+    return projectItems
+      .filter(i => overdueProjectMap.has(i.projectId) && i.status === 'checked-out')
+      .map(item => {
+        const proj = overdueProjectMap.get(item.projectId)!;
+        const returnDate = new Date(proj.returnDate);
+        const now = new Date();
+        const daysOverdue = Math.ceil((now.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
+        return { item, project: proj, daysOverdue };
+      })
+      .sort((a, b) => b.daysOverdue - a.daysOverdue);
+  }, [projects, projectItems]);
+
   const getBorrowerStats = useCallback((): BorrowerStat[] => {
     if (!klasslista) return [];
 
@@ -355,9 +392,10 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   return (
     <InventoryContext.Provider value={{
       projects, projectItems, allEquipment, isScanning, scanMode, recentScans, loading,
-      klasslista, klasslistaLoading,
+      klasslista, klasslistaLoading, projektlista,
       loadEquipment,
       createProject: createProjectFn,
+      updateProject: updateProjectFn,
       updateProjectStatus: updateProjectStatusFn,
       deleteProject: deleteProjectFn,
       startScanning, stopScanning,
@@ -366,7 +404,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       updateItemStatus: updateItemStatusFn, markCheckinItem,
       getProjectItems, getActiveProjects, getArchivedProjects,
       getDamagedItems, getMissingItems, getMostBorrowed, getCheckedOutEquipment,
-      getBorrowerStats,
+      getOverdueEquipment, getBorrowerStats,
     }}>
       {children}
     </InventoryContext.Provider>

@@ -6,7 +6,7 @@ import { useInventory } from '../context/InventoryContext';
 
 export default function ProjectCreate() {
   const navigate = useNavigate();
-  const { createProject, klasslista, klasslistaLoading } = useInventory();
+  const { createProject, klasslista, klasslistaLoading, projektlista } = useInventory();
 
   const [name, setName] = useState('');
   const [borrowers, setBorrowers] = useState<string[]>([]);
@@ -82,11 +82,25 @@ export default function ProjectCreate() {
 
             <div className="form-group">
               <label>Project Name</label>
+              {projektlista.length > 0 && (
+                <select
+                  className="form-select"
+                  value=""
+                  onChange={e => {
+                    if (e.target.value) setName(e.target.value);
+                  }}
+                >
+                  <option value="">Select from list...</option>
+                  {projektlista.map((pn, i) => (
+                    <option key={i} value={pn}>{pn}</option>
+                  ))}
+                </select>
+              )}
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="e.g. Documentary Short Film"
+                placeholder={projektlista.length > 0 ? 'Or type a custom name...' : 'e.g. Documentary Short Film'}
                 autoFocus
               />
             </div>
