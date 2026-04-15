@@ -80,7 +80,8 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     fetchFromServer().then(data => {
-      if (!cancelled) {
+      // data is null if local changes are pending (dirty) — skip
+      if (!cancelled && data) {
         setProjects(data.projects);
         setProjectItems(data.items);
       }
@@ -91,11 +92,15 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Poll server for updates every SYNC_INTERVAL ms
+  // fetchFromServer() returns null when local edits are unsaved,
+  // so we never overwrite in-progress work.
   useEffect(() => {
     syncTimerRef.current = setInterval(() => {
       fetchFromServer().then(data => {
-        setProjects(data.projects);
-        setProjectItems(data.items);
+        if (data) {
+          setProjects(data.projects);
+          setProjectItems(data.items);
+        }
       }).catch(() => {
         // Silently fail — local cache is still valid
       });
