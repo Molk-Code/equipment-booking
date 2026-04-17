@@ -178,42 +178,58 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startScanning = useCallback((projectId: string, mode: 'checkout' | 'checkin') => {
-    // Build set of known scans from what's currently in sheets
-    const known = new Set<string>();
-
-    // Mark all currently known contract scans as known to only catch new ones
-    fetchContractScans().then(scans => {
-      scans.forEach(s => known.add(`${s.timestamp}|${s.equipmentName}`));
-    }).catch(() => {});
-
     setIsScanning(true);
     setScanMode(mode);
     setRecentScans([]);
 
-    const stop = startScanPolling(
-      // On new scans added to sheets
-      (newScans) => {
-        setRecentScans(prev => [...newScans, ...prev]);
-      },
-      // On scans removed from sheets
-      (removedScans) => {
-        // Remove from recent scans display
-        setRecentScans(prev => prev.filter(s => {
-          const key = `${s.timestamp}|${s.equipmentName}`;
-          return !removedScans.some(r => `${r.timestamp}|${r.equipmentName}` === key);
-        }));
-        // Remove from project items
-        removedScans.forEach(removed => {
-          setProjectItems(prevItems => prevItems.filter(i =>
-            !(i.projectId === projectId && i.equipmentName === removed.equipmentName && i.checkoutTimestamp === removed.timestamp)
-          ));
-          api.removeProjectItem(projectId, removed.equipmentName, removed.timestamp);
-        });
-      },
-      known
-    );
+    // Use a plain object so we can mutate it from inside the async callback
+    // without stale closure issues.
+    const state: { cancelled: boolean; stopPolling: (() => void) | null } = {
+      cancelled: false,
+      stopPolling: null,
+    };
 
-    setStopPoll(() => stop);
+    // Set a stop function immediately so the user can cancel even while
+    // fetchContractScans is still in-flight.
+    const stopFn = () => {
+      state.cancelled = true;
+      if (state.stopPolling) state.stopPolling();
+    };
+    setStopPoll(() => stopFn);
+
+    // ── Key fix: await the initial sheet state BEFORE starting the poll ──
+    // Without this, the poll fires (3 s interval) before `known` is populated
+    // and treats every existing scan as "new", re-adding all items on each
+    // page load / Vercel deploy.
+    fetchContractScans()
+      .catch(() => [] as QRScanEntry[])
+      .then(scans => {
+        if (state.cancelled) return; // scanning was stopped while fetching
+
+        const known = new Set<string>();
+        scans.forEach(s => known.add(`${s.timestamp}|${s.equipmentName}`));
+
+        state.stopPolling = startScanPolling(
+          // On new scans added to sheets
+          (newScans) => {
+            setRecentScans(prev => [...newScans, ...prev]);
+          },
+          // On scans removed from sheets
+          (removedScans) => {
+            setRecentScans(prev => prev.filter(s => {
+              const key = `${s.timestamp}|${s.equipmentName}`;
+              return !removedScans.some(r => `${r.timestamp}|${r.equipmentName}` === key);
+            }));
+            removedScans.forEach(removed => {
+              setProjectItems(prevItems => prevItems.filter(i =>
+                !(i.projectId === projectId && i.equipmentName === removed.equipmentName && i.checkoutTimestamp === removed.timestamp)
+              ));
+              api.removeProjectItem(projectId, removed.equipmentName, removed.timestamp);
+            });
+          },
+          known
+        );
+      });
   }, []);
 
   const stopScanning = useCallback(() => {

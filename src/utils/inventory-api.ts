@@ -134,8 +134,21 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return si;
   });
 
-  const mergedProjects = [...mergedServerProjects, ...localOnlyProjects];
-  const mergedItems = [...mergedServerItems, ...localOnlyItems];
+  // Deduplicate merged arrays — guards against server-side duplicates snowballing
+  const seenProjectIds = new Set<string>();
+  const mergedProjects = [...mergedServerProjects, ...localOnlyProjects].filter(p => {
+    if (seenProjectIds.has(p.id)) return false;
+    seenProjectIds.add(p.id);
+    return true;
+  });
+
+  const seenItemKeys = new Set<string>();
+  const mergedItems = [...mergedServerItems, ...localOnlyItems].filter(i => {
+    const key = `${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}`;
+    if (seenItemKeys.has(key)) return false;
+    seenItemKeys.add(key);
+    return true;
+  });
 
   // Update local cache
   writeLocalProjects(mergedProjects);
