@@ -150,8 +150,12 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (!isScanning || scanMode !== 'checkout' || !projectId) return;
     recentScans.forEach(scan => {
-      const alreadyAdded = items.some(
-        i => i.equipmentName === scan.equipmentName && i.checkoutTimestamp === scan.timestamp
+      // Consider the item already present if it exists with a non-returned status.
+    // Intentionally NOT matching on checkoutTimestamp — format differences between
+    // the scan sheet and localStorage would otherwise cause the same item to be
+    // added again on every render cycle.
+    const alreadyAdded = items.some(
+        i => i.equipmentName === scan.equipmentName && i.status !== 'returned'
       );
       if (!alreadyAdded) {
         addItemFromScan(projectId, scan);

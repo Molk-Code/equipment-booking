@@ -11,6 +11,25 @@
 import type { InventoryProject, ProjectItem, ItemStatus, ProjectStatus } from '../types';
 
 const API_URL = '/api/inventory-data';
+
+// ===== Timestamp normalisation =====
+// The Apps Script / Google Sheets round-trip can alter timestamp strings
+// (e.g. "manual_2026-04-12 14:30:05" → "2026-04-12T14:30:05.000Z", or
+// locale-formatted dates).  We normalise to "YYYY-MM-DD HH:MM" (16 chars)
+// so that format differences don't make identical moments look like different keys.
+function normTs(ts: string): string {
+  return ts
+    .replace(/^manual_/, '')          // strip manual_ prefix
+    .replace('T', ' ')                // ISO T separator → space
+    .replace(/\.\d+Z?$/, '')          // strip milliseconds + Z
+    .replace(/(\d{1,2})\.(\d{2})\.\d{2}$/, '$1:$2') // HH.MM.SS → HH:MM
+    .trim()
+    .slice(0, 16);                    // keep only YYYY-MM-DD HH:MM
+}
+
+function itemKey(i: ProjectItem): string {
+  return `${i.projectId}|${i.equipmentName}|${normTs(i.checkoutTimestamp)}`;
+}
 const LS_PROJECTS = 'inventory_projects';
 const LS_ITEMS = 'inventory_items';
 const LS_LAST_SYNC = 'inventory_last_sync';
@@ -100,12 +119,9 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
   const serverProjectIds = new Set(serverProjects.map(p => p.id));
   const localOnlyProjects = localProjects.filter(p => !serverProjectIds.has(p.id));
 
-  const serverItemKeys = new Set(
-    serverItems.map(i => `${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}`)
-  );
-  const localOnlyItems = localItems.filter(
-    i => !serverItemKeys.has(`${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}`)
-  );
+  // Use normalised keys so timestamp format differences don't create phantom duplicates
+  const serverItemKeys = new Set(serverItems.map(itemKey));
+  const localOnlyItems = localItems.filter(i => !serverItemKeys.has(itemKey(i)));
 
   // Also check for locally-updated fields on existing projects (status, dates, etc.)
   const localProjectMap = new Map(localProjects.map(p => [p.id, p]));
@@ -118,15 +134,11 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return sp;
   });
 
-  // Same for items — prefer local if it has a newer status/checkin
-  const localItemMap = new Map(
-    localItems.map(i => [`${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}`, i])
-  );
+  // Prefer local item if it has more progress (checked-in, damage notes, etc.)
+  const localItemMap = new Map(localItems.map(i => [itemKey(i), i]));
   const mergedServerItems = serverItems.map(si => {
-    const key = `${si.projectId}|${si.equipmentName}|${si.checkoutTimestamp}`;
-    const li = localItemMap.get(key);
+    const li = localItemMap.get(itemKey(si));
     if (li) {
-      // Keep the version with more progress (checked-in > checked-out, has damage notes, etc.)
       if (li.checkinTimestamp && !si.checkinTimestamp) return li;
       if (li.status !== si.status && li.status !== 'checked-out') return li;
       if (li.damageNotes && !si.damageNotes) return li;
@@ -134,7 +146,7 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return si;
   });
 
-  // Deduplicate merged arrays — guards against server-side duplicates snowballing
+  // Deduplicate — use normalised key so format differences don't sneak through
   const seenProjectIds = new Set<string>();
   const mergedProjects = [...mergedServerProjects, ...localOnlyProjects].filter(p => {
     if (seenProjectIds.has(p.id)) return false;
@@ -144,9 +156,9 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
 
   const seenItemKeys = new Set<string>();
   const mergedItems = [...mergedServerItems, ...localOnlyItems].filter(i => {
-    const key = `${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}`;
-    if (seenItemKeys.has(key)) return false;
-    seenItemKeys.add(key);
+    const k = itemKey(i);
+    if (seenItemKeys.has(k)) return false;
+    seenItemKeys.add(k);
     return true;
   });
 
@@ -319,6 +331,13 @@ export async function addProjectItem(item: {
 }): Promise<void> {
   markDirty();
   const items = readLocalItems();
+  // Guard: never store a duplicate (same project + name + non-returned status)
+  const alreadyStored = items.some(
+    i => i.projectId === item.projectId &&
+         i.equipmentName === item.equipmentName &&
+         i.status !== 'returned'
+  );
+  if (alreadyStored) return;
   items.push({
     projectId: item.projectId,
     equipmentName: item.equipmentName,
