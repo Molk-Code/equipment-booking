@@ -146,7 +146,7 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return si;
   });
 
-  // Deduplicate — use normalised key so format differences don't sneak through
+  // ── Deduplicate projects by id ──
   const seenProjectIds = new Set<string>();
   const mergedProjects = [...mergedServerProjects, ...localOnlyProjects].filter(p => {
     if (seenProjectIds.has(p.id)) return false;
@@ -154,22 +154,40 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return true;
   });
 
-  const seenItemKeys = new Set<string>();
-  const mergedItems = [...mergedServerItems, ...localOnlyItems].filter(i => {
-    const k = itemKey(i);
-    if (seenItemKeys.has(k)) return false;
-    seenItemKeys.add(k);
-    return true;
-  });
+  // ── Deduplicate items by (projectId, equipmentName) ──
+  // This is the critical step: if the Apps Script ever appended rows instead of
+  // replacing them (e.g. after a manual row deletion in the sheet), the server
+  // can return many copies of the same item with different timestamps.
+  // We keep the most "complete" copy (one that has been checked in / has status changes).
+  const nameKeyMap = new Map<string, ProjectItem>();
+  for (const i of [...mergedServerItems, ...localOnlyItems]) {
+    const nk = `${i.projectId}|${i.equipmentName}`;
+    const existing = nameKeyMap.get(nk);
+    if (!existing) {
+      nameKeyMap.set(nk, i);
+    } else {
+      // Prefer the item with more progress
+      const betterStatus = existing.status === 'checked-out' && i.status !== 'checked-out';
+      const betterCheckin = !existing.checkinTimestamp && i.checkinTimestamp;
+      const betterNotes = !existing.damageNotes && i.damageNotes;
+      if (betterStatus || betterCheckin || betterNotes) {
+        nameKeyMap.set(nk, i);
+      }
+    }
+  }
+  const mergedItems = [...nameKeyMap.values()];
 
   // Update local cache
   writeLocalProjects(mergedProjects);
   writeLocalItems(mergedItems);
   localStorage.setItem(LS_LAST_SYNC, String(data.timestamp || Date.now()));
 
-  // Push merged data back if we had local-only entries
-  if (localOnlyProjects.length > 0 || localOnlyItems.length > 0) {
-    console.log(`[sync] Merging ${localOnlyProjects.length} local projects + ${localOnlyItems.length} local items → server`);
+  // Always push merged (clean) data back to repair any server-side duplicates
+  const serverItemCount = serverItems.length;
+  const needsRepair = localOnlyProjects.length > 0 || localOnlyItems.length > 0 ||
+                      serverItemCount > mergedItems.length; // server had more = had duplicates
+  if (needsRepair) {
+    console.log(`[sync] Repairing server data — server had ${serverItemCount} items, clean set has ${mergedItems.length}`);
     pushToServer(mergedProjects, mergedItems);
   }
 
