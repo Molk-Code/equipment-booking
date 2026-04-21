@@ -2,6 +2,8 @@ import jsPDF from 'jspdf';
 import type { InventoryProject, ProjectItem, Equipment } from '../types';
 import { calculatePrice } from '../context/CartContext';
 
+type MergedItem = { name: string; quantity: number; representative: ProjectItem };
+
 // Normalize timestamp for display: strip manual_ prefix, convert dots to colons, drop seconds
 function formatTimestamp(ts: string): string {
   // Strip manual_ prefix
@@ -86,48 +88,61 @@ export function generateContractPDF(
   doc.text(mode === 'checkout' ? 'Equipment List' : 'Return Summary', 20, y);
   y += 10;
 
-  // Table header row
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.setFillColor(30, 30, 30);
-  doc.setTextColor(255);
-  doc.rect(20, y - 4, pageWidth - 40, 8, 'F');
-
   const showPrices = rentalDays > 0;
-  if (mode === 'checkout') {
-    doc.text('#', 22, y);
-    doc.text('Equipment', 30, y);
-    if (showPrices) {
-      doc.text('Price', 130, y);
-    }
-    doc.text('Scanned At', showPrices ? 155 : 140, y);
-  } else {
-    doc.text('#', 22, y);
-    doc.text('Equipment', 30, y);
-    doc.text('Status', 130, y);
-    doc.text('Notes', 155, y);
-  }
-  y += 8;
 
-  doc.setTextColor(0);
-  doc.setFont('helvetica', 'normal');
-
-  // Merge duplicate items by equipment name
-  const mergedItems: { name: string; quantity: number; representative: ProjectItem; }[] = [];
-  const itemGroups = new Map<string, { items: ProjectItem[]; quantity: number }>();
-  items.forEach(item => {
-    const key = item.equipmentName;
-    const existing = itemGroups.get(key);
-    if (existing) {
-      existing.items.push(item);
-      existing.quantity++;
+  // Helper: draw table header row
+  function drawTableHeader() {
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(30, 30, 30);
+    doc.setTextColor(255);
+    doc.rect(20, y - 4, pageWidth - 40, 8, 'F');
+    if (mode === 'checkout') {
+      doc.text('#', 22, y);
+      doc.text('Equipment', 30, y);
+      if (showPrices) doc.text('Price', 130, y);
+      doc.text('Scanned At', showPrices ? 155 : 140, y);
     } else {
-      itemGroups.set(key, { items: [item], quantity: 1 });
+      doc.text('#', 22, y);
+      doc.text('Equipment', 30, y);
+      doc.text('Status', 130, y);
+      doc.text('Notes', 155, y);
     }
+    y += 8;
+    doc.setTextColor(0);
+    doc.setFont('helvetica', 'normal');
+  }
+
+  drawTableHeader();
+
+  // Helper: merge items into quantity groups (by name only — within one session)
+  function mergeItems(itemList: ProjectItem[]): MergedItem[] {
+    const groups = new Map<string, { items: ProjectItem[]; quantity: number }>();
+    itemList.forEach(item => {
+      const key = item.equipmentName;
+      const existing = groups.get(key);
+      if (existing) { existing.items.push(item); existing.quantity++; }
+      else { groups.set(key, { items: [item], quantity: 1 }); }
+    });
+    const result: MergedItem[] = [];
+    groups.forEach((g, name) => result.push({ name, quantity: g.quantity, representative: g.items[0] }));
+    return result;
+  }
+
+  // Split items: original checkout vs addon sessions
+  const originalItems = items.filter(i => !i.addonSessionId);
+  const addonSessionMap = new Map<string, ProjectItem[]>();
+  items.filter(i => i.addonSessionId).forEach(i => {
+    const sid = i.addonSessionId!;
+    const existing = addonSessionMap.get(sid);
+    if (existing) existing.push(i);
+    else addonSessionMap.set(sid, [i]);
   });
-  itemGroups.forEach((group, name) => {
-    mergedItems.push({ name, quantity: group.quantity, representative: group.items[0] });
-  });
+
+  // For backward-compat (mode === 'checkin'), merge ALL items together
+  const mergedItems: MergedItem[] = mode === 'checkin'
+    ? mergeItems(items)
+    : mergeItems(originalItems);
 
   // Build a lookup map for equipment "included" items
   // Match by normalized name (lowercase, strip #N suffixes and parenthetical content)
@@ -160,8 +175,14 @@ export function generateContractPDF(
     return priceMap.get(norm) ?? -1;
   }
 
-  // Table rows
-  mergedItems.forEach((merged, index) => {
+  // Helper: render a list of merged items as table rows
+  function renderRows(rows: MergedItem[], startIndex = 0) {
+    rows.forEach((merged, index) => {
+      renderRow(merged, startIndex + index);
+    });
+  }
+
+  function renderRow(merged: MergedItem, index: number) {
     const included = findIncluded(merged.name);
     const includedLineCount = included ? included.length : 0;
     // Pre-calculate name wrap lines for row height
@@ -252,7 +273,45 @@ export function generateContractPDF(
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0);
     }
-  });
+  } // end renderRow
+
+  // Render original checkout items
+  renderRows(mergedItems);
+
+  // Render addon sessions (checkout mode only — checkin already merged all)
+  if (mode === 'checkout') {
+    addonSessionMap.forEach((sessionItems) => {
+      const sessionMerged = mergeItems(sessionItems);
+      if (sessionMerged.length === 0) return;
+      const rep = sessionItems[0];
+      const sessionDate = rep.addonDate || '';
+      const collectedBy = rep.addonCollectedBy || '';
+      const sessionManager = rep.addonManager || '';
+
+      // Section divider
+      y += 6;
+      if (y + 16 > 265) { doc.addPage(); y = 20; }
+      doc.setDrawColor(180);
+      doc.line(20, y, pageWidth - 20, y);
+      y += 6;
+
+      // Session header
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(60, 60, 60);
+      let headerLine = `Added: ${sessionDate}`;
+      if (collectedBy) headerLine += `  |  Collected by: ${collectedBy}`;
+      if (sessionManager) headerLine += `  |  Manager: ${sessionManager}`;
+      doc.text(headerLine, 20, y);
+      y += 8;
+
+      // Table header for this session
+      drawTableHeader();
+
+      // Rows for this session
+      renderRows(sessionMerged);
+    });
+  }
 
   // Count total individual items for summary
   const totalItemCount = items.length;
@@ -266,11 +325,15 @@ export function generateContractPDF(
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0);
   doc.text(`Total items: ${totalItemCount}`, 20, y);
 
   if (showPrices && mode === 'checkout') {
     let grandTotal = 0;
-    mergedItems.forEach(merged => {
+    // Sum over ALL items (original + addon sessions)
+    const allMerged: MergedItem[] = [...mergedItems];
+    addonSessionMap.forEach(si => mergeItems(si).forEach(m => allMerged.push(m)));
+    allMerged.forEach(merged => {
       const dayRate = findDayRate(merged.name);
       if (dayRate > 0) {
         grandTotal += calculatePrice(dayRate, rentalDays) * merged.quantity;

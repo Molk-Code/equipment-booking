@@ -51,6 +51,20 @@ export interface ProjectItem {
   checkinTimestamp: string;
   status: ItemStatus;
   damageNotes: string;
+  // Feature 1: Task assignment for missing items
+  assignedTo?: string;
+  // Feature 2: Add-on checkout session metadata
+  addonSessionId?: string;
+  addonDate?: string;
+  addonCollectedBy?: string;
+  addonManager?: string;
+}
+
+export interface AddonSession {
+  sessionId: string;
+  date: string;
+  collectedBy: string;
+  manager: string;
 }
 
 export interface QRScanEntry {

@@ -17,8 +17,10 @@ export default function InventoryStats() {
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string; label?: string } | null>(null);
-  const [borrowerPopup, setBorrowerPopup] = useState<{ name: string; type: 'projects' | 'damaged' | 'missing'; projectIds: string[] } | null>(null);
+  const [borrowerPopup, setBorrowerPopup] = useState<{ name: string; type: 'projects' | 'damaged' | 'missing' | 'tasks'; projectIds: string[] } | null>(null);
   const [detailItem, setDetailItem] = useState<Equipment | null>(null);
+  // Task assignment: which missing item row is showing the assign dropdown
+  const [assigningItem, setAssigningItem] = useState<{ projectId: string; equipmentName: string } | null>(null);
 
   // Sync tab with URL param when it changes
   useEffect(() => {
@@ -91,6 +93,16 @@ export default function InventoryStats() {
         .map(i => i.projectId)
     );
     return [...idsWithDamage];
+  };
+
+  const getBorrowerTaskProjects = (borrowerName: string): string[] => {
+    const nameLower = borrowerName.toLowerCase();
+    const idsWithTasks = new Set(
+      projectItems
+        .filter(i => i.status === 'missing' && i.assignedTo && i.assignedTo.toLowerCase() === nameLower)
+        .map(i => i.projectId)
+    );
+    return [...idsWithTasks];
   };
 
   const getBorrowerMissingProjects = (borrowerName: string): string[] => {
@@ -402,6 +414,8 @@ export default function InventoryStats() {
                 {missingItems.map((mi, i) => {
                   const matchedEquip = findEquipmentByName(mi.item.equipmentName, allEquipment);
                   const hasDetail = matchedEquip && (matchedEquip.image || (matchedEquip.included && matchedEquip.included.length > 0));
+                  const isAssigning = assigningItem?.projectId === mi.item.projectId && assigningItem?.equipmentName === mi.item.equipmentName;
+                  const allStudents = klasslista ? [...(klasslista.film1 || []), ...(klasslista.film2 || [])] : [];
                   return (
                   <div key={i} className="missing-item-row">
                     <XCircle size={16} className="missing-item-icon" />
@@ -424,6 +438,49 @@ export default function InventoryStats() {
                       >
                         {mi.item.damageNotes}
                       </span>
+                    )}
+                    {/* Assigned-to badge */}
+                    {mi.item.assignedTo && !isAssigning && (
+                      <span className="missing-item-assigned" title="Click to reassign or clear" onClick={() => setAssigningItem({ projectId: mi.item.projectId, equipmentName: mi.item.equipmentName })}>
+                        👤 {mi.item.assignedTo}
+                      </span>
+                    )}
+                    {/* Assign dropdown */}
+                    {isAssigning ? (
+                      <div className="missing-assign-row">
+                        <select
+                          className="missing-assign-select"
+                          defaultValue={mi.item.assignedTo || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            updateItemStatus(mi.item.projectId, mi.item.equipmentName, mi.item.status, mi.item.damageNotes, val);
+                            setAssigningItem(null);
+                          }}
+                        >
+                          <option value="">— Unassign —</option>
+                          {klasslista?.film1 && klasslista.film1.length > 0 && (
+                            <optgroup label="Film 1">
+                              {klasslista.film1.map(n => <option key={n} value={n}>{n}</option>)}
+                            </optgroup>
+                          )}
+                          {klasslista?.film2 && klasslista.film2.length > 0 && (
+                            <optgroup label="Film 2">
+                              {klasslista.film2.map(n => <option key={n} value={n}>{n}</option>)}
+                            </optgroup>
+                          )}
+                          {allStudents.length === 0 && <option disabled>No students loaded</option>}
+                        </select>
+                        <button className="missing-assign-cancel" onClick={() => setAssigningItem(null)}>✕</button>
+                      </div>
+                    ) : (
+                      <button
+                        className="missing-item-assign-btn"
+                        onClick={() => setAssigningItem({ projectId: mi.item.projectId, equipmentName: mi.item.equipmentName })}
+                        title="Assign search task to a student"
+                      >
+                        <Users size={13} />
+                        {mi.item.assignedTo ? 'Reassign' : 'Assign'}
+                      </button>
                     )}
                     <button
                       className="missing-item-remove-btn"
@@ -548,6 +605,7 @@ export default function InventoryStats() {
                   <span className="bs-col-projects">Projects</span>
                   <span className="bs-col-damaged">Damaged</span>
                   <span className="bs-col-missing">Missing</span>
+                  <span className="bs-col-tasks">Tasks</span>
                 </div>
                 {borrowerStats.map(stat => (
                   <div key={stat.name} className={`borrower-stats-row ${stat.damagedCount > 0 || stat.missingCount > 0 ? 'has-issues' : ''}`}>
@@ -591,6 +649,19 @@ export default function InventoryStats() {
                         </button>
                       ) : (
                         <span className="bs-zero">0</span>
+                      )}
+                    </span>
+                    <span className="bs-col-tasks">
+                      {stat.taskCount > 0 ? (
+                        <button
+                          className="bs-clickable bs-clickable-task"
+                          onClick={() => setBorrowerPopup({ name: stat.name, type: 'tasks', projectIds: getBorrowerTaskProjects(stat.name) })}
+                          title="Items assigned to find"
+                        >
+                          {stat.taskCount}
+                        </button>
+                      ) : (
+                        <span className="bs-zero">—</span>
                       )}
                     </span>
                   </div>
@@ -691,7 +762,12 @@ export default function InventoryStats() {
             <div className="note-popup borrower-projects-popup" onClick={e => e.stopPropagation()}>
               <div className="note-popup-header">
                 <h4>
-                  {borrowerPopup.name} — {borrowerPopup.type === 'projects' ? 'Projects' : borrowerPopup.type === 'damaged' ? 'Damaged in' : 'Missing in'}
+                  {borrowerPopup.name} — {
+                    borrowerPopup.type === 'projects' ? 'Projects' :
+                    borrowerPopup.type === 'damaged' ? 'Damaged in' :
+                    borrowerPopup.type === 'tasks' ? 'Assigned tasks in' :
+                    'Missing in'
+                  }
                 </h4>
                 <button className="note-popup-close" onClick={() => setBorrowerPopup(null)}>
                   <XCircle size={18} />

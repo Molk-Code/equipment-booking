@@ -2781,3 +2781,207 @@
   color: var(--text-muted, #888);
   white-space: nowrap;
 }
+
+/* ===== Addon Session (Add Items) ===== */
+
+.addon-session-section {
+  margin-top: 1.25rem;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.addon-session-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(99, 102, 241, 0.08);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  flex-wrap: wrap;
+}
+
+.addon-session-header svg {
+  color: var(--accent, #6366f1);
+  flex-shrink: 0;
+}
+
+.addon-session-title {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--accent, #6366f1);
+}
+
+.addon-session-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted, #888);
+}
+
+.addon-session-meta strong {
+  color: var(--text-primary, #fff);
+}
+
+.addon-session-section .project-items-list {
+  border-radius: 0;
+}
+
+/* Banner shown during addon scanning */
+.addon-session-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #ccc);
+  margin-bottom: 0.5rem;
+}
+
+.addon-session-banner svg {
+  color: var(--accent, #6366f1);
+  flex-shrink: 0;
+}
+
+.addon-session-banner strong {
+  color: var(--accent, #6366f1);
+}
+
+/* Addon session modal */
+.addon-modal {
+  max-width: 420px;
+  width: 95%;
+}
+
+.addon-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.addon-modal-body .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.addon-modal-body .form-group label {
+  font-size: 0.78rem;
+  color: var(--text-muted, #888);
+  font-weight: 500;
+}
+
+.addon-modal-body .form-input,
+.addon-modal-body input[type="date"],
+.addon-modal-body input[type="text"] {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 8px;
+  color: var(--text-primary, #fff);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.addon-modal-body .form-input:focus,
+.addon-modal-body input[type="date"]:focus,
+.addon-modal-body input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent, #6366f1);
+}
+
+/* ===== Task Assignment (Missing Items) ===== */
+
+.missing-item-assign-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  color: var(--accent, #6366f1);
+  font-size: 0.72rem;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.missing-item-assign-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent, #6366f1);
+}
+
+.missing-item-assigned {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 6px;
+  color: var(--accent, #6366f1);
+  font-size: 0.72rem;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.missing-item-assigned:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.missing-assign-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.missing-assign-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent, #6366f1);
+  border-radius: 6px;
+  color: var(--text-primary, #fff);
+  font-size: 0.78rem;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  max-width: 180px;
+}
+
+.missing-assign-cancel {
+  background: none;
+  border: none;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.1rem 0.25rem;
+  border-radius: 4px;
+}
+
+.missing-assign-cancel:hover {
+  color: var(--text-primary, #fff);
+}
+
+/* ===== Borrower Stats — Tasks column ===== */
+
+.bs-col-tasks {
+  min-width: 56px;
+  text-align: center;
+}
+
+.bs-clickable-task {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 6px;
+  color: var(--accent, #6366f1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.bs-clickable-task:hover {
+  background: rgba(99, 102, 241, 0.28);
+}

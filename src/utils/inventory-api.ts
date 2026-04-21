@@ -154,14 +154,18 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return true;
   });
 
-  // ── Deduplicate items by (projectId, equipmentName) ──
+  // ── Deduplicate items by (projectId, equipmentName [, addonSessionId]) ──
   // This is the critical step: if the Apps Script ever appended rows instead of
   // replacing them (e.g. after a manual row deletion in the sheet), the server
   // can return many copies of the same item with different timestamps.
   // We keep the most "complete" copy (one that has been checked in / has status changes).
+  // Add-on session items use a session-scoped key so they aren't collapsed with
+  // the original checkout items or with items from other sessions.
   const nameKeyMap = new Map<string, ProjectItem>();
   for (const i of [...mergedServerItems, ...localOnlyItems]) {
-    const nk = `${i.projectId}|${i.equipmentName}`;
+    const nk = i.addonSessionId
+      ? `${i.projectId}|${i.equipmentName}|addon_${i.addonSessionId}`
+      : `${i.projectId}|${i.equipmentName}`;
     const existing = nameKeyMap.get(nk);
     if (!existing) {
       nameKeyMap.set(nk, i);
@@ -346,14 +350,22 @@ export async function addProjectItem(item: {
   projectId: string;
   equipmentName: string;
   checkoutTimestamp: string;
+  addonSessionId?: string;
+  addonDate?: string;
+  addonCollectedBy?: string;
+  addonManager?: string;
 }): Promise<void> {
   markDirty();
   const items = readLocalItems();
-  // Guard: never store a duplicate (same project + name + non-returned status)
+  // Guard: never store a duplicate within the same session
+  // (addon sessions are scoped separately from the original checkout)
   const alreadyStored = items.some(
     i => i.projectId === item.projectId &&
          i.equipmentName === item.equipmentName &&
-         i.status !== 'returned'
+         i.status !== 'returned' &&
+         (item.addonSessionId
+           ? i.addonSessionId === item.addonSessionId
+           : !i.addonSessionId)
   );
   if (alreadyStored) return;
   items.push({
@@ -363,6 +375,10 @@ export async function addProjectItem(item: {
     checkinTimestamp: '',
     status: 'checked-out',
     damageNotes: '',
+    addonSessionId: item.addonSessionId,
+    addonDate: item.addonDate,
+    addonCollectedBy: item.addonCollectedBy,
+    addonManager: item.addonManager,
   });
   writeLocalItems(items);
   debouncedSave();
@@ -388,6 +404,7 @@ export async function updateProjectItem(
     checkinTimestamp?: string;
     status?: ItemStatus;
     damageNotes?: string;
+    assignedTo?: string;
   }
 ): Promise<void> {
   markDirty();
@@ -399,6 +416,7 @@ export async function updateProjectItem(
     if (updates.checkinTimestamp !== undefined) items[idx].checkinTimestamp = updates.checkinTimestamp;
     if (updates.status !== undefined) items[idx].status = updates.status;
     if (updates.damageNotes !== undefined) items[idx].damageNotes = updates.damageNotes;
+    if (updates.assignedTo !== undefined) items[idx].assignedTo = updates.assignedTo || undefined;
     writeLocalItems(items);
     debouncedSave();
   }

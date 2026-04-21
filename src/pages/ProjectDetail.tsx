@@ -4,7 +4,7 @@ import {
   ArrowLeft, FileText, Archive,
   Calendar, Users, Package, Download, AlertTriangle,
   CheckCircle, XCircle, Wrench, Plus, Trash2, Search, X,
-  Pencil, Save, UserPlus
+  Pencil, Save, UserPlus, Clock
 } from 'lucide-react';
 import InventoryHeader from '../components/inventory/InventoryHeader';
 import ScanMonitor from '../components/inventory/ScanMonitor';
@@ -12,6 +12,7 @@ import EquipmentDetailModal, { findEquipmentByName } from '../components/invento
 import { useInventory } from '../context/InventoryContext';
 import { generateContractPDF } from '../utils/inventory-pdf';
 import { calculatePrice } from '../context/CartContext';
+import type { AddonSession, ProjectItem, Equipment } from '../types';
 
 // Strip ISO time portion: "2026-04-12T22:00:00.000Z" → "2026-04-12"
 function formatDate(d: string): string {
@@ -59,7 +60,15 @@ export default function ProjectDetail() {
   const [missingNotes, setMissingNotes] = useState<Record<string, string>>({});
   const [isAddingItems, setIsAddingItems] = useState(false);
   const [expandedNote, setExpandedNote] = useState<{ name: string; notes: string } | null>(null);
-  const [detailItem, setDetailItem] = useState<import('../types').Equipment | null>(null);
+  const [detailItem, setDetailItem] = useState<Equipment | null>(null);
+
+  // Addon session state
+  const [showAddonModal, setShowAddonModal] = useState(false);
+  const [addonDate, setAddonDate] = useState('');
+  const [addonCollectedBy, setAddonCollectedBy] = useState('');
+  const [addonManualCollector, setAddonManualCollector] = useState('');
+  const [addonManager, setAddonManager] = useState('');
+  const [currentAddonSession, setCurrentAddonSession] = useState<AddonSession | null>(null);
 
   // Edit mode state
   const [editing, setEditing] = useState(false);
@@ -82,10 +91,15 @@ export default function ProjectDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, project?.status]);
 
-  // Merge duplicate items by equipment name into quantity groups
-  const mergedItems = (() => {
+  // Merge items by (equipmentName, addonSessionId) into quantity groups
+  type ItemGroup = {
+    name: string; quantity: number; displayName: string;
+    representative: ProjectItem; allItems: ProjectItem[];
+  };
+
+  const mergeItemsIntoGroups = (itemList: typeof items): ItemGroup[] => {
     const groups = new Map<string, { items: typeof items; quantity: number }>();
-    items.forEach(item => {
+    itemList.forEach(item => {
       const key = item.equipmentName;
       const existing = groups.get(key);
       if (existing) {
@@ -99,11 +113,31 @@ export default function ProjectDetail() {
       name,
       quantity,
       displayName: quantity > 1 ? `${quantity}x ${name}` : name,
-      // Use the first item for status/timestamp display
       representative: groupItems[0],
       allItems: groupItems,
     }));
-  })();
+  };
+
+  // Separate items into: original checkout + addon sessions
+  const originalItems = items.filter(i => !i.addonSessionId);
+  const mergedItems = mergeItemsIntoGroups(originalItems);
+
+  // Group addon items by session
+  const addonSessionsMap = new Map<string, typeof items>();
+  items.filter(i => i.addonSessionId).forEach(i => {
+    const sid = i.addonSessionId!;
+    const existing = addonSessionsMap.get(sid);
+    if (existing) existing.push(i);
+    else addonSessionsMap.set(sid, [i]);
+  });
+  // Build ordered list of unique sessions (ordered by date of first item)
+  const addonSessions = Array.from(addonSessionsMap.entries()).map(([sid, sessionItems]) => ({
+    sessionId: sid,
+    date: sessionItems[0].addonDate || '',
+    collectedBy: sessionItems[0].addonCollectedBy || '',
+    manager: sessionItems[0].addonManager || '',
+    mergedItems: mergeItemsIntoGroups(sessionItems),
+  }));
 
   // Count missing items for archived projects
   const missingCount = items.filter(i => i.status === 'missing').length;
@@ -134,34 +168,48 @@ export default function ProjectDetail() {
     return Math.max(diff, 1);
   }, [project]);
 
-  // Total price for all items
+  // Total price for all items (original + addon sessions)
+  const allMergedGroups = useMemo(() => {
+    const addonGroups: ItemGroup[] = [];
+    addonSessionsMap.forEach(sessionItems => {
+      mergeItemsIntoGroups(sessionItems).forEach(g => addonGroups.push(g));
+    });
+    return [...mergedItems, ...addonGroups];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, priceMap]);
+
   const totalPrice = useMemo(() => {
     let total = 0;
-    mergedItems.forEach(group => {
+    allMergedGroups.forEach(group => {
       const rate = getDayRate(group.name);
       if (rate > 0) {
         total += calculatePrice(rate, rentalDays) * group.quantity;
       }
     });
     return total;
-  }, [mergedItems, rentalDays, priceMap]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allMergedGroups, rentalDays]);
 
   // Auto-add scanned items during checkout
   useEffect(() => {
     if (!isScanning || scanMode !== 'checkout' || !projectId) return;
     recentScans.forEach(scan => {
-      // Consider the item already present if it exists with a non-returned status.
-    // Intentionally NOT matching on checkoutTimestamp — format differences between
-    // the scan sheet and localStorage would otherwise cause the same item to be
-    // added again on every render cycle.
-    const alreadyAdded = items.some(
-        i => i.equipmentName === scan.equipmentName && i.status !== 'returned'
+      // Consider the item already present if it exists with a non-returned status
+      // within the same session (original checkout OR the current addon session).
+      // Intentionally NOT matching on checkoutTimestamp — format differences between
+      // the scan sheet and localStorage would otherwise cause the same item to be
+      // added again on every render cycle.
+      const sessionId = currentAddonSession?.sessionId;
+      const alreadyAdded = items.some(
+        i => i.equipmentName === scan.equipmentName &&
+             i.status !== 'returned' &&
+             (sessionId ? i.addonSessionId === sessionId : !i.addonSessionId)
       );
       if (!alreadyAdded) {
-        addItemFromScan(projectId, scan);
+        addItemFromScan(projectId, scan, currentAddonSession ?? undefined);
       }
     });
-  }, [recentScans, isScanning, scanMode, projectId, items, addItemFromScan]);
+  }, [recentScans, isScanning, scanMode, projectId, items, addItemFromScan, currentAddonSession]);
 
   const handleStopScanning = useCallback(() => {
     if (scanMode === 'checkout' && projectId && !isAddingItems) {
@@ -169,16 +217,35 @@ export default function ProjectDetail() {
       updateProjectStatus(projectId, 'checked-out');
     }
     setIsAddingItems(false);
+    setCurrentAddonSession(null);
     stopScanning();
   }, [scanMode, projectId, isAddingItems, updateProjectStatus, stopScanning]);
 
-  // Start adding items to an already checked-out project
+  // Start adding items — show addon session modal first
   const handleStartAddItems = useCallback(() => {
-    if (projectId) {
-      setIsAddingItems(true);
-      startScanning(projectId, 'checkout');
-    }
-  }, [projectId, startScanning]);
+    const today = new Date().toLocaleDateString('sv-SE');
+    setAddonDate(today);
+    setAddonCollectedBy('');
+    setAddonManualCollector('');
+    setAddonManager(project?.equipmentManager || '');
+    setShowAddonModal(true);
+  }, [project]);
+
+  // Confirm addon session and begin scanning
+  const handleConfirmAddItems = useCallback(() => {
+    if (!projectId) return;
+    const collector = addonCollectedBy || addonManualCollector.trim();
+    const session: AddonSession = {
+      sessionId: `addon_${Date.now()}`,
+      date: addonDate,
+      collectedBy: collector,
+      manager: addonManager,
+    };
+    setCurrentAddonSession(session);
+    setShowAddonModal(false);
+    setIsAddingItems(true);
+    startScanning(projectId, 'checkout');
+  }, [projectId, addonDate, addonCollectedBy, addonManualCollector, addonManager, startScanning]);
 
   // Available categories from equipment
   const availableCategories = (() => {
@@ -207,9 +274,9 @@ export default function ProjectDetail() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const timestamp = `manual_${dateStr}`;
-    addItemFromScan(projectId, { timestamp, equipmentName: eqName });
+    addItemFromScan(projectId, { timestamp, equipmentName: eqName }, currentAddonSession ?? undefined);
     setEquipPickerOpen(false);
-  }, [projectId, addItemFromScan]);
+  }, [projectId, addItemFromScan, currentAddonSession]);
 
   // Focus search when picker opens
   useEffect(() => {
@@ -232,9 +299,9 @@ export default function ProjectDetail() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('sv-SE') + ' ' + now.toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
     const timestamp = `manual_${dateStr}`;
-    addItemFromScan(projectId, { timestamp, equipmentName: manualItemName.trim() });
+    addItemFromScan(projectId, { timestamp, equipmentName: manualItemName.trim() }, currentAddonSession ?? undefined);
     setManualItemName('');
-  }, [projectId, manualItemName, addItemFromScan]);
+  }, [projectId, manualItemName, addItemFromScan, currentAddonSession]);
 
   // Remove item during checkout
   const handleRemoveItem = useCallback((equipmentName: string, checkoutTimestamp: string) => {
@@ -531,6 +598,18 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {/* Addon session banner when scanning in add-items mode */}
+        {isScanning && currentAddonSession && (
+          <div className="addon-session-banner">
+            <Clock size={14} />
+            <span>
+              <strong>Add Items Session</strong> &mdash; {currentAddonSession.date}
+              {currentAddonSession.collectedBy && <> &middot; Collected by: <strong>{currentAddonSession.collectedBy}</strong></>}
+              {currentAddonSession.manager && <> &middot; Manager: <strong>{currentAddonSession.manager}</strong></>}
+            </span>
+          </div>
+        )}
+
         {/* Scan Monitor (checkout only) */}
         {isScanning && (
           <ScanMonitor
@@ -591,14 +670,16 @@ export default function ProjectDetail() {
         )}
 
         {/* Item List — interactive for checked-out projects */}
-        {mergedItems.length > 0 && (
+        {items.length > 0 && (
           <section className="inv-section" style={{ marginTop: '1rem' }}>
             <h3 className="inv-section-title">
               <Package size={18} />
               Equipment ({items.length})
             </h3>
-            <div className="project-items-list">
-              {mergedItems.map((group, i) => {
+
+            {/* ── Render helper for item rows ── */}
+            {(() => {
+              const renderItemRow = (group: ItemGroup, i: number) => {
                 const item = group.representative;
                 const ts = item.checkoutTimestamp;
                 const dayRate = getDayRate(group.name);
@@ -721,8 +802,38 @@ export default function ProjectDetail() {
                     )}
                   </div>
                 );
-              })}
-            </div>
+              };
+
+              return (
+                <>
+                  {/* Original checkout items */}
+                  {mergedItems.length > 0 && (
+                    <div className="project-items-list">
+                      {mergedItems.map((group, i) => renderItemRow(group, i))}
+                    </div>
+                  )}
+
+                  {/* Addon session sections */}
+                  {addonSessions.map(session => (
+                    <div key={session.sessionId} className="addon-session-section">
+                      <div className="addon-session-header">
+                        <Clock size={14} />
+                        <span className="addon-session-title">Added {session.date}</span>
+                        {session.collectedBy && (
+                          <span className="addon-session-meta">Collected by: <strong>{session.collectedBy}</strong></span>
+                        )}
+                        {session.manager && (
+                          <span className="addon-session-meta">Manager: <strong>{session.manager}</strong></span>
+                        )}
+                      </div>
+                      <div className="project-items-list">
+                        {session.mergedItems.map((group, i) => renderItemRow(group, i))}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </section>
         )}
 
@@ -767,6 +878,89 @@ export default function ProjectDetail() {
             </button>
           </div>
         )}
+        {/* Addon session modal */}
+        {showAddonModal && (
+          <div className="note-popup-overlay" onClick={() => setShowAddonModal(false)}>
+            <div className="note-popup addon-modal" onClick={e => e.stopPropagation()}>
+              <div className="note-popup-header">
+                <h4>Add Items Session</h4>
+                <button className="note-popup-close" onClick={() => setShowAddonModal(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="note-popup-body addon-modal-body">
+                <div className="form-group">
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={addonDate}
+                    onChange={e => setAddonDate(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Collected by (student)</label>
+                  {hasKlasslista && (
+                    <select
+                      className="form-select"
+                      value={addonCollectedBy}
+                      onChange={e => { setAddonCollectedBy(e.target.value); if (e.target.value) setAddonManualCollector(''); }}
+                    >
+                      <option value="">Select from list...</option>
+                      {klasslista!.film1.length > 0 && (
+                        <optgroup label="Film 1">
+                          {klasslista!.film1.map(n => <option key={n} value={n}>{n}</option>)}
+                        </optgroup>
+                      )}
+                      {klasslista!.film2.length > 0 && (
+                        <optgroup label="Film 2">
+                          {klasslista!.film2.map(n => <option key={n} value={n}>{n}</option>)}
+                        </optgroup>
+                      )}
+                    </select>
+                  )}
+                  {!addonCollectedBy && (
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Or type name manually..."
+                      value={addonManualCollector}
+                      onChange={e => setAddonManualCollector(e.target.value)}
+                      style={{ marginTop: hasKlasslista ? '0.4rem' : '0' }}
+                    />
+                  )}
+                </div>
+                <div className="form-group">
+                  <label>Equipment Manager</label>
+                  <select
+                    className="form-select"
+                    value={addonManager}
+                    onChange={e => setAddonManager(e.target.value)}
+                  >
+                    <option value="">Select manager...</option>
+                    <option value="Fredrik">Fredrik</option>
+                    <option value="Karl">Karl</option>
+                    <option value="Mats">Mats</option>
+                  </select>
+                </div>
+                <div className="checkout-buttons" style={{ marginTop: '1rem' }}>
+                  <button
+                    className="primary-btn"
+                    onClick={handleConfirmAddItems}
+                    disabled={!addonDate}
+                  >
+                    <Plus size={16} />
+                    Start Scanning
+                  </button>
+                  <button className="secondary-btn" onClick={() => setShowAddonModal(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Note popup overlay */}
         {expandedNote && (
           <div className="note-popup-overlay" onClick={() => setExpandedNote(null)}>

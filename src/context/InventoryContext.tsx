@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
-import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus, Klasslista } from '../types';
+import type { InventoryProject, ProjectItem, QRScanEntry, Equipment, ProjectStatus, ItemStatus, Klasslista, AddonSession } from '../types';
 import { fetchContractScans, startScanPolling } from '../utils/inventory-sheets';
 import { fetchEquipment } from '../utils/sheets';
 import { fetchKlasslista } from '../utils/klasslista-sheets';
@@ -13,6 +13,7 @@ export interface BorrowerStat {
   projectCount: number;
   damagedCount: number;
   missingCount: number;
+  taskCount: number;
 }
 
 interface InventoryContextType {
@@ -33,9 +34,9 @@ interface InventoryContextType {
   deleteProject: (id: string) => void;
   startScanning: (projectId: string, mode: 'checkout' | 'checkin') => void;
   stopScanning: () => void;
-  addItemFromScan: (projectId: string, scan: QRScanEntry) => Promise<void>;
+  addItemFromScan: (projectId: string, scan: QRScanEntry, addonSession?: AddonSession) => Promise<void>;
   removeProjectItem: (projectId: string, equipmentName: string, checkoutTimestamp: string) => void;
-  updateItemStatus: (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string) => Promise<void>;
+  updateItemStatus: (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string, assignedTo?: string) => Promise<void>;
   markCheckinItem: (projectId: string, equipmentName: string, checkinTimestamp: string) => Promise<void>;
   getProjectItems: (projectId: string) => ProjectItem[];
   getActiveProjects: () => InventoryProject[];
@@ -239,7 +240,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     setStopPoll(null);
   }, [stopPoll]);
 
-  const addItemFromScan = useCallback(async (projectId: string, scan: QRScanEntry) => {
+  const addItemFromScan = useCallback(async (projectId: string, scan: QRScanEntry, addonSession?: AddonSession) => {
     const newItem: ProjectItem = {
       projectId,
       equipmentName: scan.equipmentName,
@@ -247,12 +248,20 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
       checkinTimestamp: '',
       status: 'checked-out',
       damageNotes: '',
+      addonSessionId: addonSession?.sessionId,
+      addonDate: addonSession?.date,
+      addonCollectedBy: addonSession?.collectedBy,
+      addonManager: addonSession?.manager,
     };
     setProjectItems(prev => [...prev, newItem]);
     await api.addProjectItem({
       projectId,
       equipmentName: scan.equipmentName,
       checkoutTimestamp: scan.timestamp,
+      addonSessionId: addonSession?.sessionId,
+      addonDate: addonSession?.date,
+      addonCollectedBy: addonSession?.collectedBy,
+      addonManager: addonSession?.manager,
     });
   }, []);
 
@@ -277,13 +286,13 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
     await api.updateProjectItem(projectId, equipmentName, { checkinTimestamp, status: 'returned' });
   }, []);
 
-  const updateItemStatusFn = useCallback(async (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string) => {
+  const updateItemStatusFn = useCallback(async (projectId: string, equipmentName: string, status: ItemStatus, damageNotes?: string, assignedTo?: string) => {
     setProjectItems(prev => prev.map(i =>
       i.projectId === projectId && i.equipmentName === equipmentName
-        ? { ...i, status, damageNotes: damageNotes || i.damageNotes }
+        ? { ...i, status, damageNotes: damageNotes ?? i.damageNotes, assignedTo: assignedTo !== undefined ? (assignedTo || undefined) : i.assignedTo }
         : i
     ));
-    await api.updateProjectItem(projectId, equipmentName, { status, damageNotes });
+    await api.updateProjectItem(projectId, equipmentName, { status, damageNotes, assignedTo });
   }, []);
 
   const getProjectItems = useCallback((projectId: string) => {
@@ -386,6 +395,10 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
         const missingCount = projectItems.filter(
           i => involvedProjectIds.has(i.projectId) && i.status === 'missing'
         ).length;
+        // Count missing items assigned to this student (from any project)
+        const taskCount = projectItems.filter(
+          i => i.status === 'missing' && i.assignedTo && i.assignedTo.toLowerCase() === nameLower
+        ).length;
 
         stats.push({
           name,
@@ -393,6 +406,7 @@ export function InventoryProvider({ children }: { children: ReactNode }) {
           projectCount: involvedProjects.length,
           damagedCount,
           missingCount,
+          taskCount,
         });
       }
     };
