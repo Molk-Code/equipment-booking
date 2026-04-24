@@ -33,6 +33,9 @@ function itemKey(i: ProjectItem): string {
 const LS_PROJECTS = 'inventory_projects';
 const LS_ITEMS = 'inventory_items';
 const LS_LAST_SYNC = 'inventory_last_sync';
+// Tracks project IDs deleted locally so the server poll doesn't re-add them
+// before the delete has been pushed to the server.
+const LS_DELETED_PROJECTS = 'inventory_deleted_project_ids';
 
 // ===== Dirty tracking =====
 // Prevents server polls from overwriting unsaved local changes.
@@ -72,6 +75,27 @@ function writeLocalItems(items: ProjectItem[]) {
   localStorage.setItem(LS_ITEMS, JSON.stringify(items));
 }
 
+// ===== Deleted-project tombstone helpers =====
+// When a project is deleted locally we record its ID so fetchFromServer can
+// suppress it if the server still has the old version (e.g. because the push
+// hasn't completed yet, or the Apps Script is appending rather than replacing).
+// The tombstone is cleared once a successful push confirms the server is clean.
+
+function readDeletedProjectIds(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_DELETED_PROJECTS) || '[]')); }
+  catch { return new Set(); }
+}
+
+function addDeletedProjectId(id: string) {
+  const ids = readDeletedProjectIds();
+  ids.add(id);
+  localStorage.setItem(LS_DELETED_PROJECTS, JSON.stringify([...ids]));
+}
+
+function clearDeletedProjectIds() {
+  localStorage.removeItem(LS_DELETED_PROJECTS);
+}
+
 // ===== API communication =====
 
 /**
@@ -90,8 +114,14 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     throw new Error(`Failed to fetch inventory data: ${res.status}`);
   }
   const data = await res.json();
-  const serverProjects: InventoryProject[] = data.projects || [];
-  const serverItems: ProjectItem[] = data.items || [];
+  // ── Suppress deleted-project tombstones ──
+  // If a project was deleted locally but the Apps Script hasn't been updated yet
+  // (push pending or failed, or the script appends instead of replacing), the
+  // server will still return the old project. We filter it out here so it never
+  // resurfaces in the UI.  The tombstone set is cleared after a successful push.
+  const deletedIds = readDeletedProjectIds();
+  const serverProjects: InventoryProject[] = (data.projects || []).filter((p: InventoryProject) => !deletedIds.has(p.id));
+  const serverItems: ProjectItem[] = (data.items || []).filter((i: ProjectItem) => !deletedIds.has(i.projectId));
 
   // ── Guard 2: re-check after network wait ──
   // A user action may have happened while the GET was in flight.
@@ -200,7 +230,9 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
                       serverItemCount > mergedItems.length; // server had more = had duplicates
   if (needsRepair) {
     console.log(`[sync] Repairing server data — server had ${serverItemCount} items, clean set has ${mergedItems.length}`);
-    pushToServer(mergedProjects, mergedItems);
+    pushToServer(mergedProjects, mergedItems).then(ok => {
+      if (ok) clearDeletedProjectIds();
+    });
   }
 
   return { projects: mergedProjects, items: mergedItems };
@@ -253,6 +285,8 @@ function debouncedSave() {
     saving = false;
 
     if (ok) {
+      // Server now has the correct state — safe to clear deleted-project tombstones
+      clearDeletedProjectIds();
       // Only advance savedVersion if no newer changes came in during the save
       if (versionAtSave >= savedVersion) {
         savedVersion = versionAtSave;
@@ -347,6 +381,9 @@ export async function updateProjectStatus(
 
 export function deleteProject(projectId: string): void {
   markDirty();
+  // Record the deletion so fetchFromServer suppresses this project from the
+  // server response until the push confirms the server is clean.
+  addDeletedProjectId(projectId);
   const projects = readLocalProjects();
   writeLocalProjects(projects.filter(p => p.id !== projectId));
   const items = readLocalItems();
