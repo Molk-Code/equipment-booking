@@ -194,13 +194,13 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (!isScanning || scanMode !== 'checkout' || !projectId) return;
     recentScans.forEach(scan => {
-      // Consider the item already present if it exists with a non-returned status
-      // within the same session (original checkout OR the current addon session).
-      // Intentionally NOT matching on checkoutTimestamp — format differences between
-      // the scan sheet and localStorage would otherwise cause the same item to be
-      // added again on every render cycle.
+      // For QR-scanned items: deduplicate by name+session to prevent the scan
+      // poll from re-adding the same item on every render cycle.
+      // For manually added items (manual_ prefix): allow multiple of the same name
+      // so the user can add 3× the same item via the picker.
       const sessionId = currentAddonSession?.sessionId;
-      const alreadyAdded = items.some(
+      const isManual = scan.timestamp.startsWith('manual_');
+      const alreadyAdded = !isManual && items.some(
         i => i.equipmentName === scan.equipmentName &&
              i.status !== 'returned' &&
              (sessionId ? i.addonSessionId === sessionId : !i.addonSessionId)

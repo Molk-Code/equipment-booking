@@ -135,6 +135,8 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
   });
 
   // Prefer local item if it has more progress (checked-in, damage notes, etc.)
+  // Also prefer local when it carries fields the server doesn't store
+  // (addonSessionId, addonCollectedBy, addonManager, addonDate, assignedTo).
   const localItemMap = new Map(localItems.map(i => [itemKey(i), i]));
   const mergedServerItems = serverItems.map(si => {
     const li = localItemMap.get(itemKey(si));
@@ -142,6 +144,10 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
       if (li.checkinTimestamp && !si.checkinTimestamp) return li;
       if (li.status !== si.status && li.status !== 'checked-out') return li;
       if (li.damageNotes && !si.damageNotes) return li;
+      // Preserve addon session metadata that the server (Apps Script) doesn't persist
+      if (li.addonSessionId && !si.addonSessionId) return li;
+      // Preserve task assignment that the server doesn't persist
+      if (li.assignedTo && !si.assignedTo) return li;
     }
     return si;
   });
@@ -154,18 +160,20 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
     return true;
   });
 
-  // ── Deduplicate items by (projectId, equipmentName [, addonSessionId]) ──
-  // This is the critical step: if the Apps Script ever appended rows instead of
-  // replacing them (e.g. after a manual row deletion in the sheet), the server
-  // can return many copies of the same item with different timestamps.
-  // We keep the most "complete" copy (one that has been checked in / has status changes).
-  // Add-on session items use a session-scoped key so they aren't collapsed with
-  // the original checkout items or with items from other sessions.
+  // ── Deduplicate items ──
+  // QR-scanned items (no manual_ prefix): deduplicate by (projectId, name) to
+  // collapse phantom duplicates the Apps Script may have appended.
+  // Manually added items (manual_ prefix): deduplicate by (projectId, name, timestamp)
+  // so the user can legitimately add 3× the same item via the picker.
+  // Add-on session items: scoped by addonSessionId so they aren't merged with
+  // the original checkout items or items from other sessions.
   const nameKeyMap = new Map<string, ProjectItem>();
   for (const i of [...mergedServerItems, ...localOnlyItems]) {
     const nk = i.addonSessionId
       ? `${i.projectId}|${i.equipmentName}|addon_${i.addonSessionId}`
-      : `${i.projectId}|${i.equipmentName}`;
+      : i.checkoutTimestamp.startsWith('manual_')
+        ? `${i.projectId}|${i.equipmentName}|${i.checkoutTimestamp}` // allow multi-qty
+        : `${i.projectId}|${i.equipmentName}`; // QR-scanned: collapse duplicates
     const existing = nameKeyMap.get(nk);
     if (!existing) {
       nameKeyMap.set(nk, i);
@@ -357,9 +365,11 @@ export async function addProjectItem(item: {
 }): Promise<void> {
   markDirty();
   const items = readLocalItems();
-  // Guard: never store a duplicate within the same session
-  // (addon sessions are scoped separately from the original checkout)
-  const alreadyStored = items.some(
+  // Guard: prevent scan race-condition duplicates for QR-scanned items.
+  // Manually added items (manual_ timestamp) are allowed multiple times so the
+  // user can check out 3× the same item via the equipment picker.
+  const isManual = item.checkoutTimestamp.startsWith('manual_');
+  const alreadyStored = !isManual && items.some(
     i => i.projectId === item.projectId &&
          i.equipmentName === item.equipmentName &&
          i.status !== 'returned' &&
