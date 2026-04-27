@@ -115,11 +115,28 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
   }
   const data = await res.json();
   // ── Suppress deleted-project tombstones ──
-  // If a project was deleted locally but the Apps Script hasn't been updated yet
-  // (push pending or failed, or the script appends instead of replacing), the
-  // server will still return the old project. We filter it out here so it never
-  // resurfaces in the UI.  The tombstone set is cleared after a successful push.
+  // A deleted project must never resurface from a stale server response.
+  // We do NOT clear tombstones when a push "succeeds" (HTTP 200), because the
+  // Apps Script may still return the old project on the next GET even after a
+  // successful POST (it sometimes appends rather than replaces rows).
+  // Instead: remove a tombstone only when this poll confirms the project is
+  // genuinely absent from the raw server response.
   const deletedIds = readDeletedProjectIds();
+  if (deletedIds.size > 0) {
+    const rawServerProjectIds = new Set((data.projects || []).map((p: InventoryProject) => p.id));
+    let changed = false;
+    deletedIds.forEach(id => {
+      if (!rawServerProjectIds.has(id)) {
+        // Server no longer returns this project — deletion confirmed, retire tombstone
+        deletedIds.delete(id);
+        changed = true;
+      }
+    });
+    if (changed) {
+      if (deletedIds.size === 0) clearDeletedProjectIds();
+      else localStorage.setItem(LS_DELETED_PROJECTS, JSON.stringify([...deletedIds]));
+    }
+  }
   const serverProjects: InventoryProject[] = (data.projects || []).filter((p: InventoryProject) => !deletedIds.has(p.id));
   const serverItems: ProjectItem[] = (data.items || []).filter((i: ProjectItem) => !deletedIds.has(i.projectId));
 
@@ -230,9 +247,7 @@ export async function fetchFromServer(): Promise<{ projects: InventoryProject[];
                       serverItemCount > mergedItems.length; // server had more = had duplicates
   if (needsRepair) {
     console.log(`[sync] Repairing server data — server had ${serverItemCount} items, clean set has ${mergedItems.length}`);
-    pushToServer(mergedProjects, mergedItems).then(ok => {
-      if (ok) clearDeletedProjectIds();
-    });
+    pushToServer(mergedProjects, mergedItems);
   }
 
   return { projects: mergedProjects, items: mergedItems };
@@ -285,9 +300,9 @@ function debouncedSave() {
     saving = false;
 
     if (ok) {
-      // Server now has the correct state — safe to clear deleted-project tombstones
-      clearDeletedProjectIds();
       // Only advance savedVersion if no newer changes came in during the save
+      // NOTE: do NOT clear tombstones here — they self-expire only when a poll
+      // confirms the server no longer returns the deleted project.
       if (versionAtSave >= savedVersion) {
         savedVersion = versionAtSave;
       }
